@@ -1,0 +1,13 @@
+{
+  "name": "family-website",
+  "version": "1.0.0",
+  "description": "🏠 Our Family Website",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs"
+  },
+  "dependencies": {
+    "vitepress": "^1.5.0"
+  }
+}
