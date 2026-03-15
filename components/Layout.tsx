@@ -12,6 +12,7 @@ interface LayoutProps {
     id: number;
     name: string;
     avatar: string;
+    is_admin?: number;
   };
 }
 
@@ -31,6 +32,11 @@ export default function Layout({ children, user }: LayoutProps) {
     { name: '公告', href: '/announcements', icon: Bell },
     { name: '留言板', href: '/messages', icon: MessageSquare },
     { name: '聊天', href: '/chat', icon: MessageSquare },
+  ];
+
+  // 管理员专属导航
+  const adminNavigation = [
+    { name: '系统管理', href: '/admin', icon: Settings },
   ];
 
   return (
@@ -83,6 +89,32 @@ export default function Layout({ children, user }: LayoutProps) {
                   </Link>
                 );
               })}
+
+              {/* 管理员菜单 */}
+              {user.is_admin === 1 && (
+                <div className="pt-6 border-t border-gray-200">
+                  <p className="text-sm text-gray-500 font-semibold mb-3 px-4">管理员功能</p>
+                  {adminNavigation.map(item => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center space-x-4 px-4 py-4 rounded-xl font-semibold text-xl ${
+                          isActive
+                            ? 'bg-red-100 text-red-700'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <Icon className="h-7 w-7" />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </nav>
 
             <div className="absolute bottom-6 left-6 right-6">
@@ -137,6 +169,31 @@ export default function Layout({ children, user }: LayoutProps) {
                 </Link>
               );
             })}
+
+            {/* 管理员菜单 */}
+            {user.is_admin === 1 && (
+              <div className="pt-6 border-t border-gray-200 mt-6">
+                <p className="text-sm text-gray-500 font-semibold mb-3 px-4">管理员功能</p>
+                {adminNavigation.map(item => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center space-x-4 px-4 py-4 rounded-xl font-semibold text-xl ${
+                        isActive
+                          ? 'bg-red-100 text-red-700'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Icon className="h-7 w-7" />
+                      <span>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </nav>
 
           <ElderFriendlyButton

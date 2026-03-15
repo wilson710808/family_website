@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Layout from '@/components/Layout';
 import { Bell, Plus, Clock, User } from 'lucide-react';
@@ -20,7 +20,7 @@ interface User {
   avatar: string;
 }
 
-export default function AnnouncementsPage() {
+function AnnouncementsContent() {
   const searchParams = useSearchParams();
   const familyId = searchParams.get('familyId');
   const [user, setUser] = useState<User | null>(null);
@@ -191,5 +191,15 @@ export default function AnnouncementsPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function AnnouncementsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
+      <p className="text-xl text-gray-500">加载中...</p>
+    </div>}>
+      <AnnouncementsContent />
+    </Suspense>
   );
 }

@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const familyId = searchParams.get('familyId');
 
-    let messages;
+    let messages: any[] = [];
 
     if (familyId) {
       const familyIdNum = parseInt(familyId);

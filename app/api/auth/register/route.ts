@@ -3,13 +3,13 @@ import { registerUser } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const { email, password, name } = await request.json();
+    const { email, password, name, avatar, referralCode } = await request.json();
 
     if (!email || !password || !name) {
       return NextResponse.json({ success: false, error: '请填写完整信息' }, { status: 400 });
     }
 
-    const result = await registerUser(email, password, name);
+    const result = await registerUser(email, password, name, avatar, referralCode);
 
     if (result.success) {
       return NextResponse.json(result);

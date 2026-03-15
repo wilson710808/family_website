@@ -33,7 +33,12 @@ export default function LoginPage() {
       if (data.success) {
         // 登录成功，设置cookie
         document.cookie = `auth_token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
-        router.push('/dashboard');
+        // 如果是管理员，跳转到管理页面，否则跳转到首页
+        if (data.user?.is_admin === 1) {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
       } else {
         setError(data.error || '登录失败');
       }

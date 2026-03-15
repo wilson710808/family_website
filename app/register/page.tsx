@@ -3,9 +3,22 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Home, User, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Home, User, Mail, Lock, ArrowRight, Hash, Search } from 'lucide-react';
 import LargeInput from '@/components/LargeInput';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
+
+// 预设头像列表
+const AVATARS = [
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family1',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family2',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family3',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family4',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family5',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family6',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family7',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family8',
+  'https://api.dicebear.com/7.x/avataaars/svg?seed=family9',
+];
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,9 +27,12 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
+    referralCode: '',
+    avatar: AVATARS[0],
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,15 +58,17 @@ export default function RegisterPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          avatar: formData.avatar,
+          referralCode: formData.referralCode.trim(),
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        // 登录成功，设置cookie
+        // 注册成功，设置cookie并跳转到首页
         document.cookie = `auth_token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       } else {
         setError(data.error || '注册失败');
       }
@@ -59,6 +77,11 @@ export default function RegisterPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const selectAvatar = (avatar: string) => {
+    setFormData(prev => ({ ...prev, avatar }));
+    setShowAvatarSelector(false);
   };
 
   return (
@@ -88,6 +111,53 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Avatar Selection */}
+            <div className="text-center">
+              <p className="text-xl font-medium text-gray-700 mb-4">选择您的头像</p>
+              <div className="relative inline-block">
+                <button
+                  type="button"
+                  onClick={() => setShowAvatarSelector(!showAvatarSelector)}
+                  className="p-2 rounded-full border-4 border-family-200 hover:border-family-400 transition-colors"
+                >
+                  <img
+                    src={formData.avatar}
+                    alt="用户头像"
+                    className="w-24 h-24 rounded-full"
+                  />
+                </button>
+                {showAvatarSelector && (
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-4 bg-white p-4 rounded-xl shadow-2xl border-2 border-gray-200 z-50 w-80">
+                    <p className="text-sm font-medium text-gray-700 mb-3">点击选择头像：</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {AVATARS.map((avatar, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => selectAvatar(avatar)}
+                          className={`p-1 rounded-full transition-all ${
+                            formData.avatar === avatar
+                              ? 'ring-4 ring-family-500 bg-family-100'
+                              : 'hover:bg-gray-100'
+                          }`}
+                        >
+                          <img src={avatar} alt={`头像${index + 1}`} className="w-16 h-16 rounded-full" />
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAvatarSelector(false)}
+                      className="mt-3 w-full py-2 bg-gray-100 rounded-lg text-gray-700 font-medium hover:bg-gray-200 transition-colors"
+                    >
+                      关闭
+                    </button>
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-2">点击头像可以更换哦</p>
+            </div>
+
             <LargeInput
               label="姓名"
               type="text"
@@ -130,6 +200,16 @@ export default function RegisterPage() {
               required
               minLength={6}
               icon={<Lock className="h-7 w-7" />}
+            />
+
+            <LargeInput
+              label="推荐码（可选）"
+              type="text"
+              value={formData.referralCode}
+              onChange={(value) => setFormData(prev => ({ ...prev, referralCode: value }))}
+              placeholder="如果有家人给您推荐码，请输入在这里"
+              icon={<Hash className="h-7 w-7" />}
+              helperText="输入推荐码可以直接加入对应的家族"
             />
 
             <ElderFriendlyButton

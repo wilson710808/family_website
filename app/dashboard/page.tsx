@@ -34,7 +34,7 @@ async function getRecentActivities(userId: number) {
   `).all(...familyIds);
 
   // 合并并按时间排序
-  const allActivities = [...announcements, ...messages].sort((a, b) => 
+  const allActivities = [...announcements, ...messages].sort((a: any, b: any) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   ).slice(0, 10);
 
@@ -102,8 +102,8 @@ export default async function DashboardPage() {
                 <p className="text-xl text-gray-500 mb-2">公告总数</p>
                 <p className="text-4xl font-bold text-gray-900">
                   {approvedFamilies.length > 0 
-                    ? (db.prepare('SELECT COUNT(*) as count FROM announcements WHERE family_id IN (' + approvedFamilies.map(() => '?').join(',') + ')').pluck().get(...approvedFamilies.map(f => f.id)) || 0)
-                    : 0
+                    ? String((db.prepare('SELECT COUNT(*) as count FROM announcements WHERE family_id IN (' + approvedFamilies.map(() => '?').join(',') + ')').pluck().get(...approvedFamilies.map(f => f.id)) || 0))
+                    : '0'
                   }
                 </p>
               </div>
@@ -119,8 +119,8 @@ export default async function DashboardPage() {
                 <p className="text-xl text-gray-500 mb-2">留言总数</p>
                 <p className="text-4xl font-bold text-gray-900">
                   {approvedFamilies.length > 0
-                    ? (db.prepare('SELECT COUNT(*) as count FROM messages WHERE family_id IN (' + approvedFamilies.map(() => '?').join(',') + ')').pluck().get(...approvedFamilies.map(f => f.id)) || 0)
-                    : 0
+                    ? String((db.prepare('SELECT COUNT(*) as count FROM messages WHERE family_id IN (' + approvedFamilies.map(() => '?').join(',') + ')').pluck().get(...approvedFamilies.map(f => f.id)) || 0))
+                    : '0'
                   }
                 </p>
               </div>
@@ -191,7 +191,7 @@ export default async function DashboardPage() {
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             {recentActivities.length > 0 ? (
               <div className="divide-y divide-gray-200">
-                {recentActivities.slice(0, 10).map(activity => (
+                {recentActivities.slice(0, 10).map((activity: any) => (
                   <div key={activity.id} className="p-8">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">

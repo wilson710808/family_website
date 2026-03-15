@@ -14,7 +14,11 @@ db.exec(`
     password TEXT NOT NULL,
     name TEXT NOT NULL,
     avatar TEXT DEFAULT 'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    referral_code TEXT UNIQUE,
+    referred_by INTEGER,
+    is_admin INTEGER DEFAULT 0 CHECK(is_admin IN (0, 1)),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (referred_by) REFERENCES users(id)
   );
 
   -- 家族表
@@ -24,6 +28,7 @@ db.exec(`
     description TEXT,
     avatar TEXT DEFAULT 'https://api.dicebear.com/7.x/avataaars/svg?seed=family',
     creator_id INTEGER NOT NULL,
+    referral_code TEXT UNIQUE NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (creator_id) REFERENCES users(id)
   );
@@ -78,15 +83,7 @@ db.exec(`
   );
 `);
 
-// 创建默认管理员用户（如果不存在）
-const defaultAdmin = db.prepare('SELECT * FROM users WHERE email = ?').get('admin@family.com');
-if (!defaultAdmin) {
-  const hashedPassword = bcrypt.hashSync('admin123456', 10);
-  db.prepare('INSERT INTO users (email, password, name) VALUES (?, ?, ?)').run(
-    'admin@family.com',
-    hashedPassword,
-    '系统管理员'
-  );
-}
+// 初始化默认用户在 auth.ts 中处理，避免构建时重复创建
+// 创建默认管理员用户逻辑已移动到 auth.ts 的 initDefaultUser 函数
 
 export { db };

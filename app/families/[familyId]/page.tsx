@@ -2,8 +2,9 @@ import { getCurrentUser, isUserInFamily } from '@/lib/auth';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings } from 'lucide-react';
+import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Copy } from 'lucide-react';
 import { db } from '@/lib/db';
+import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 
 interface FamilyPageProps {
   params: Promise<{ familyId: string }>;
@@ -23,6 +24,7 @@ async function getFamily(familyId: number, userId: number) {
     description: string;
     avatar: string;
     creator_id: number;
+    referral_code: string;
     created_at: string;
     role: string;
     status: string;
@@ -144,34 +146,49 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
                 className="w-24 h-24 rounded-full border-4 border-white shadow-md"
               />
               <div className="flex space-x-3">
-                <Link
-                  href={`/chat?familyId=${familyId}`}
-                  className="flex items-center px-4 py-2 bg-family-500 text-white rounded-lg hover:bg-family-600 font-medium transition-colors"
-                >
-                  <Send className="h-5 w-5 mr-2" />
-                  开始聊天
+                <Link href={`/chat?familyId=${familyId}`}>
+                  <ElderFriendlyButton variant="primary" size="md">
+                    <span className="flex items-center">
+                      <Send className="h-5 w-5 mr-2" />
+                      开始聊天
+                    </span>
+                  </ElderFriendlyButton>
                 </Link>
-                {family.role === 'admin' && (
-                  <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    邀请成员
-                  </button>
-                )}
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-4">
+            {/* Referral Code */}
+            {family.role === 'admin' && (
+              <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-lg font-semibold text-blue-800 mb-1">家族推荐码</p>
+                    <p className="text-2xl font-bold text-blue-600 font-mono">{family.referral_code}</p>
+                    <p className="text-sm text-blue-600 mt-1">把这个码发给家人，他们注册时输入就能加入家族</p>
+                  </div>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(family.referral_code)}
+                    className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    title="复制推荐码"
+                  >
+                    <Copy className="h-6 w-6" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 grid grid-cols-3 gap-4">
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-gray-900">{approvedMembers.length}</p>
-                <p className="text-sm text-gray-500">成员总数</p>
+                <p className="text-lg text-gray-500">成员总数</p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-gray-900">{announcements.length}</p>
-                <p className="text-sm text-gray-500">公告数量</p>
+                <p className="text-lg text-gray-500">公告数量</p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-gray-900">{messages.length}</p>
-                <p className="text-sm text-gray-500">留言总数</p>
+                <p className="text-lg text-gray-500">留言总数</p>
               </div>
             </div>
           </div>
@@ -183,81 +200,81 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
             href={`/announcements?familyId=${familyId}`}
             className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-center"
           >
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Bell className="h-6 w-6 text-blue-500" />
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Bell className="h-8 w-8 text-blue-500" />
             </div>
-            <h3 className="font-medium text-gray-900">公告栏</h3>
-            <p className="text-sm text-gray-500 mt-1">查看家族通知</p>
+            <h3 className="text-xl font-semibold text-gray-900">公告栏</h3>
+            <p className="text-lg text-gray-500 mt-1">查看家族通知</p>
           </Link>
 
           <Link
             href={`/messages?familyId=${familyId}`}
             className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-center"
           >
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <MessageSquare className="h-6 w-6 text-green-500" />
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <MessageSquare className="h-8 w-8 text-green-500" />
             </div>
-            <h3 className="font-medium text-gray-900">留言板</h3>
-            <p className="text-sm text-gray-500 mt-1">分享生活点滴</p>
+            <h3 className="text-xl font-semibold text-gray-900">留言板</h3>
+            <p className="text-lg text-gray-500 mt-1">分享生活点滴</p>
           </Link>
 
           <Link
             href={`/chat?familyId=${familyId}`}
             className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-center"
           >
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Send className="h-6 w-6 text-purple-500" />
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Send className="h-8 w-8 text-purple-500" />
             </div>
-            <h3 className="font-medium text-gray-900">即时聊天</h3>
-            <p className="text-sm text-gray-500 mt-1">实时在线交流</p>
+            <h3 className="text-xl font-semibold text-gray-900">即时聊天</h3>
+            <p className="text-lg text-gray-500 mt-1">实时在线交流</p>
           </Link>
 
           <Link
             href={`/families/${familyId}/members`}
             className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow text-center"
           >
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Users className="h-6 w-6 text-orange-500" />
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Users className="h-8 w-8 text-orange-500" />
             </div>
-            <h3 className="font-medium text-gray-900">成员列表</h3>
-            <p className="text-sm text-gray-500 mt-1">查看家族成员</p>
+            <h3 className="text-xl font-semibold text-gray-900">成员列表</h3>
+            <p className="text-lg text-gray-500 mt-1">查看家族成员</p>
           </Link>
         </div>
 
         {/* Recent Announcements */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
-              <Bell className="h-5 w-5 mr-2 text-blue-500" />
+            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+              <Bell className="h-7 w-7 mr-2 text-blue-500" />
               最新公告
             </h2>
             <Link
               href={`/announcements?familyId=${familyId}`}
-              className="text-family-600 hover:text-family-700 font-medium text-sm"
+              className="text-xl text-family-600 hover:text-family-700 font-semibold"
             >
-              查看全部
+              查看全部 →
             </Link>
           </div>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             {announcements.length > 0 ? (
               <div className="divide-y divide-gray-200">
                 {announcements.map(announcement => (
-                  <div key={announcement.id} className="p-6">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium text-gray-900">{announcement.title}</h3>
-                      <span className="text-xs text-gray-500">
+                  <div key={announcement.id} className="p-8">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-2xl font-semibold text-gray-900">{announcement.title}</h3>
+                      <span className="text-lg text-gray-500">
                         {new Date(announcement.created_at).toLocaleDateString('zh-CN')}
                       </span>
                     </div>
-                    <p className="text-gray-600 text-sm mb-2">{announcement.content}</p>
-                    <p className="text-xs text-gray-500">发布者：{announcement.user_name}</p>
+                    <p className="text-xl text-gray-600 mb-3">{announcement.content}</p>
+                    <p className="text-lg text-gray-500">发布者：{announcement.user_name}</p>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="p-12 text-center">
-                <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">暂无公告</p>
+                <Bell className="h-24 w-24 text-gray-300 mx-auto mb-6" />
+                <p className="text-xl text-gray-500">暂无公告</p>
               </div>
             )}
           </div>
@@ -266,36 +283,36 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
         {/* Recent Messages */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
-              <MessageSquare className="h-5 w-5 mr-2 text-green-500" />
+            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+              <MessageSquare className="h-7 w-7 mr-2 text-green-500" />
               最新留言
             </h2>
             <Link
               href={`/messages?familyId=${familyId}`}
-              className="text-family-600 hover:text-family-700 font-medium text-sm"
+              className="text-xl text-family-600 hover:text-family-700 font-semibold"
             >
-              查看全部
+              查看全部 →
             </Link>
           </div>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             {messages.length > 0 ? (
               <div className="divide-y divide-gray-200">
                 {messages.map(message => (
-                  <div key={message.id} className="p-6">
-                    <div className="flex items-start space-x-3">
+                  <div key={message.id} className="p-8">
+                    <div className="flex items-start space-x-4">
                       <img
                         src={message.user_avatar}
                         alt={message.user_name}
-                        className="w-10 h-10 rounded-full flex-shrink-0"
+                        className="w-14 h-14 rounded-full flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-medium text-gray-900">{message.user_name}</p>
-                          <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xl font-semibold text-gray-900">{message.user_name}</p>
+                          <span className="text-lg text-gray-500 flex-shrink-0 ml-2">
                             {new Date(message.created_at).toLocaleString('zh-CN')}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-sm">{message.content}</p>
+                        <p className="text-xl text-gray-600">{message.content}</p>
                       </div>
                     </div>
                   </div>
@@ -303,8 +320,8 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
               </div>
             ) : (
               <div className="p-12 text-center">
-                <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">暂无留言</p>
+                <MessageSquare className="h-24 w-24 text-gray-300 mx-auto mb-6" />
+                <p className="text-xl text-gray-500">暂无留言</p>
               </div>
             )}
           </div>
@@ -313,27 +330,27 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
         {/* Members */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
-              <Users className="h-5 w-5 mr-2 text-orange-500" />
+            <h2 className="text-3xl font-bold text-gray-900 flex items-center">
+              <Users className="h-7 w-7 mr-2 text-orange-500" />
               家族成员 ({approvedMembers.length})
             </h2>
             <Link
               href={`/families/${familyId}/members`}
-              className="text-family-600 hover:text-family-700 font-medium text-sm"
+              className="text-xl text-family-600 hover:text-family-700 font-semibold"
             >
-              查看全部
+              查看全部 →
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {approvedMembers.slice(0, 12).map(member => (
-              <div key={member.id} className="bg-white rounded-xl shadow-sm p-4 text-center">
+              <div key={member.id} className="bg-white rounded-xl shadow-sm p-6 text-center">
                 <img
                   src={member.avatar}
                   alt={member.name}
-                  className="w-16 h-16 rounded-full mx-auto mb-3"
+                  className="w-20 h-20 rounded-full mx-auto mb-4"
                 />
-                <p className="font-medium text-gray-900 truncate">{member.name}</p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xl font-semibold text-gray-900 truncate">{member.name}</p>
+                <p className="text-lg text-gray-500 mt-2">
                   {member.role === 'admin' ? '管理员' : '成员'}
                 </p>
               </div>
