@@ -1,0 +1,60 @@
+
+> family-website@1.0.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /root/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /root/.openclaw/workspace/family-portal/package-lock.json
+
+▲ Next.js 16.1.6 (Turbopack)
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 10.0s
+  Running TypeScript ...
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/24) ...
+  Generating static pages using 1 worker (6/24) 
+  Generating static pages using 1 worker (12/24) 
+  Generating static pages using 1 worker (18/24) 
+✓ Generating static pages using 1 worker (24/24) in 320.2ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ○ /announcements
+├ ƒ /api/admin/families
+├ ƒ /api/admin/stats
+├ ƒ /api/admin/users
+├ ƒ /api/admin/users/[userId]/delete
+├ ƒ /api/announcements
+├ ƒ /api/announcements/create
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/register
+├ ƒ /api/chat
+├ ƒ /api/chat/send
+├ ƒ /api/families/[familyId]/respond
+├ ƒ /api/families/create
+├ ƒ /api/messages
+├ ƒ /api/user
+├ ○ /chat
+├ ƒ /dashboard
+├ ƒ /families
+├ ƒ /families/[familyId]
+├ ƒ /families/create
+├ ○ /login
+├ ○ /messages
+└ ○ /register
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

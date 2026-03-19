@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  serverExternalPackages: ['better-sqlite3', 'bcryptjs', 'jsonwebtoken'],
+  // output: 'standalone', - removed, caused issues with next start
+  serverExternalPackages: ['better-sqlite3', 'bcryptjs', 'jsonwebtoken', 'socket.io'],
   images: {
     unoptimized: true,
     remotePatterns: [

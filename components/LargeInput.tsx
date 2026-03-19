@@ -32,7 +32,7 @@ export default function LargeInput({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label className="block text-lg font-medium text-gray-800">
+        <label className="block text-2xl font-medium text-gray-800">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -58,7 +58,7 @@ export default function LargeInput({
             focus:outline-none focus:ring-4 focus:ring-family-200 focus:border-family-500
             transition-colors
             ${icon ? 'pl-14' : ''}
-            placeholder:text-gray-400
+            placeholder:text-gray-600
           `}
           style={{
             fontSize: '20px',

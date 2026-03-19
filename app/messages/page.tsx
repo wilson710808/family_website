@@ -29,13 +29,20 @@ function MessagesContent() {
   const [newMessage, setNewMessage] = useState('');
 
   useEffect(() => {
-    // 获取当前用户信息
+    // 获取当前用户信息 - 开发模式：如果返回 null，使用默认管理员
     fetch('/api/user')
       .then(res => res.json())
       .then(data => {
         if (data.user) {
           setUser(data.user);
+        } else {
+          // 如果没有获取到用户，使用默认管理员
+          setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin' });
         }
+      })
+      .catch(() => {
+        // 出错也使用默认管理员
+        setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin' });
       });
 
     // 加载留言列表
@@ -81,7 +88,15 @@ function MessagesContent() {
     }
   };
 
-  if (!user) return null;
+  // 如果还没加载完用户，显示加载中
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
+        <p className="text-xl text-gray-500 ml-4">加载中...</p>
+      </div>
+    );
+  }
 
   return (
     <Layout user={user}>

@@ -1,20 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Mail, Lock, ArrowRight } from 'lucide-react';
-import LargeInput from '@/components/LargeInput';
-import ElderFriendlyButton from '@/components/ElderFriendlyButton';
+import { useRouter } from 'next/navigation';
+import { Lock, User, ArrowRight } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,109 +20,120 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.success) {
-        // 登录成功，设置cookie
-        document.cookie = `auth_token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
-        // 如果是管理员，跳转到管理页面，否则跳转到首页
-        if (data.user?.is_admin === 1) {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/dashboard';
-        }
+        // 登录成功，跳转到仪表板
+        router.push('/dashboard');
       } else {
-        setError(data.error || '登录失败');
+        setError(data.error || t('login_failed'));
       }
     } catch (err) {
-      setError('网络错误，请重试');
+      setError(t('network_error'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-family-50 to-white flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-2">
-            <Home className="h-8 w-8 text-family-500" />
-            <span className="text-2xl font-bold text-family-800">家族中心</span>
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-4xl font-bold text-gray-900">
+          {t('login')}
+        </h2>
+        <p className="mt-2 text-center text-xl text-gray-600">
+          {t('welcome_back_to_family')}
+        </p>
+      </div>
 
-      {/* Login Form */}
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">欢迎回来</h1>
-            <p className="text-xl text-gray-600">登录您的账号，进入家族空间</p>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 text-lg font-medium">
-              ❌ {error}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow-xl rounded-xl sm:px-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-xl font-medium text-gray-700 mb-3">
+                {t('email')}
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <User className="h-6 w-6 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="block w-full pl-12 pr-4 py-4 text-xl border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-family-500 focus:border-family-500"
+                  placeholder="you@example.com"
+                />
+              </div>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <LargeInput
-              label="邮箱"
-              type="email"
-              value={formData.email}
-              onChange={(value) => setFormData(prev => ({ ...prev, email: value }))}
-              placeholder="请输入您的邮箱"
-              required
-              icon={<Mail className="h-7 w-7" />}
-            />
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-xl font-medium text-gray-700 mb-3">
+                {t('password')}
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-6 w-6 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="block w-full pl-12 pr-4 py-4 text-xl border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-family-500 focus:border-family-500"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
 
-            <LargeInput
-              label="密码"
-              type="password"
-              value={formData.password}
-              onChange={(value) => setFormData(prev => ({ ...prev, password: value }))}
-              placeholder="请输入密码"
-              required
-              minLength={6}
-              icon={<Lock className="h-7 w-7" />}
-            />
+            {/* Demo account info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-lg font-semibold text-blue-800 mb-2">{t('demo_account')}</p>
+              <p className="text-base text-blue-700">{t('demo_email')}</p>
+              <p className="text-base text-blue-700">{t('demo_password')}</p>
+            </div>
 
-            <ElderFriendlyButton
-              type="submit"
-              disabled={loading}
-              fullWidth
-              size="lg"
-            >
-              <span className="flex items-center justify-center">
-                {loading ? '登录中...' : '登录'}
-                {!loading && <ArrowRight className="h-6 w-6 ml-3" />}
-              </span>
-            </ElderFriendlyButton>
+            {/* Error message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-xl text-red-600">{error}</p>
+              </div>
+            )}
+
+            {/* Submit button */}
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center items-center px-6 py-4 border border-transparent rounded-lg text-xl font-medium text-white bg-family-500 hover:bg-family-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-family-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? t('loading') : t('login')}
+                {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
+              </button>
+            </div>
+
+            {/* Register link */}
+            <div className="text-center pt-4">
+              <p className="text-xl text-gray-600">
+                {t('no_account_yet')}{' '}
+                <Link href="/register" className="font-medium text-family-600 hover:text-family-500">
+                  {t('create_account')}
+                </Link>
+              </p>
+            </div>
           </form>
-
-          <div className="mt-8 text-center text-lg text-gray-600">
-            还没有账号？
-            <Link href="/register" className="text-family-600 hover:text-family-700 font-bold ml-2">
-              立即注册
-            </Link>
-          </div>
-
-          {/* Demo Account Info */}
-          <div className="mt-8 p-6 bg-gray-50 rounded-xl border-2 border-gray-200">
-            <p className="text-lg text-gray-800 mb-3 font-bold">📋 测试账号：</p>
-            <p className="text-base text-gray-600 mb-1">邮箱: admin@family.com</p>
-            <p className="text-base text-gray-600">密码: admin123456</p>
-          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

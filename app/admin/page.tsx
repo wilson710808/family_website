@@ -1,9 +1,15 @@
 import { getCurrentUser } from '@/lib/auth';
 import Layout from '@/components/Layout';
 import { db } from '@/lib/db';
-import { Users, Home, UserCheck, UserX, Clock, Trash2 } from 'lucide-react';
-import ElderFriendlyButton from '@/components/ElderFriendlyButton';
+import { Users, Home, Clock, Trash2, MessageSquare } from 'lucide-react';
 import { redirect } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 // 定义数据类型
 interface UserWithFamilies {
@@ -12,6 +18,9 @@ interface UserWithFamilies {
   name: string;
   avatar: string;
   created_at: string;
+  login_total: number;
+  login_30d: number;
+  last_login: string | null;
   families: {
     id: number;
     name: string;
@@ -32,9 +41,9 @@ interface FamilyWithMembers {
 }
 
 async function getAllUsers(): Promise<UserWithFamilies[]> {
-  // 获取所有用户
+  // 获取所有用户（包含登录统计）
   const users = db.prepare(`
-    SELECT id, email, name, avatar, created_at
+    SELECT id, email, name, avatar, created_at, login_total, login_30d, last_login
     FROM users
     ORDER BY created_at DESC
   `).all() as UserWithFamilies[];
@@ -68,12 +77,14 @@ async function getSystemStats() {
   const familyCount = db.prepare('SELECT COUNT(*) as count FROM families').pluck().get() as number;
   const announcementCount = db.prepare('SELECT COUNT(*) as count FROM announcements').pluck().get() as number;
   const messageCount = db.prepare('SELECT COUNT(*) as count FROM messages').pluck().get() as number;
+  const chatMessageCount = db.prepare('SELECT COUNT(*) as count FROM chat_messages').pluck().get() as number;
 
   return {
     userCount,
     familyCount,
     announcementCount,
     messageCount,
+    chatMessageCount,
   };
 }
 
@@ -83,8 +94,8 @@ export default async function AdminPage() {
     redirect('/dashboard');
   }
 
-  const users = await getAllUsers();
-  const families = await getAllFamilies();
+  const initialUsers = await getAllUsers();
+  const initialFamilies = await getAllFamilies();
   const stats = await getSystemStats();
 
   return (
@@ -97,7 +108,7 @@ export default async function AdminPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <div className="bg-white rounded-xl shadow-sm p-8">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -141,7 +152,19 @@ export default async function AdminPage() {
                 <p className="text-4xl font-bold text-gray-900">{stats.messageCount}</p>
               </div>
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                <Trash2 className="h-8 w-8 text-purple-500" />
+                <MessageSquare className="h-8 w-8 text-purple-500" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xl text-gray-500 mb-2">聊天消息</p>
+                <p className="text-4xl font-bold text-gray-900">{stats.chatMessageCount}</p>
+              </div>
+              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
+                <MessageSquare className="h-8 w-8 text-indigo-500" />
               </div>
             </div>
           </div>
@@ -158,40 +181,67 @@ export default async function AdminPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">用户</th>
-                    <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">邮箱</th>
-                    <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">加入时间</th>
-                    <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">所属家族</th>
-                    <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">状态</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">用户</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">邮箱</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">总登录</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">近30天</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">最后登录</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">加入时间</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">所属家族</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">状态</th>
+                    <th className="px-6 py-4 text-left text-xl font-semibold text-gray-700">操作</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map(user => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        <div className="flex items-center space-x-4">
-                          <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-full" />
+                  {initialUsers.map(userRow => (
+                    <tr key={userRow.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        <div className="flex items-center space-x-3">
+                          <img src={userRow.avatar} alt={userRow.name} className="w-10 h-10 rounded-full" />
                           <div>
-                            <p className="text-xl font-semibold text-gray-900">{user.name}</p>
-                            <p className="text-lg text-gray-500">ID: {user.id}</p>
+                            <p className="text-xl font-semibold text-gray-900">{userRow.name}</p>
+                            <p className="text-base text-gray-500">ID: {userRow.id}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        <p className="text-xl text-gray-900">{user.email}</p>
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        <p className="text-xl text-gray-900">{userRow.email}</p>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        <p className="text-lg text-gray-600">
-                          {new Date(user.created_at).toLocaleString('zh-CN')}
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xl font-semibold">
+                          {userRow.login_total || 0}
+                        </span>
+                      </td>
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        <span className={`px-3 py-1 rounded-full text-xl font-semibold ${
+                          (userRow.login_30d || 0) > 0 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {userRow.login_30d || 0}
+                        </span>
+                      </td>
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        {userRow.last_login ? (
+                          <p className="text-base text-gray-600">
+                            {new Date(userRow.last_login).toLocaleString('zh-CN')}
+                          </p>
+                        ) : (
+                          <p className="text-base text-gray-400">从未登录</p>
+                        )}
+                      </td>
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        <p className="text-base text-gray-600">
+                          {new Date(userRow.created_at).toLocaleString('zh-CN')}
                         </p>
                       </td>
-                      <td className="px-8 py-6">
-                        <div className="flex flex-wrap gap-2">
-                          {user.families.length > 0 ? (
-                            user.families.map(family => (
+                      <td className="px-6 py-6">
+                        <div className="flex flex-wrap gap-2 max-w-[200px]">
+                          {userRow.families.length > 0 ? (
+                            userRow.families.map(family => (
                               <span
                                 key={family.id}
-                                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
                                   family.status === 'approved'
                                     ? 'bg-green-100 text-green-800'
                                     : family.status === 'pending'
@@ -199,26 +249,47 @@ export default async function AdminPage() {
                                     : 'bg-red-100 text-red-800'
                                 }`}
                               >
-                                {family.name} ({family.role})
+                                {family.name}
                               </span>
                             ))
                           ) : (
-                            <p className="text-lg text-gray-400">未加入任何家族</p>
+                            <p className="text-base text-gray-400">无</p>
                           )}
                         </div>
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
+                      <td className="px-6 py-6 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          {user.email === 'admin@family.com' ? (
-                            <span className="px-4 py-2 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+                          {userRow.email === 'admin@family.com' ? (
+                            <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
                               超级管理员
                             </span>
                           ) : (
-                            <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                              正常用户
+                            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                              正常
                             </span>
                           )}
                         </div>
+                      </td>
+                      <td className="px-6 py-6 whitespace-nowrap">
+                        {userRow.email !== 'admin@family.com' && (
+                          <form
+                            method="post"
+                            action={`/api/admin/users/${userRow.id}/delete`}
+                            onSubmit={(e) => {
+                              if (!confirm('确定要删除用户 "' + userRow.name + '" (' + userRow.email + ')？\n此操作不可撤销！')) {
+                                e.preventDefault();
+                              }
+                            }}
+                          >
+                            <button
+                              type="submit"
+                              className="flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-base font-medium transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              删除
+                            </button>
+                          </form>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -247,7 +318,7 @@ export default async function AdminPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {families.map(family => (
+                  {initialFamilies.map(family => (
                     <tr key={family.id} className="hover:bg-gray-50">
                       <td className="px-8 py-6 whitespace-nowrap">
                         <div className="flex items-center space-x-4">

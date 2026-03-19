@@ -1,14 +1,21 @@
 import { getCurrentUser, getUserFamilies } from '@/lib/auth';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Plus, Users, Calendar, Clock, Check, X, UserPlus } from 'lucide-react';
 import { db } from '@/lib/db';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export default async function FamiliesPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
-
+  if (!user) {
+    redirect('/login');
+  }
   const families = await getUserFamilies(user.id);
   const approvedFamilies = families.filter(f => f.status === 'approved');
   const pendingInvitations = families.filter(f => f.status === 'pending');

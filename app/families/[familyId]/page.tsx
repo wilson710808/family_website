@@ -6,6 +6,11 @@ import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Copy }
 import { db } from '@/lib/db';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 interface FamilyPageProps {
   params: Promise<{ familyId: string }>;
 }
@@ -90,8 +95,9 @@ async function getRecentMessages(familyId: number) {
 
 export default async function FamilyDetailPage({ params }: FamilyPageProps) {
   const user = await getCurrentUser();
-  if (!user) return null;
-
+  if (!user) {
+    redirect('/login');
+  }
   const { familyId } = await params;
   const familyIdNum = parseInt(familyId);
 

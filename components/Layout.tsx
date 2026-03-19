@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, Users, Bell, MessageSquare, Settings, LogOut, Menu, X } from 'lucide-react';
 import ElderFriendlyButton from './ElderFriendlyButton';
+import { useI18n } from '@/lib/i18n';
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,24 +21,27 @@ export default function Layout({ children, user }: LayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useI18n();
 
-  const handleLogout = () => {
-    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    router.push('/login');
-  };
-
+  // 导航菜单
   const navigation = [
-    { name: '首页', href: '/dashboard', icon: Home },
-    { name: '家族', href: '/families', icon: Users },
-    { name: '公告', href: '/announcements', icon: Bell },
-    { name: '留言板', href: '/messages', icon: MessageSquare },
-    { name: '聊天', href: '/chat', icon: MessageSquare },
+    { name: t('home'), href: '/dashboard', icon: Home },
+    { name: t('family'), href: '/families', icon: Users },
+    { name: t('announcements'), href: '/announcements', icon: Bell },
+    { name: t('messages'), href: '/messages', icon: MessageSquare },
+    { name: t('chat'), href: '/chat', icon: MessageSquare },
   ];
 
   // 管理员专属导航
   const adminNavigation = [
-    { name: '系统管理', href: '/admin', icon: Settings },
+    { name: t('system_admin'), href: '/admin', icon: Settings },
   ];
+
+  // 处理登出
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,7 +50,7 @@ export default function Layout({ children, user }: LayoutProps) {
         <div className="px-4 py-4 flex justify-between items-center">
           <Link href="/dashboard" className="flex items-center space-x-2">
             <Home className="h-8 w-8 text-family-500" />
-            <span className="text-2xl font-bold text-family-800">家族中心</span>
+            <span className="text-2xl font-bold text-family-800">{t('family_center')}</span>
           </Link>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -65,7 +69,7 @@ export default function Layout({ children, user }: LayoutProps) {
               <img src={user.avatar} alt={user.name} className="w-16 h-16 rounded-full" />
               <div>
                 <p className="text-xl font-semibold text-gray-900">{user.name}</p>
-                <p className="text-lg text-gray-500">欢迎回来</p>
+                <p className="text-lg text-gray-500">{t('welcome_back')}</p>
               </div>
             </div>
 
@@ -93,7 +97,7 @@ export default function Layout({ children, user }: LayoutProps) {
               {/* 管理员菜单 */}
               {user.is_admin === 1 && (
                 <div className="pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 font-semibold mb-3 px-4">管理员功能</p>
+                  <p className="text-sm text-gray-500 font-semibold mb-3 px-4">{t('system_admin')}</p>
                   {adminNavigation.map(item => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
@@ -115,21 +119,9 @@ export default function Layout({ children, user }: LayoutProps) {
                   })}
                 </div>
               )}
-            </nav>
 
-            <div className="absolute bottom-6 left-6 right-6">
-              <ElderFriendlyButton
-                onClick={handleLogout}
-                variant="danger"
-                fullWidth
-                size="lg"
-              >
-                <span className="flex items-center justify-center">
-                  <LogOut className="h-6 w-6 mr-2" />
-                  退出登录
-                </span>
-              </ElderFriendlyButton>
-            </div>
+              {/* 登出已移除 - 无需登录注册 */}
+            </nav>
           </div>
         </div>
       )}
@@ -138,7 +130,7 @@ export default function Layout({ children, user }: LayoutProps) {
       <div className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:w-72 lg:flex-col lg:bg-white lg:shadow-lg">
         <div className="p-6 flex items-center space-x-3 border-b border-gray-200">
           <Home className="h-10 w-10 text-family-500" />
-          <h1 className="text-2xl font-bold text-family-800">家族中心</h1>
+          <h1 className="text-2xl font-bold text-family-800">{t('family_center')}</h1>
         </div>
 
         <div className="flex-1 flex flex-col overflow-y-auto p-6">
@@ -146,7 +138,7 @@ export default function Layout({ children, user }: LayoutProps) {
             <img src={user.avatar} alt={user.name} className="w-16 h-16 rounded-full" />
             <div>
               <p className="text-xl font-semibold text-gray-900">{user.name}</p>
-              <p className="text-base text-gray-500">欢迎回来</p>
+              <p className="text-base text-gray-500">{t('welcome_back')}</p>
             </div>
           </div>
 
@@ -194,20 +186,9 @@ export default function Layout({ children, user }: LayoutProps) {
                 })}
               </div>
             )}
-          </nav>
 
-          <ElderFriendlyButton
-            onClick={handleLogout}
-            variant="danger"
-            fullWidth
-            size="lg"
-            className="mt-6"
-          >
-            <span className="flex items-center justify-center">
-              <LogOut className="h-6 w-6 mr-2" />
-              退出登录
-            </span>
-          </ElderFriendlyButton>
+            {/* 登出已移除 - 无需登录注册 */}
+          </nav>
         </div>
       </div>
 
