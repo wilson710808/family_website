@@ -314,7 +314,7 @@ function ChatContent() {
 
     if (readCount === 0) return '没有人已读';
     if (readCount === total) return '全部已读';
-    return `${readCount}/${total} 已读';
+    return `${readCount}/${total} 已读`;
   };
 
   if (!familyId) {
@@ -387,7 +387,7 @@ function ChatContent() {
                 <p className="text-gray-500">还没有消息，快来发送第一条消息吧！</p>
               </div>
             ) : (
-              messages.map((message) => (
+              messages.map((message) => 
                 <div 
                   key={message.id} 
                   className={`flex items-start space-x-3 ${message.isButler || message.user_id === 0 ? 'justify-center' : ''}`}
@@ -422,7 +422,7 @@ function ChatContent() {
                       </div>
                     </div>
                   ) : (
-                    // 他人消息 - 显示关系称谓（带括号
+                    // 他人消息 - 显示关系称谓
                     <div className="flex items-start space-x-3 max-w-[70%]">
                       <img 
                         src={message.user_avatar} 
@@ -439,7 +439,7 @@ function ChatContent() {
                     </div>
                   )}
                 </div>
-              ))
+              )
             )}
             {typingUser && (
               <div className="flex items-center space-x-2 text-gray-500 text-sm px-4 py-2">

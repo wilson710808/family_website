@@ -5,6 +5,8 @@ import { Users, Bell, MessageSquare, Plus, Calendar, Clock } from 'lucide-react'
 import Layout from '@/components/Layout';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 import { useI18n } from '@/lib/i18n';
+import BirthdayWidget from '@/components/plugins/BirthdayWidget';
+import RecentPhotosWidget from '@/components/plugins/RecentPhotosWidget';
 
 interface DashboardClientProps {
   user: any;
@@ -96,6 +98,14 @@ export default function DashboardClient({
             </div>
           </div>
         </div>
+
+        {/* 插件小部件区域 - 生日提醒 + 最新照片（只在插件启用时显示 */}
+        {approvedFamilies.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <BirthdayWidget familyId={approvedFamilies[0].id} />
+            <RecentPhotosWidget familyId={approvedFamilies[0].id} />
+          </div>
+        )}
 
         {/* My Families */}
         <div>
