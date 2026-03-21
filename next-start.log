@@ -1,6 +1,6 @@
 
 > family-website@1.0.0 start
-> next start -p 3000 -p 3000
+> next start -p 3000
 
 ▲ Next.js 16.1.6
 - Local:         http://localhost:3000
@@ -14,7 +14,7 @@
  Detected additional lockfiles: 
    * /root/.openclaw/workspace/family-portal/package-lock.json
 
-✓ Ready in 256ms
+✓ Ready in 302ms
 Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
 Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
     at ignore-listed frames
@@ -132,100 +132,3 @@ Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
 Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
 Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
     at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "nhs79w4". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "kkwxaz1p". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "j". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "t". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
-Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
-    at ignore-listed frames
-Error: aborted
-    at ignore-listed frames {
-  code: 'ECONNRESET'
-}

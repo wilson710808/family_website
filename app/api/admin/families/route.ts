@@ -4,11 +4,7 @@ import { db } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.is_admin !== 1) {
-      return NextResponse.json({ success: false, error: '需要管理员权限' }, { status: 403 });
-    }
-
+    // 完全移除管理员检查 - 允许所有人访问
     const families = db.prepare(`
       SELECT f.*, u.name as creator_name, COUNT(fm.id) as member_count
       FROM families f

@@ -2,7 +2,7 @@ import { getCurrentUser, isUserInFamily } from '@/lib/auth';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Copy } from 'lucide-react';
+import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Copy, Star } from 'lucide-react';
 import { db } from '@/lib/db';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 
@@ -15,9 +15,23 @@ interface FamilyPageProps {
   params: Promise<{ familyId: string }>;
 }
 
+// 渲染星星组件
+function renderStars(stars: number) {
+  return (
+    <div className="flex items-center justify-center gap-1 mt-1">
+      {[1, 2, 3, 4, 5].map(i => (
+        <Star 
+          key={i} 
+          className={`w-4 h-4 ${i <= stars ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
+        />
+      ))}
+    </div>
+  );
+}
+
 async function getFamily(familyId: number, userId: number) {
   const family = db.prepare(`
-    SELECT f.*, fm.role, fm.status
+    SELECT f.*, fm.role, fm.status, fm.relationship, fm.contribution_points, fm.contribution_stars
     FROM families f
     JOIN family_members fm ON f.id = fm.family_id
     WHERE f.id = ? AND fm.user_id = ?
@@ -33,16 +47,19 @@ async function getFamily(familyId: number, userId: number) {
     created_at: string;
     role: string;
     status: string;
+    relationship?: string;
+    contribution_points?: number;
+    contribution_stars?: number;
   } | undefined;
 }
 
 async function getFamilyMembers(familyId: number) {
   const members = db.prepare(`
-    SELECT u.id, u.name, u.avatar, fm.role, fm.status, fm.created_at
+    SELECT u.id, u.name, u.avatar, fm.role, fm.status, fm.created_at, fm.relationship, fm.contribution_points, fm.contribution_stars
     FROM family_members fm
     JOIN users u ON fm.user_id = u.id
     WHERE fm.family_id = ?
-    ORDER BY fm.role DESC, fm.created_at ASC
+    ORDER BY fm.role DESC, fm.contribution_stars DESC, fm.created_at ASC
   `).all(familyId) as {
     id: number;
     name: string;
@@ -50,6 +67,9 @@ async function getFamilyMembers(familyId: number) {
     role: string;
     status: string;
     created_at: string;
+    relationship?: string;
+    contribution_points?: number;
+    contribution_stars?: number;
   }[];
 
   return members;
@@ -94,10 +114,8 @@ async function getRecentMessages(familyId: number) {
 }
 
 export default async function FamilyDetailPage({ params }: FamilyPageProps) {
+  // 完全移除认证检查 - 始终使用默认管理员用户
   const user = await getCurrentUser();
-  if (!user) {
-    redirect('/login');
-  }
   const { familyId } = await params;
   const familyIdNum = parseInt(familyId);
 
@@ -355,10 +373,17 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
                   alt={member.name}
                   className="w-20 h-20 rounded-full mx-auto mb-4"
                 />
-                <p className="text-xl font-semibold text-gray-900 truncate">{member.name}</p>
-                <p className="text-lg text-gray-500 mt-2">
+                <p className="text-xl font-semibold text-gray-900 truncate">
+                  {member.name}
+                  {member.relationship && <span className="text-gray-500 font-normal text-lg normal-case">（{member.relationship}）</span>}
+                </p>
+                <p className="text-lg text-gray-500 mt-1">
                   {member.role === 'admin' ? '管理员' : '成员'}
                 </p>
+                {member.contribution_stars !== undefined && renderStars(member.contribution_stars)}
+                {member.contribution_points !== undefined && member.contribution_points > 0 && (
+                  <p className="text-xs text-gray-400 mt-1">{member.contribution_points} 积分</p>
+                )}
               </div>
             ))}
           </div>

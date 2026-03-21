@@ -4,11 +4,7 @@ import { db } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.is_admin !== 1) {
-      return NextResponse.json({ success: false, error: '需要管理员权限' }, { status: 403 });
-    }
-
+    // 完全移除管理员检查 - 允许所有人访问统计数据
     const userCount = db.prepare('SELECT COUNT(*) as count FROM users').pluck().get() as number;
     const familyCount = db.prepare('SELECT COUNT(*) as count FROM families').pluck().get() as number;
     const announcementCount = db.prepare('SELECT COUNT(*) as count FROM announcements').pluck().get() as number;

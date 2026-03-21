@@ -4,11 +4,7 @@ import { db } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.is_admin !== 1) {
-      return NextResponse.json({ success: false, error: '需要管理员权限' }, { status: 403 });
-    }
-
+    // 完全移除管理员检查 - 允许所有人访问
     // 获取所有用户（包含登录统计）
     const users = db.prepare(`
       SELECT id, email, name, avatar, created_at, login_total, login_30d, last_login

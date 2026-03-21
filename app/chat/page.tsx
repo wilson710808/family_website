@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import Layout from '@/components/Layout';
-import { Send, Users, MessageSquare, Clock, Bot } from 'lucide-react';
+import { Send, Users, MessageSquare, Clock, Bot, Check, CheckCheck } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 
 interface ChatMessage {
@@ -16,6 +16,7 @@ interface ChatMessage {
   user_name: string;
   user_avatar: string;
   isButler?: boolean;
+  read_count?: number;
 }
 
 interface OnlineUser {
@@ -40,6 +41,7 @@ function ChatContent() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [totalMembers, setTotalMembers] = useState(0);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
@@ -69,6 +71,36 @@ function ChatContent() {
     scrollToBottom();
   }, [messages]);
 
+  // 标记消息已读
+  const markMessageAsRead = async (messageId: number) => {
+    if (!familyId || !user) return;
+
+    try {
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messageId,
+          familyId: Number(familyId),
+          userId: user.id,
+        }),
+      });
+    } catch (error) {
+      console.error('标记已读失败:', error);
+    }
+  };
+
+  // 当消息可见时，标记所有未读消息为已读
+  const markAllMessagesAsRead = () => {
+    if (!familyId || !user || !messages.length) return;
+    
+    messages.forEach(message => {
+      if (message.user_id !== user.id) {
+        markMessageAsRead(message.id);
+      }
+    });
+  };
+
   // 获取当前用户
   useEffect(() => {
     fetch('/api/user')
@@ -91,19 +123,20 @@ function ChatContent() {
 
     const loadMessages = async () => {
       try {
-        const res = await fetch(`/api/chat?familyId=${familyId}`);
+        const res = await fetch(`/api/chat?familyId=${familyId}&userId=${user.id}`);
         const data = await res.json();
         if (data.success) {
           setMessages(data.messages);
+          setTotalMembers(data.totalMembers || 0);
         }
       } catch (error) {
-        console.error('加载消息失败:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+          console.error('加载消息失败:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    loadMessages();
+      loadMessages();
   }, [familyId, user]);
 
   // 初始化 Socket.IO 连接
@@ -166,6 +199,7 @@ function ChatContent() {
           user_name: message.userName,
           user_avatar: message.avatar,
           isButler: message.isButler,
+          read_count: 1, // 发送者自己已读
         };
         setMessages(prev => [...prev, formattedMessage]);
       }
@@ -190,6 +224,25 @@ function ChatContent() {
       socket = null;
     };
   }, [familyId, user]);
+
+  // 页面加载完成后标记所有消息已读
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      setTimeout(() => {
+        markAllMessagesAsRead();
+      }, 1000);
+    }
+  }, [loading, messages]);
+
+  // 当有新消息进来时，如果窗口已聚焦，标记新消息也标记已读
+  useEffect(() => {
+    const handleFocus = () => {
+      markAllMessagesAsRead();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -236,6 +289,32 @@ function ChatContent() {
         userName: user.name,
       });
     }
+  };
+
+  // 渲染已读状态图标
+  const renderReadStatus = (message: ChatMessage) => {
+    if (message.user_id !== user?.id) return null; // 只给自己的消息显示已读状态
+    
+    const readCount = message.read_count || 0;
+    const unreadCount = totalMembers > 0 ? totalMembers - 1 - readCount : 0; // 减去自己
+
+    if (readCount === 0) {
+      return <Check className="w-3 h-3 text-gray-300" />;
+    } else if (unreadCount > 0) {
+      return <CheckCheck className="w-3 h-3 text-yellow-400" />;
+    } else {
+      return <CheckCheck className="w-3 h-3 text-green-500 fill-green-500" />;
+    }
+  };
+
+  // 获取已读文本提示
+  const getReadText = (message: ChatMessage) => {
+    const readCount = message.read_count || 0;
+    const total = totalMembers > 0 ? totalMembers - 1 : 0; // 减去自己
+
+    if (readCount === 0) return '没有人已读';
+    if (readCount === total) return '全部已读';
+    return `${readCount}/${total} 已读';
   };
 
   if (!familyId) {
@@ -289,10 +368,15 @@ function ChatContent() {
                 </span>
               )}
             </div>
+            {totalMembers > 0 && (
+              <span className="text-sm text-gray-500">
+                {totalMembers} 位成员
+              </span>
+            )}
           </div>
 
           {/* 消息列表 */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4" onFocus={markAllMessagesAsRead} onClick={markAllMessagesAsRead}>
             {loading ? (
               <div className="flex items-center justify-center h-32">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500"></div>
@@ -331,13 +415,14 @@ function ChatContent() {
                       />
                       <div className="bg-green-500 text-white rounded-2xl rounded-tr-none px-4 py-3 max-w-[70%]">
                         <p className="break-words">{message.content}</p>
-                        <div className="text-right text-xs text-green-100 mt-1">
-                          {new Date(message.created_at).toLocaleTimeString('zh-CN')}
+                        <div className="flex items-center justify-end space-x-1 text-xs text-green-100 mt-1">
+                          <span>{getReadText(message)}</span>
+                          {renderReadStatus(message)}
                         </div>
                       </div>
                     </div>
                   ) : (
-                    // 他人消息
+                    // 他人消息 - 显示关系称谓（带括号
                     <div className="flex items-start space-x-3 max-w-[70%]">
                       <img 
                         src={message.user_avatar} 

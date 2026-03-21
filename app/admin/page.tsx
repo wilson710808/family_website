@@ -89,11 +89,8 @@ async function getSystemStats() {
 }
 
 export default async function AdminPage() {
+  // 完全移除认证检查 - 所有人都可以访问管理后台
   const user = await getCurrentUser();
-  if (!user || user.is_admin !== 1) {
-    redirect('/dashboard');
-  }
-
   const initialUsers = await getAllUsers();
   const initialFamilies = await getAllFamilies();
   const stats = await getSystemStats();

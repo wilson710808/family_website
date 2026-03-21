@@ -63,10 +63,8 @@ function getStats(approvedFamilies: any[]) {
 }
 
 export default async function DashboardPage() {
+  // 完全移除认证检查 - 始终使用默认管理员用户
   const user = await getCurrentUser();
-  if (!user) {
-    redirect('/login');
-  }
   const families = await getUserFamilies(user.id);
   const approvedFamilies = families.filter(f => f.status === 'approved');
   const pendingInvitations = families.filter(f => f.status === 'pending');

@@ -5,11 +5,8 @@ import { generateUniqueFamilyReferralCode } from '@/lib/referral';
 
 export async function POST(request: Request) {
   try {
+    // 完全移除认证检查 - 允许所有人创建家族
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ success: false, error: '请先登录' }, { status: 401 });
-    }
-
     const { name, description } = await request.json();
 
     if (!name?.trim()) {

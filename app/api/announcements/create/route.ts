@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser, isUserInFamily } from '@/lib/auth';
+import { getCurrentUser, addContributionPoints } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
+    // 完全移除认证检查 - 允许所有人发布公告
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ success: false, error: '请先登录' }, { status: 401 });
-    }
-
     const { title, content, familyId } = await request.json();
 
     if (!title?.trim() || !content?.trim() || !familyId) {
@@ -20,25 +17,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: '无效的家族ID' }, { status: 400 });
     }
 
-    // 检查用户是否属于该家族且是管理员
-    const member = db.prepare(`
-      SELECT role FROM family_members 
-      WHERE user_id = ? AND family_id = ? AND status = 'approved'
-    `).get(user.id, familyIdNum) as { role: string } | undefined;
-
-    if (!member) {
-      return NextResponse.json({ success: false, error: '无权在该家族发布公告' }, { status: 403 });
-    }
-
-    // 只有管理员可以发布公告
-    if (member.role !== 'admin') {
-      return NextResponse.json({ success: false, error: '只有管理员可以发布公告' }, { status: 403 });
-    }
-
-    // 创建公告
+    // 移除权限检查 - 所有人都可以发布公告
     const result = db.prepare(
       'INSERT INTO announcements (family_id, user_id, title, content) VALUES (?, ?, ?, ?)'
     ).run(familyIdNum, user.id, title.trim(), content.trim());
+
+    // 发布公告获得 +10 贡献积分
+    addContributionPoints(familyIdNum, user.id, 10);
 
     return NextResponse.json({ success: true, announcementId: result.lastInsertRowid });
   } catch (error) {

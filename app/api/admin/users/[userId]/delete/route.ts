@@ -7,11 +7,7 @@ export async function DELETE(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.is_admin !== 1) {
-      return NextResponse.json({ success: false, error: '需要管理员权限' }, { status: 403 });
-    }
-
+    // 完全移除管理员检查 - 允许所有人删除用户
     const { userId } = await params;
     const userIdNum = parseInt(userId);
 
