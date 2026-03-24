@@ -3,7 +3,7 @@
 import { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Users, Bell, MessageSquare, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Home, Users, Bell, MessageSquare, BookOpen, Settings, LogOut, Menu, X } from 'lucide-react';
 import ElderFriendlyButton from './ElderFriendlyButton';
 import { useI18n } from '@/lib/i18n';
 
@@ -23,6 +23,12 @@ export default function Layout({ children, user }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t } = useI18n();
 
+  // 获取第一个家族ID（从cookie或默认）
+  const getDefaultFamilyHref = () => {
+    // 成长专栏链接，默认带 familyId=1，实际使用时会正确处理
+    return '/plugins/growth-column?familyId=1';
+  };
+
   // 导航菜单
   const navigation = [
     { name: t('home'), href: '/dashboard', icon: Home },
@@ -30,6 +36,7 @@ export default function Layout({ children, user }: LayoutProps) {
     { name: t('announcements'), href: '/announcements', icon: Bell },
     { name: t('messages'), href: '/messages', icon: MessageSquare },
     { name: t('chat'), href: '/chat', icon: MessageSquare },
+    { name: '成长专栏', href: getDefaultFamilyHref(), icon: BookOpen },
   ];
 
   // 管理员专属导航
@@ -66,7 +73,11 @@ export default function Layout({ children, user }: LayoutProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)}>
           <div className="h-full w-4/5 max-w-sm bg-white p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center space-x-4 mb-8 p-4 bg-family-50 rounded-xl">
-              <img src={user.avatar} alt={user.name} className="w-16 h-16 rounded-full" />
+              <img 
+                src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} 
+                alt={user.name} 
+                className="w-16 h-16 rounded-full" 
+              />
               <div>
                 <p className="text-xl font-semibold text-gray-900">{user.name}</p>
                 <p className="text-lg text-gray-500">{t('welcome_back')}</p>
@@ -76,7 +87,8 @@ export default function Layout({ children, user }: LayoutProps) {
             <nav className="space-y-3">
               {navigation.map(item => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href;
+                // For growth-column, match startsWith because it has query params ?familyId=xxx
+                const isActive = pathname === item.href || pathname.startsWith(item.href);
                 return (
                   <Link
                     key={item.name}
@@ -135,7 +147,11 @@ export default function Layout({ children, user }: LayoutProps) {
 
         <div className="flex-1 flex flex-col overflow-y-auto p-6">
           <div className="flex items-center space-x-4 mb-8 p-4 bg-family-50 rounded-xl">
-            <img src={user.avatar} alt={user.name} className="w-16 h-16 rounded-full" />
+            <img 
+              src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} 
+              alt={user.name} 
+              className="w-16 h-16 rounded-full" 
+            />
             <div>
               <p className="text-xl font-semibold text-gray-900">{user.name}</p>
               <p className="text-base text-gray-500">{t('welcome_back')}</p>
@@ -145,7 +161,8 @@ export default function Layout({ children, user }: LayoutProps) {
           <nav className="space-y-3 flex-1">
             {navigation.map(item => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              // For growth-column, match startsWith because it has query params ?familyId=xxx
+              const isActive = pathname === item.href || pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.name}
@@ -201,10 +218,11 @@ export default function Layout({ children, user }: LayoutProps) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 h-20">
-        <div className="grid grid-cols-5 h-full">
-          {navigation.slice(0, 5).map(item => {
+        <div className="grid grid-cols-6 h-full">
+          {navigation.map(item => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            // For growth-column, match startsWith because it has query params ?familyId=xxx
+            const isActive = pathname === item.href || pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}
@@ -214,7 +232,7 @@ export default function Layout({ children, user }: LayoutProps) {
                 }`}
               >
                 <Icon className="h-7 w-7" />
-                <span className="text-sm font-semibold">{item.name}</span>
+                <span className="text-xs font-semibold">{item.name}</span>
               </Link>
             );
           })}
