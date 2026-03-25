@@ -3,6 +3,7 @@ import Layout from '@/components/Layout';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Copy, Star } from 'lucide-react';
+import FamilyDeleteButton from '@/components/FamilyDeleteButton';
 import { db } from '@/lib/db';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 
@@ -157,9 +158,12 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-family-500 to-family-600 h-32 relative">
             {family.role === 'admin' && (
-              <button className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg backdrop-blur-sm transition-colors">
-                <Settings className="h-5 w-5" />
-              </button>
+              <>
+                <button className="absolute top-4 right-16 bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg backdrop-blur-sm transition-colors">
+                  <Settings className="h-5 w-5" />
+                </button>
+                <FamilyDeleteButton familyId={familyId} />
+              </>
             )}
           </div>
           <div className="px-6 pb-6">

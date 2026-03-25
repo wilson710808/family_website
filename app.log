@@ -1,0 +1,645 @@
+
+> family-website@1.0.0 start
+> next start -p 3000
+
+▲ Next.js 16.1.6
+- Local:         http://localhost:3000
+- Network:       http://10.4.0.3:3000
+
+✓ Starting...
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /root/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /root/.openclaw/workspace/family-portal/package-lock.json
+
+✓ Ready in 300ms
+[FamilyAlbumPlugin] 初始化失败: Error: ENOENT: no such file or directory, open '/ROOT/.openclaw/workspace/family-portal/plugins/family-album/schema.sql'
+    at n (.next/server/chunks/[root-of-the-server]__225e5573._.js:12:32)
+    at <unknown> (.next/server/chunks/[root-of-the-server]__225e5573._.js:45:2758) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/ROOT/.openclaw/workspace/family-portal/plugins/family-album/schema.sql'
+}
+[BirthdayReminderPlugin] 初始化失败: Error: ENOENT: no such file or directory, open '/ROOT/.openclaw/workspace/family-portal/plugins/birthday-reminder/schema.sql'
+    at n (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:12:32)
+    at <unknown> (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:3739) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/ROOT/.openclaw/workspace/family-portal/plugins/birthday-reminder/schema.sql'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+=== Growth Column API Debug ===
+OPENAI_API_KEY exists: true
+OPENAI_API_KEY length: 70
+OPENAI_BASE_URL: https://integrate.api.nvidia.com/v1
+config.openai.apiKey exists: true
+==============================
+=== Growth Column API Debug ===
+OPENAI_API_KEY exists: true
+OPENAI_API_KEY length: 70
+OPENAI_BASE_URL: https://integrate.api.nvidia.com/v1
+config.openai.apiKey exists: true
+==============================
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+=== Growth Column API Debug ===
+OPENAI_API_KEY exists: true
+OPENAI_API_KEY length: 70
+OPENAI_BASE_URL: https://integrate.api.nvidia.com/v1
+config.openai.apiKey exists: true
+==============================
+=== Growth Column API Debug ===
+OPENAI_API_KEY exists: true
+OPENAI_API_KEY length: 70
+OPENAI_BASE_URL: https://integrate.api.nvidia.com/v1
+config.openai.apiKey exists: true
+==============================
+=== Growth Column API Debug ===
+OPENAI_API_KEY exists: true
+OPENAI_API_KEY length: 70
+OPENAI_BASE_URL: https://integrate.api.nvidia.com/v1
+config.openai.apiKey exists: true
+==============================
+=== Growth Column API Debug ===
+OPENAI_API_KEY exists: true
+OPENAI_API_KEY length: 70
+OPENAI_BASE_URL: https://integrate.api.nvidia.com/v1
+config.openai.apiKey exists: true
+==============================
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+⨯ Error: Event handlers cannot be passed to Client Component props.
+  {method: "post", action: ..., onSubmit: function onSubmit, children: ...}
+                                          ^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '3559076808'
+}
+⨯ Error: Event handlers cannot be passed to Client Component props.
+  {method: "post", action: ..., onSubmit: function onSubmit, children: ...}
+                                          ^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '3559076808'
+}
+⨯ Error: Event handlers cannot be passed to Client Component props.
+  {onClick: function onClick, className: ..., title: ..., children: ...}
+            ^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '1024440008'
+}
+⨯ Error: Event handlers cannot be passed to Client Component props.
+  {onClick: function onClick, className: ..., title: ..., children: ...}
+            ^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '1024440008'
+}
+⨯ Error: Event handlers cannot be passed to Client Component props.
+  {onClick: function onClick, className: ..., title: ..., children: ...}
+            ^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '1024440008'
+}
+⨯ Error: Event handlers cannot be passed to Client Component props.
+  {onClick: function onClick, className: ..., title: ..., children: ...}
+            ^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '1024440008'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Album Photos API] GET error: SqliteError: no such table: plugin_album_photos
+    at c (.next/server/chunks/[root-of-the-server]__225e5573._.js:30:111)
+    at x (.next/server/chunks/[root-of-the-server]__143562bd._.js:45:1306) {
+  code: 'SQLITE_ERROR'
+}
+[Birthday Upcoming API] GET error: SqliteError: no such table: plugin_birthday_reminders
+    at d (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:18:154)
+    at c (.next/server/chunks/[root-of-the-server]__e1e854fb._.js:37:173)
+    at E (.next/server/chunks/[root-of-the-server]__498689f2._.js:37:2199) {
+  code: 'SQLITE_ERROR'
+}

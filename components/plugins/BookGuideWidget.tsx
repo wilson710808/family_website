@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BookOpen, Search } from 'lucide-react';
-import { isEnabled } from '../../plugins/growth-column';
+import { isEnabled } from '../../plugins/growth-column/index.client';
 import Link from 'next/link';
 
 interface RecentBook {
