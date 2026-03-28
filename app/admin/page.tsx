@@ -193,6 +193,7 @@ export default async function AdminPage() {
                     <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">成员数</th>
                     <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">创建时间</th>
                     <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">描述</th>
+                    <th className="px-8 py-4 text-left text-xl font-semibold text-gray-700">操作</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -225,6 +226,33 @@ export default async function AdminPage() {
                         <p className="text-lg text-gray-600 line-clamp-2">
                           {family.description || '暂无描述'}
                         </p>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`确定要删除家族 "${family.name}"？\n此操作会删除家族所有数据，包括所有公告、留言、聊天记录，不可撤销！`)) {
+                              return;
+                            }
+                            try {
+                              const res = await fetch(`/api/families/${family.id}/delete`, {
+                                method: 'POST',
+                              });
+                              const data = await res.json();
+                              if (data.success) {
+                                alert('家族删除成功');
+                                window.location.reload();
+                              } else {
+                                alert(data.error || '删除失败');
+                              }
+                            } catch (error) {
+                              console.error('Delete failed:', error);
+                              alert('删除失败，请重试');
+                            }
+                          }}
+                          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-base font-medium transition-colors"
+                        >
+                          删除
+                        </button>
                       </td>
                     </tr>
                   ))}
