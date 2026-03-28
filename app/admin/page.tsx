@@ -170,7 +170,7 @@ export default async function AdminPage() {
 
         {/* User Management */}
         <div>
-          <div className="flex justify-between items-center mb-6">
+          <div className="mb-6">
             <h2 className="text-3xl font-bold text-gray-900">用户管理</h2>
           </div>
 

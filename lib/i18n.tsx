@@ -40,6 +40,8 @@ const translations = {
     'no_account_yet': '还没有账号？',
     'have_account_already': '已有账号？',
     'create_account': '创建账号',
+    'full_name': '全名',
+    'your_full_name': '请输入您的全名',
     'join_family_space': '加入我们，开启家族专属空间',
     'welcome_back_to_family': '欢迎回来，登录您的账号，进入家族空间',
     'loading': '加载中...',
@@ -50,6 +52,9 @@ const translations = {
     'password_length_min': '密码长度至少6位',
     'please_fill_all': '请填写完整信息',
     'register_success': '注册成功，正在跳转...',
+    'already_have_account': '已有账号？',
+    'login_now': '立即登录',
+    'register_to_join_family': '注册加入家族空间',
     
     // Demo account
     'demo_account': '📋 测试账号',
@@ -204,6 +209,8 @@ const translations = {
     'no_account_yet': '還沒有帳號？',
     'have_account_already': '已經有帳號？',
     'create_account': '建立帳號',
+    'full_name': '全名',
+    'your_full_name': '請輸入你的全名',
     'join_family_space': '加入我們，開啟家族專屬空間',
     'welcome_back_to_family': '歡迎回來，登入你的帳號，進入家族空間',
     'loading': '載入中...',
@@ -214,6 +221,9 @@ const translations = {
     'password_length_min': '密碼長度至少6位',
     'please_fill_all': '請填寫完整資訊',
     'register_success': '註冊成功，正在跳轉...',
+    'already_have_account': '已經有帳號？',
+    'login_now': '立即登入',
+    'register_to_join_family': '註冊加入家族空間',
     
     // Demo account
     'demo_account': '📋 測試帳號',
