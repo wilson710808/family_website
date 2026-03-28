@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Search, BookOpen, Heart, History, Star, ArrowLeft, Share2 } from 'lucide-react';
+import { Search, BookOpen, Heart, History, Star, ArrowLeft, Share2, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import PageFavoritesPart from '@/components/growth-column/page-favorites-part';
 import { isEnabled } from '../../../plugins/growth-column/index.client';
+
+interface PracticalExample {
+  scenario: string;
+  advice: string;
+}
 
 interface BookGuide {
   title: string;
@@ -15,6 +20,7 @@ interface BookGuide {
   summary: string;
   keyPoints: string[];
   inspiration: string;
+  practicalExamples: PracticalExample[];
   quotes: string[];
   readingTime: string;
   difficulty: string;
@@ -44,7 +50,69 @@ interface User {
   is_admin?: number;
 }
 
-const quickBooks = ['原子習慣', '被討厭的勇氣', '思考快與慢', '富爸爸窮爸爸', '影響力'];
+// 热门推荐书籍库 - 30本不重复推荐
+const recommendedBooks = [
+  '原子習慣', '被討厭的勇氣', '思考快與慢', '富爸爸窮爸爸', '影響力',
+  '高效能人士的七個習慣', '微習慣', '關於這件事你對了，我錯了', '關於未來', '斜槓青年',
+  '刻意練習', '深度工作', '心流', '快樂宣言', '情緒調整理論',
+  '關鍵對話', '非暴力溝通', '關鍵改變', '掌控習慣', '自我改變的心理學',
+  '讓品格長成力量', '終身成長', '學習這件事', '如何閱讀一本書', '記憶術',
+  '思考的藝術', '邏輯思考', '批判性思維', '創造性思維', '高效閱讀'
+];
+
+// 获取今天推荐的5本书索引 - 基于日期计算，每天凌晨3点切换
+function getTodayRandomQuickBooks(): number[] {
+  const now = new Date();
+  // 调整到凌晨3点作为切换点，每天得到不同的随机种子
+  const day = Math.floor((now.getTime() - 3 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+  
+  // 使用日期作为随机种子生成5个不重复的索引
+  const indices = recommendedBooks.map((_, idx) => idx);
+  
+  // 简单的伪随机打乱（基于日期种子）
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor((day * (i + 1)) % (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  
+  // 取前5个
+  return indices.slice(0, 5);
+}
+
+// 记录已经推荐过的书籍索引，确保全局不重复
+let usedRecommendations: Set<number> = new Set();
+
+// 获取N个不重复的随机推荐
+function getNUniqueRandomRecommendations(count: number): string[] {
+  // 如果剩余可用书籍不够N本，清空重新开始
+  const availableIndices = recommendedBooks
+    .map((_, idx) => idx)
+    .filter(idx => !usedRecommendations.has(idx));
+  
+  if (availableIndices.length < count) {
+    usedRecommendations.clear();
+    availableIndices.splice(0, 0, ...recommendedBooks.map((_, idx) => idx));
+  }
+  
+  // Fisher-Yates 打乱
+  for (let i = availableIndices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [availableIndices[i], availableIndices[j]] = [availableIndices[j], availableIndices[i]];
+  }
+  
+  // 取前count个，标记为已使用
+  const selected = availableIndices.slice(0, count);
+  selected.forEach(idx => usedRecommendations.add(idx));
+  
+  return selected.map(idx => recommendedBooks[idx]);
+}
+
+// 获取今日快速推荐列表（基于日期，每天更新5本）
+function getTodayQuickBooks(): string[] {
+  const todayIndices = getTodayRandomQuickBooks();
+  return todayIndices.map(idx => recommendedBooks[idx]);
+}
+
 const categories = ['全部', '自我成長', '商業', '歷史', '心理學', '小說', '科技'];
 
 function GrowthColumnContent() {
@@ -59,6 +127,25 @@ function GrowthColumnContent() {
   const [activeTab, setActiveTab] = useState<'search' | 'history' | 'favorites'>('search');
   const [filterCategory, setFilterCategory] = useState<string>('全部');
   const [isFavorite, setIsFavorite] = useState(false);
+  // 每日凌晨3点自动更新5本，每次点击AI推荐重新生成5本，保证不重复
+  // 从localStorage读取用户AI推荐过的书单，如果没有就使用每日默认推荐
+  const getInitialQuickBooks = (): string[] => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('growth_column_quick_books');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === 5) {
+            return parsed;
+          }
+        } catch (e) {
+          // ignore invalid saved data
+        }
+      }
+    }
+    return getTodayQuickBooks();
+  };
+  const [quickBooks, setQuickBooks] = useState<string[]>(getInitialQuickBooks());
 
   // 获取url参数
   const [familyId, setFamilyId] = useState<number>(1);
@@ -132,8 +219,10 @@ function GrowthColumnContent() {
 
   async function fetchFavorites() {
     try {
+      console.log('Fetching favorites for familyId:', familyId);
       const res = await fetch(`/api/plugins/growth-column/favorites?familyId=${familyId}`);
       const data = await res.json();
+      console.log('Favorites response:', data);
       if (data.success) {
         setFavorites(data.favorites);
       }
@@ -178,11 +267,13 @@ function GrowthColumnContent() {
     if (!result) return;
 
     try {
+      console.log('Toggle favorite for:', result.title, 'userId:', user?.id, 'familyId:', familyId);
       const res = await fetch(`/api/plugins/growth-column/favorites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           familyId,
+          userId: user?.id,
           bookName: result.title,
           author: result.author,
           category: result.category
@@ -190,13 +281,21 @@ function GrowthColumnContent() {
       });
 
       const data = await res.json();
+      console.log('Toggle favorite response:', data);
       if (data.success) {
         setIsFavorite(data.action === 'added');
         await fetchFavorites();
+        if (data.action === 'added') {
+          alert('已添加到收藏');
+        } else {
+          alert('已取消收藏');
+        }
+      } else {
+        alert(data.message || '操作失败');
       }
     } catch (error) {
       console.error('Toggle favorite failed:', error);
-      alert('操作失败');
+      alert('操作失败：' + (error as Error).message);
     }
   }
 
@@ -207,27 +306,42 @@ function GrowthColumnContent() {
     const shareTitle = `${result.title} - 成長專欄導讀`;
     const shareText = `${shareTitle}\n\n${shareUrl}`;
 
+    // Show the link directly to user as fallback
+    const showLinkAlert = () => {
+      alert('分享鏈接：\n' + shareUrl);
+    };
+
     if (navigator.share) {
       // Use Web Share API if available
       navigator.share({
         title: shareTitle,
         text: shareText,
         url: shareUrl
-      }).catch(() => {
-        // User cancelled, fallback to clipboard
-        navigator.clipboard.writeText(shareText).then(() => {
-          alert('分享鏈接已復製到剪貼板！');
-        }).catch(() => {
-          alert('分享鏈接：\n' + shareUrl);
-        });
+      }).catch((error) => {
+        // User cancelled or share failed, fallback to clipboard
+        console.log('Web Share failed:', error);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareText).then(() => {
+            alert('分享鏈接已復製到剪貼板！');
+          }).catch((clipError) => {
+            console.log('Clipboard failed:', clipError);
+            showLinkAlert();
+          });
+        } else {
+          showLinkAlert();
+        }
       });
-    } else {
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
       // Fallback to clipboard
       navigator.clipboard.writeText(shareText).then(() => {
         alert('分享鏈接已復製到剪貼板！');
-      }).catch(() => {
-        alert('分享鏈接：\n' + shareUrl);
+      }).catch((clipError) => {
+        console.log('Clipboard failed:', clipError);
+        showLinkAlert();
       });
+    } else {
+      // No clipboard API available, just show the link
+      showLinkAlert();
     }
   }
 
@@ -290,8 +404,8 @@ function GrowthColumnContent() {
         <div className="space-y-6">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
             <BookOpen className="w-12 h-12 mx-auto text-yellow-400 mb-4" />
-            <h2 className="text-xl font-semibold text-yellow-800 mb-2">成长专栏插件未启用</h2>
-            <p className="text-yellow-600">该插件已被禁用，请在环境变量中设置 PLUGIN_GROWTH_COLUMN=true 启用。</p>
+            <h2 className="text-xl font-semibold text-yellow-800 mb-2">成長專欄插件未啟用</h2>
+            <p className="text-yellow-600">該插件已被禁用，請在環境變量中設置 PLUGIN_GROWTH_COLUMN=true 啟用。</p>
           </div>
         </div>
       </Layout>
@@ -334,9 +448,9 @@ function GrowthColumnContent() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <BookOpen className="h-8 w-8 mr-2 text-purple-500" />
-              成长专栏
+              成長專欄
             </h1>
-            <p className="text-gray-600 mt-1">AI智能书籍导读，和家族成员一起成长</p>
+            <p className="text-gray-600 mt-1">AI智能書籍導讀，和家族成員一起成長</p>
           </div>
         </div>
 
@@ -347,14 +461,14 @@ function GrowthColumnContent() {
             className={`flex-1 py-3 flex items-center justify-center gap-2 ${activeTab === 'search' ? 'bg-purple-500 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
           >
             <Search className="w-4 h-4" />
-            搜索
+            搜尋
           </button>
           <button
             onClick={() => setActiveTab('history')}
             className={`flex-1 py-3 flex items-center justify-center gap-2 ${activeTab === 'history' ? 'bg-purple-500 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
           >
             <History className="w-4 h-4" />
-            历史
+            歷史
           </button>
           <button
             onClick={() => setActiveTab('favorites')}
@@ -375,7 +489,7 @@ function GrowthColumnContent() {
                   type="text"
                   value={bookName}
                   onChange={e => setBookName(e.target.value)}
-                  placeholder="输入书名，探索AI导读..."
+                  placeholder="輸入書名，探索AI導讀..."
                   className="flex-1 border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-200"
                 />
                 <button
@@ -384,12 +498,12 @@ function GrowthColumnContent() {
                   className="bg-purple-500 disabled:bg-gray-300 text-white px-6 py-3 rounded-lg hover:bg-purple-600 flex items-center gap-2"
                 >
                   <Search className="w-4 h-4" />
-                  {isSearching ? '搜索中...' : '搜索'}
+                  {isSearching ? '搜尋中...' : '搜尋'}
                 </button>
               </form>
 
               {/* Quick Tags */}
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2 items-center">
                 {quickBooks.map(b => (
                   <button
                     key={b}
@@ -402,6 +516,25 @@ function GrowthColumnContent() {
                     {b}
                   </button>
                 ))}
+                <button
+                  onClick={() => {
+                    // 生成5本全新的不重复推荐，替换整个书单
+                    const newQuickBooks = getNUniqueRandomRecommendations(5);
+                    setQuickBooks(newQuickBooks);
+                    // 保存到localStorage，刷新页面后保持这次推荐
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('growth_column_quick_books', JSON.stringify(newQuickBooks));
+                    }
+                    // 用户可以从新生成的5本中点击选择，这里不自动搜索
+                    setBookName('');
+                    setResult(null);
+                  }}
+                  className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-full text-sm transition-colors flex items-center gap-1"
+                  title="AI推薦熱門書單"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  AI推薦
+                </button>
               </div>
             </div>
 
@@ -418,8 +551,20 @@ function GrowthColumnContent() {
               <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-purple-500 to-purple-400 text-white p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
+                  <div className="flex gap-6 items-start">
+                    {/* Book Cover Image */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src={`https://covers.openlibrary.org/b/title/${encodeURIComponent(result.title)}-M.jpg`}
+                        alt={result.title}
+                        className="w-32 h-48 object-cover rounded-lg shadow-md"
+                        onError={(e) => {
+                          // 如果找不到封面，用占位图
+                          (e.target as HTMLImageElement).src = `https://placehold.co/128x192/eeeeee/999999?text=${encodeURIComponent(result.title)}`;
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1">
                       <h2 className="text-2xl font-bold">{result.title}</h2>
                       <p className="mt-1 opacity-90">{result.author}</p>
                       <div className="flex items-center gap-3 mt-3">
@@ -427,24 +572,24 @@ function GrowthColumnContent() {
                         <span className="text-sm">{result.readingTime}</span>
                         <span className="text-sm">{result.difficulty}</span>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      {renderRating(result.rating)}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={toggleFavorite}
-                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${isFavorite ? 'bg-red-400 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
-                        >
-                          <Heart className={`w-4 h-4 ${isFavorite ? 'fill-white' : ''}`} />
-                          {isFavorite ? '已收藏' : '收藏'}
-                        </button>
-                        <button
-                          onClick={handleShare}
-                          className="flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-white/20 text-white hover:bg-white/30"
-                        >
-                          <Share2 className="w-4 h-4" />
-                          分享
-                        </button>
+                      <div className="flex flex-col items-start gap-2 mt-4">
+                        {renderRating(result.rating)}
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={toggleFavorite}
+                            className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${isFavorite ? 'bg-red-400 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}
+                          >
+                            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-white' : ''}`} />
+                            {isFavorite ? '已收藏' : '收藏'}
+                          </button>
+                          <button
+                            onClick={handleShare}
+                            className="flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-white/20 text-white hover:bg-white/30"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            分享
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -491,6 +636,28 @@ function GrowthColumnContent() {
                       </div>
                     </div>
                   )}
+
+                  {/* 實際生活應用範例 */}
+                  {result.practicalExamples && result.practicalExamples.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-purple-600 mb-3 uppercase tracking-wide">實際生活應用範例</h3>
+                      <div className="space-y-4">
+                        {result.practicalExamples.map((example, idx) => (
+                          <div key={idx} className="bg-gray-50 rounded-lg p-4">
+                            <div className="mb-2">
+                              <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded">
+                                場景 {idx + 1}
+                              </span>
+                            </div>
+                            <p className="text-gray-800 font-medium mb-2">{example.scenario}</p>
+                            <div className="pl-3 border-l-2 border-purple-200">
+                              <p className="text-gray-700 text-base">{example.advice}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -502,7 +669,7 @@ function GrowthColumnContent() {
           <div className="bg-white rounded-xl shadow-sm">
             <div className="p-4 border-b">
               <div className="flex justify-between items-center">
-                <h3 className="font-semibold">阅读历史 ({filteredHistory.length}/{history.length})</h3>
+                <h3 className="font-semibold">閱讀歷史 ({filteredHistory.length}/{history.length})</h3>
               </div>
               {/* Category Filter */}
               <div className="flex flex-wrap gap-2 mt-3">
@@ -524,7 +691,7 @@ function GrowthColumnContent() {
             {filteredHistory.length === 0 ? (
               <div className="p-12 text-center text-gray-500">
                 <History className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p>暂无阅读历史{filterCategory !== '全部' ? ` - ${filterCategory}` : ''}</p>
+                <p>暫無閱讀歷史{filterCategory !== '全部' ? ` - ${filterCategory}` : ''}</p>
               </div>
             ) : (
               <div className="divide-y">
@@ -570,7 +737,7 @@ function GrowthColumnContent() {
 
         {/* Footer */}
         <div className="mt-6 text-center text-sm text-gray-400">
-          📚 成长专栏插件 · 基于 AI 生成的智能书籍导读 · 可插拔设计
+          📚 成長專欄插件 · 基於 AI 生成的智能書籍導讀 · 可插拔設計
         </div>
       </div>
     </Layout>

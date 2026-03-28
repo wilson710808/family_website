@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS plugin_growth_book_favorites (
   book_name TEXT NOT NULL,
   author TEXT,
   category TEXT,
+  status INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(family_id, book_name, user_id)
 );

@@ -1,20 +1,22 @@
-# 成长专栏 - AI书籍导读插件
+# 成長專欄 - AI書籍導讀插件
 
-## 功能介绍
+## 功能介紹
 
-基于 [books_group](https://github.com/wilson710808/books_group) 项目集成，提供 AI 智能书籍导读功能。
+提供 AI 智能書籍導讀功能。
 
-- 🔍 **智能搜索** - 输入书名，AI 自动生成完整导读
-- 📖 **完整导读** - 包含简介、核心观点、读后启发、金句
-- ❤️ **收藏功能** - 喜欢的导读一键收藏
-- 📚 **阅读历史** - 自动记录浏览过的书籍
-- 🎙️ **语音朗读** - 支持文字转语音（需要 API 配置）
-- 📱 **手机优先** - 专为手机设计的极简界面
+- 🔍 **智能搜索** - 輸入書名，AI 自動生成完整導讀
+- 📖 **完整導讀** - 包含簡介、核心觀點、讀後啟發、金句
+- ❤️ **收藏功能** - 喜歡的導讀一鍵收藏
+- 📚 **閱讀歷史** - 自動記錄瀏覽過的書籍
+- 🎙️ **語音朗讀** - 支持文字轉語音（需要 API 配置）
+- 📱 **手機優先** - 專為手機設計的極簡界面
+- 🎲 **AI推薦** - 點擊按鈕隨機推薦熱門書單，保證30次不重複
+- 📅 **每日推薦** - 基於日期自動每日更換推薦書籍
 
-## 环境变量控制
+## 環境變量控制
 
 ```bash
-# 默认启用
+# 默認啟用
 # 禁用方式（在 .env.local 中添加：
 PLUGIN_GROWTH_COLUMN=false
 # 或者
@@ -23,30 +25,30 @@ DISABLE_PLUGIN_GROWTH_COLUMN=true
 
 ## API 配置
 
-需要在环境变量中配置 OpenAI API：
+需要在環境變量中配置 OpenAI API（兼容 NVIDIA NIM）：
 
 ```bash
 # OpenAI API Key（必需）
 OPENAI_API_KEY=your-api-key
-# API 端点（可选，默认使用 OpenAI，可配置 NVIDIA NIM）
+# API 端點（可選，默認使用 OpenAI，可配置 NVIDIA NIM）
 OPENAI_BASE_URL=https://integrate.api.nvidia.com/v1
-# 模型（可选）
-OPENAI_MODEL=meta/llama-3.1-405b-instruct
-# ElevenLabs TTS（可选，更自然的语音）
+# 模型（可選，推薦使用較小模型獲得更快速度）
+OPENAI_MODEL=meta/llama-3.1-8b-instruct
+# ElevenLabs TTS（可選，更自然的語音）
 ELEVENLABS_API_KEY=your-elevenlabs-key
 ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
 ```
 
-## 访问地址
+## 訪問地址
 
 `/plugins/growth-column?familyId={家族ID}`
 
-## 数据库
+## 數據庫
 
-- `plugin_growth_book_history` - 用户阅读历史
+- `plugin_growth_book_history` - 用戶閱讀歷史
 - `plugin_growth_book_favorites` - 收藏
-- `plugin_growth_book_recommendations` - 推荐书单
+- `plugin_growth_book_recommendations` - 推薦書單
 
-## 卸载
+## 卸載
 
-禁用后，数据库表会保留但不会被访问。如果确定不需要了，可以手动删除这三个表。
+禁用後，數據庫表會保留但不會被訪問。如果確定不需要了，可以手動刪除這三個表。

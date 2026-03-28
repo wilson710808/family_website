@@ -73,13 +73,13 @@ export default function BookGuideWidget({ familyId, maxItems = 5 }: BookGuideWid
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-gray-800 flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-purple-500" />
-          最近阅读
+          最近閱讀
         </h3>
         <Link
           href={`/plugins/growth-column?familyId=${familyId}`}
           className="text-sm text-blue-500 hover:underline"
         >
-          成长专栏 →
+          成長專欄 →
         </Link>
       </div>
 

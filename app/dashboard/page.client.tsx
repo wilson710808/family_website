@@ -1,13 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, Bell, MessageSquare, Plus, Calendar, Clock, BookOpen } from 'lucide-react';
+import { Users, Bell, MessageSquare, Plus, Calendar, Clock } from 'lucide-react';
 import Layout from '@/components/Layout';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 import { useI18n } from '@/lib/i18n';
 import BirthdayWidget from '@/components/plugins/BirthdayWidget';
 import RecentPhotosWidget from '@/components/plugins/RecentPhotosWidget';
-import BookGuideWidget from '@/components/plugins/BookGuideWidget';
 
 interface DashboardClientProps {
   user: any;
@@ -53,16 +52,6 @@ export default function DashboardClient({
                 </span>
               </ElderFriendlyButton>
             </Link>
-            {approvedFamilies.length > 0 && (
-              <Link href={`/plugins/growth-column?familyId=${approvedFamilies[0].id}`}>
-                <ElderFriendlyButton variant="primary" size="lg" className="bg-purple-500 border border-purple-400 hover:bg-purple-600">
-                  <span className="flex items-center">
-                    <BookOpen className="h-6 w-6 mr-2" />
-                    成长专栏
-                  </span>
-                </ElderFriendlyButton>
-              </Link>
-            )}
           </div>
         </div>
 
@@ -110,12 +99,11 @@ export default function DashboardClient({
           </div>
         </div>
 
-        {/* 插件小部件区域 - 生日提醒 + 最新照片 + 成长专栏（只在插件启用时显示 */}
+        {/* 插件小部件区域 - 生日提醒 + 最新照片（只在插件启用时显示 */}
         {approvedFamilies.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BirthdayWidget familyId={approvedFamilies[0].id} />
             <RecentPhotosWidget familyId={approvedFamilies[0].id} />
-            <BookGuideWidget familyId={approvedFamilies[0].id} />
           </div>
         )}
 

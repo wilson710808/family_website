@@ -25,7 +25,7 @@ export default function Layout({ children, user }: LayoutProps) {
 
   // 获取第一个家族ID（从cookie或默认）
   const getDefaultFamilyHref = () => {
-    // 成长专栏链接，默认带 familyId=1，实际使用时会正确处理
+    // 成長專欄鏈接，默認帶 familyId=1，實際使用時會正確處理
     return '/plugins/growth-column?familyId=1';
   };
 
@@ -36,7 +36,7 @@ export default function Layout({ children, user }: LayoutProps) {
     { name: t('announcements'), href: '/announcements', icon: Bell },
     { name: t('messages'), href: '/messages', icon: MessageSquare },
     { name: t('chat'), href: '/chat', icon: MessageSquare },
-    { name: '成长专栏', href: getDefaultFamilyHref(), icon: BookOpen },
+    { name: '成長專欄', href: getDefaultFamilyHref(), icon: BookOpen },
   ];
 
   // 管理员专属导航

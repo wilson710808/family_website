@@ -45,13 +45,13 @@ export async function POST(
     // 4. 删除聊天消息
     db.prepare(`DELETE FROM chat_messages WHERE family_id = ?`).run(familyIdNum);
 
-    // 5. 删除成长专栏历史和收藏（如果插件表存在）
+    // 5. 刪除成長專欄歷史和收藏（如果插件表存在）
     try {
-      db.prepare(`DELETE FROM growth_column_history WHERE family_id = ?`).run(familyIdNum);
-      db.prepare(`DELETE FROM growth_column_favorites WHERE family_id = ?`).run(familyIdNum);
+      db.prepare(`DELETE FROM plugin_growth_book_history WHERE family_id = ?`).run(familyIdNum);
+      db.prepare(`DELETE FROM plugin_growth_book_favorites WHERE family_id = ?`).run(familyIdNum);
     } catch (e) {
-      // 如果表不存在，忽略错误
-      console.log('成长专栏表不存在，跳过');
+      // 如果表不存在，忽略錯誤
+      console.log('成長專欄表不存在，跳過');
     }
 
     // 6. 删除生日提醒设置（如果插件表存在）

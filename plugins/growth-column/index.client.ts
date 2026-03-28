@@ -1,11 +1,11 @@
 /**
- * 成长专栏 - 客户端导出
- * 只包含安全的、可在浏览器端运行的代码
+ * 成長專欄 - 客戶端導出
+ * 只包含安全的、可在瀏覽器端運行的代碼
  */
 
-// 检查插件是否启用
+// 檢查插件是否啟用
 export function isEnabled(): boolean {
-  // 客户端默认启用，实际服务端会控制API可用性
+  // 客戶端默認啟用，實際服務端會控制API可用性
   return typeof process !== 'undefined' && process.env 
     ? process.env.PLUGIN_GROWTH_COLUMN !== 'false' && 
       process.env.DISABLE_PLUGIN_GROWTH_COLUMN !== 'true'
