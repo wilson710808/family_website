@@ -26,22 +26,35 @@ export async function DELETE(
     }
 
     // 开始删除 - 需要先删除所有关联数据
-    // 1. 删除用户的聊天消息
-    db.prepare('DELETE FROM chat_messages WHERE user_id = ?').run(userIdNum);
+    // 逐个删除，忽略表不存在的错误
+    const tablesToClean = [
+      'DELETE FROM chat_messages WHERE user_id = ?',
+      'DELETE FROM chat_message_reads WHERE user_id = ?',
+      'DELETE FROM messages WHERE user_id = ?',
+      'DELETE FROM announcements WHERE user_id = ?',
+      'DELETE FROM family_members WHERE user_id = ?',
+      'DELETE FROM user_login_logs WHERE user_id = ?',
+      'DELETE FROM plugin_growth_book_history WHERE user_id = ?',
+      'DELETE FROM plugin_growth_book_favorites WHERE user_id = ?',
+    ];
+
+    for (const sql of tablesToClean) {
+      try {
+        db.prepare(sql).run(userIdNum);
+      } catch (e) {
+        // 表不存在没关系，跳过
+        console.warn(`Failed to clean table ${sql}, skipping:`, e);
+      }
+    }
     
-    // 2. 删除用户的留言
-    db.prepare('DELETE FROM messages WHERE user_id = ?').run(userIdNum);
+    // 如果用户创建了家族，这些家族保留但 creator_id 设为 NULL
+    try {
+      db.prepare('UPDATE families SET creator_id = NULL WHERE creator_id = ?').run(userIdNum);
+    } catch (e) {
+      console.warn('Failed to update families creator_id:', e);
+    }
     
-    // 3. 删除用户的公告
-    db.prepare('DELETE FROM announcements WHERE user_id = ?').run(userIdNum);
-    
-    // 4. 删除用户的家族成员关系
-    db.prepare('DELETE FROM family_members WHERE user_id = ?').run(userIdNum);
-    
-    // 5. 如果用户创建了家族，这些家族保留但 creator_id 设为 NULL（或者可以选择删除，这里选择保留）
-    db.prepare('UPDATE families SET creator_id = NULL WHERE creator_id = ?').run(userIdNum);
-    
-    // 6. 最后删除用户本身
+    // 最后删除用户本身
     db.prepare('DELETE FROM users WHERE id = ?').run(userIdNum);
 
     return NextResponse.json({ 
