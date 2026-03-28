@@ -27,35 +27,60 @@ export async function DELETE(
 
     // 开始删除 - 需要先删除所有关联数据
     // 逐个删除，忽略表不存在的错误
-    const tablesToClean = [
-      'DELETE FROM chat_messages WHERE user_id = ?',
-      'DELETE FROM chat_message_reads WHERE user_id = ?',
-      'DELETE FROM messages WHERE user_id = ?',
-      'DELETE FROM announcements WHERE user_id = ?',
-      'DELETE FROM family_members WHERE user_id = ?',
-      'DELETE FROM user_login_logs WHERE user_id = ?',
-      'DELETE FROM plugin_growth_book_history WHERE user_id = ?',
-      'DELETE FROM plugin_growth_book_favorites WHERE user_id = ?',
-    ];
-
-    for (const sql of tablesToClean) {
-      try {
-        db.prepare(sql).run(userIdNum);
-      } catch (e) {
-        // 表不存在没关系，跳过
-        console.warn(`Failed to clean table ${sql}, skipping:`, e);
-      }
-    }
+    const dbConn = db;
     
-    // 如果用户创建了家族，这些家族保留但 creator_id 设为 NULL
+    // 1. 删除聊天消息
     try {
-      db.prepare('UPDATE families SET creator_id = NULL WHERE creator_id = ?').run(userIdNum);
-    } catch (e) {
-      console.warn('Failed to update families creator_id:', e);
-    }
+      dbConn.prepare('DELETE FROM chat_messages WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean chat_messages failed (skip):', e); }
     
-    // 最后删除用户本身
-    db.prepare('DELETE FROM users WHERE id = ?').run(userIdNum);
+    // 2. 删除聊天已读标记
+    try {
+      dbConn.prepare('DELETE FROM chat_message_reads WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean chat_message_reads failed (skip):', e); }
+    
+    // 3. 删除留言
+    try {
+      dbConn.prepare('DELETE FROM messages WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean messages failed (skip):', e); }
+    
+    // 4. 删除公告
+    try {
+      dbConn.prepare('DELETE FROM announcements WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean announcements failed (skip):', e); }
+    
+    // 5. 删除家族成员关系
+    try {
+      dbConn.prepare('DELETE FROM family_members WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean family_members failed (skip):', e); }
+    
+    // 6. 删除登录日志
+    try {
+      dbConn.prepare('DELETE FROM user_login_logs WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean user_login_logs failed (skip):', e); }
+    
+    // 7. 删除成长专栏历史 - 表可能不存在
+    try {
+      dbConn.prepare('DELETE FROM plugin_growth_book_history WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean plugin_growth_book_history failed (skip):', e); }
+    
+    // 8. 删除成长专栏收藏 - 表可能不存在
+    try {
+      dbConn.prepare('DELETE FROM plugin_growth_book_favorites WHERE user_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Clean plugin_growth_book_favorites failed (skip):', e); }
+    
+    // 9. 如果用户创建了家族，这些家族保留但 creator_id 设为 NULL
+    try {
+      dbConn.prepare('UPDATE families SET creator_id = NULL WHERE creator_id = ?').run(userIdNum);
+    } catch (e) { console.warn('Update families creator_id failed (skip):', e); }
+    
+    // 10. 最后删除用户本身 - users 表一定存在
+    try {
+      dbConn.prepare('DELETE FROM users WHERE id = ?').run(userIdNum);
+    } catch (finalError) {
+      console.error('Final delete user failed:', finalError);
+      throw finalError;
+    }
 
     return NextResponse.json({ 
       success: true, 
