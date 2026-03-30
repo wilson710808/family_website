@@ -254,9 +254,9 @@ export default function Layout({ children, user }: LayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation - 只放 5 个，保证每个按钮有足够空间 */}
+      {/* Mobile Bottom Navigation - 动态设置列数，成长专栏启用时显示 6 列 */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 h-20">
-        <div className="grid grid-cols-5 h-full">
+        <div className={`grid h-full ${isGrowthColumnEnabled() ? 'grid-cols-6' : 'grid-cols-5'}`}>
           {bottomNavigation.map(item => {
             const Icon = item.icon;
             // For growth-column, match startsWith because it has query params ?familyId=xxx
