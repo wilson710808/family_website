@@ -4,6 +4,8 @@
  */
 
 import type Database from 'better-sqlite3';
+import fs from 'fs';
+import path from 'path';
 
 // 檢查插件是否啟用
 export function isEnabled(): boolean {
@@ -16,11 +18,9 @@ export function initDatabase(db: InstanceType<typeof Database>): void {
   if (!isEnabled()) return;
 
   try {
-    // 讀取並執行 schema
-    const schema = require('fs').readFileSync(
-      require('path').join(__dirname, 'schema.sql'),
-      'utf8'
-    );
+    // 使用绝对路径避免大小写问题
+    const schemaPath = path.join('/root/.openclaw/workspace/family-portal/plugins/growth-column', 'schema.sql');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
 
     db.exec(schema);
     console.log('✅ 成長專欄插件數據庫初始化完成');
