@@ -45,8 +45,9 @@ export default function Layout({ children, user }: LayoutProps) {
     navigation.push({ name: '成長專欄', href: getDefaultFamilyHref(), icon: BookOpen });
   }
 
-  // 底部导航只显示 5 个，保证不挤，多余的可以通过侧边菜单访问
-  const bottomNavigation = navigation.slice(0, 5);
+  // 底部导航：成长专栏启用时显示全部 6 个，不启用时显示 5 个
+  // 5/6 个在移动端都能放下，每个按钮依然有足够空间
+  const bottomNavigation = navigation.slice(0, isGrowthColumnEnabled() ? 6 : 5);
 
   // 管理员专属导航
   const adminNavigation = [
