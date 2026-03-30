@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Home, Users, Bell, MessageSquare, BookOpen, Settings, LogOut, Menu, X } from 'lucide-react';
 import ElderFriendlyButton from './ElderFriendlyButton';
 import { useI18n } from '@/lib/i18n';
+import { isEnabled as isGrowthColumnEnabled } from '../plugins/growth-column/index.client';
 
 interface LayoutProps {
   children: ReactNode;
@@ -29,15 +30,23 @@ export default function Layout({ children, user }: LayoutProps) {
     return '/plugins/growth-column?familyId=1';
   };
 
-  // 导航菜单
-  const navigation = [
+  // 导航菜单 - 基础导航
+  const baseNavigation = [
     { name: t('home'), href: '/dashboard', icon: Home },
     { name: t('family'), href: '/families', icon: Users },
     { name: t('announcements'), href: '/announcements', icon: Bell },
     { name: t('messages'), href: '/messages', icon: MessageSquare },
     { name: t('chat'), href: '/chat', icon: MessageSquare },
-    { name: '成長專欄', href: getDefaultFamilyHref(), icon: BookOpen },
   ];
+  
+  // 成長專欄插件只有启用了才添加到导航中（真正的插拔体验）
+  const navigation = [...baseNavigation];
+  if (isGrowthColumnEnabled()) {
+    navigation.push({ name: '成長專欄', href: getDefaultFamilyHref(), icon: BookOpen });
+  }
+
+  // 底部导航只显示 5 个，保证不挤，多余的可以通过侧边菜单访问
+  const bottomNavigation = navigation.slice(0, 5);
 
   // 管理员专属导航
   const adminNavigation = [
@@ -74,7 +83,7 @@ export default function Layout({ children, user }: LayoutProps) {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)}>
-          <div className="h-screen max-h-screen w-1/3 max-w-[280px] bg-white flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="h-screen max-h-screen w-3/4 max-w-[280px] bg-white flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex-shrink-0 p-3">
               <div className="flex items-center space-x-3 p-3 bg-family-50 rounded-xl">
                 <img 
@@ -244,10 +253,10 @@ export default function Layout({ children, user }: LayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation - 只放 5 个，保证每个按钮有足够空间 */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 h-20">
-        <div className="grid grid-cols-6 h-full">
-          {navigation.map(item => {
+        <div className="grid grid-cols-5 h-full">
+          {bottomNavigation.map(item => {
             const Icon = item.icon;
             // For growth-column, match startsWith because it has query params ?familyId=xxx
             const isActive = pathname === item.href || pathname.startsWith(item.href);
@@ -259,8 +268,8 @@ export default function Layout({ children, user }: LayoutProps) {
                   isActive ? 'text-family-500' : 'text-gray-500'
                 }`}
               >
-                <Icon className="h-7 w-7" />
-                <span className="text-xs font-semibold">{item.name}</span>
+                <Icon className="h-6 w-6" />
+                <span className="text-xs font-semibold truncate px-1">{item.name.replace('成長專欄', '書籤')}</span>
               </Link>
             );
           })}
