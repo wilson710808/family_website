@@ -178,6 +178,7 @@ const translations = {
     'language': '语言',
     'simplified_chinese': '简体中文',
     'traditional_chinese': '繁體中文',
+    'growth_column_short': '书签',
     'no_description': '暂无描述',
   },
   'zh-TW': {
@@ -347,6 +348,7 @@ const translations = {
     'language': '語言',
     'simplified_chinese': '简体中文',
     'traditional_chinese': '繁體中文',
+    'growth_column_short': '書籤',
     'no_description': '暂无描述',
   },
 };
@@ -357,9 +359,13 @@ const I18nContext = createContext<I18nContextType>({
   t: (key: string) => key,
 });
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
+export function I18nProvider({ children, initialLang }: { children: React.ReactNode, initialLang?: Language }) {
   const [lang, setLang] = useState<Language>(() => {
-    // 从cookie读取保存的语言，默认繁体中文
+    // 如果服务端传递了 initialLang，使用它（保证 hydration 匹配）
+    if (initialLang) {
+      return initialLang;
+    }
+    // 否则从cookie读取保存的语言，默认繁体中文
     if (typeof window !== 'undefined') {
       const saved = document.cookie.split('; ').find(row => row.startsWith('language='));
       if (saved) {

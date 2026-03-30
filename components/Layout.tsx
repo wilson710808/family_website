@@ -260,6 +260,8 @@ export default function Layout({ children, user }: LayoutProps) {
             const Icon = item.icon;
             // For growth-column, match startsWith because it has query params ?familyId=xxx
             const isActive = pathname === item.href || pathname.startsWith(item.href);
+            // 底部导航空间小，成長專欄缩写为 書籤
+            const displayName = item.name === '成長專欄' ? t('growth_column_short') : item.name;
             return (
               <Link
                 key={item.name}
@@ -269,7 +271,7 @@ export default function Layout({ children, user }: LayoutProps) {
                 }`}
               >
                 <Icon className="h-6 w-6" />
-                <span className="text-xs font-semibold truncate px-1">{item.name.replace('成長專欄', '書籤')}</span>
+                <span className="text-xs font-semibold truncate px-1">{displayName}</span>
               </Link>
             );
           })}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import I18nProviderClient from "./I18nProviderClient";
+import { cookies } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,10 +22,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 从 cookie 读取语言，保证服务端和客户端初始值一致
+  const cookieStore = cookies();
+  const savedLang = cookieStore.get('language')?.value;
+  const initialLang = (savedLang === 'zh-CN' || savedLang === 'zh-TW') ? savedLang : 'zh-TW';
+
   return (
-    <html lang="zh-CN">
+    <html lang={initialLang === 'zh-CN' ? 'zh-CN' : 'zh-TW'}>
       <body className={`${inter.className} min-h-screen bg-gray-50`}>
-        <I18nProviderClient>
+        <I18nProviderClient initialLang={initialLang}>
           {children}
         </I18nProviderClient>
       </body>
