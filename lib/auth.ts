@@ -40,16 +40,45 @@ const DEFAULT_ADMIN_USER: User = {
 };
 
 /**
- * 移除认证检查 - 始终返回默认管理员用户
- * 所有访客自动以管理员身份登录，无需注册登录
+ * 从 cookie 中读取 JWT token，获取当前登录用户
+ * 如果没有 token 或 token 无效，返回默认管理员用户（向后兼容）
  */
 export async function getCurrentUser(): Promise<User> {
-  // 始终返回默认管理员，不需要认证
   try {
-    const user = db.prepare(
+    const cookieStore = cookies();
+    const token = cookieStore.get('auth-token');
+    
+    // 如果没有 token，返回默认管理员（访客模式）
+    if (!token) {
+      const user = db.prepare(
+        'SELECT id, email, name, avatar, is_admin, created_at, login_total, login_30d, last_login FROM users WHERE email = ?'
+      ).get('admin@family.com') as User;
+      return user || DEFAULT_ADMIN_USER;
+    }
+    
+    // 验证 JWT token
+    try {
+      const decoded = jwt.verify(token.value, JWT_SECRET) as { userId: number };
+      const userId = decoded.userId;
+      
+      // 从数据库获取用户信息
+      const user = db.prepare(
+        'SELECT id, email, name, avatar, is_admin, created_at, login_total, login_30d, last_login FROM users WHERE id = ?'
+      ).get(userId) as User;
+      
+      if (user) {
+        return user;
+      }
+    } catch (jwtError) {
+      // token 无效或过期，回退到默认管理员
+      console.error('JWT 验证失败:', jwtError);
+    }
+    
+    // 如果找不到用户，返回默认管理员
+    const defaultUser = db.prepare(
       'SELECT id, email, name, avatar, is_admin, created_at, login_total, login_30d, last_login FROM users WHERE email = ?'
     ).get('admin@family.com') as User;
-    return user || DEFAULT_ADMIN_USER;
+    return defaultUser || DEFAULT_ADMIN_USER;
   } catch {
     return DEFAULT_ADMIN_USER;
   }
