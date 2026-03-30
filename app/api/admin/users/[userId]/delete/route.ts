@@ -103,7 +103,35 @@ export async function DELETE(
       console.warn('[DELETE USER] Clean plugin_growth_book_favorites failed (skip):', (e as Error).message); 
     }
     
-    // 9. 如果用户创建了家族，这些家族保留但 creator_id 设为 NULL
+    // 9. 清理家族相册插件数据 - 用户上传的照片
+    try {
+      console.log('[DELETE USER] Cleaning family album photos...');
+      // 删除用户上传的照片的评论和点赞，然后删除照片
+      // 先获取用户上传的所有照片
+      const userPhotos: { id: number, album_id: number }[] = dbConn.prepare('SELECT id, album_id FROM plugin_album_photos WHERE uploaded_by = ?').all(userIdNum) as { id: number, album_id: number }[];
+      for (const photo of userPhotos) {
+        dbConn.prepare('DELETE FROM plugin_album_likes WHERE photo_id = ?').run(photo.id);
+        dbConn.prepare('DELETE FROM plugin_album_comments WHERE photo_id = ?').run(photo.id);
+        dbConn.prepare('DELETE FROM plugin_album_photos WHERE id = ?').run(photo.id);
+      }
+      // 如果用户创建了相册，删除用户创建的相册及其所有内容
+      const userAlbums: { id: number }[] = dbConn.prepare('SELECT id FROM plugin_album_albums WHERE created_by = ?').all(userIdNum) as { id: number }[];
+      for (const album of userAlbums) {
+        // 删除相册中所有照片及其评论点赞
+        const albumPhotos: { id: number }[] = dbConn.prepare('SELECT id FROM plugin_album_photos WHERE album_id = ?').all(album.id) as { id: number }[];
+        for (const photo of albumPhotos) {
+          dbConn.prepare('DELETE FROM plugin_album_likes WHERE photo_id = ?').run(photo.id);
+          dbConn.prepare('DELETE FROM plugin_album_comments WHERE photo_id = ?').run(photo.id);
+          dbConn.prepare('DELETE FROM plugin_album_photos WHERE id = ?').run(photo.id);
+        }
+        dbConn.prepare('DELETE FROM plugin_album_albums WHERE id = ?').run(album.id);
+      }
+      console.log('[DELETE USER] Family album data cleaned');
+    } catch (e) { 
+      console.warn('[DELETE USER] Clean family album data failed (skip):', (e as Error).message); 
+    }
+    
+    // 10. 如果用户创建了家族，这些家族保留但 creator_id 设为 NULL
     try {
       console.log('[DELETE USER] Updating families creator_id...');
       dbConn.prepare('UPDATE families SET creator_id = NULL WHERE creator_id = ?').run(userIdNum);
@@ -111,7 +139,7 @@ export async function DELETE(
       console.warn('[DELETE USER] Update families creator_id failed (skip):', (e as Error).message); 
     }
     
-    // 10. 最后删除用户本身 - users 表一定存在
+    // 11. 最后删除用户本身 - users 表一定存在
     try {
       console.log('[DELETE USER] Final delete from users...');
       dbConn.prepare('DELETE FROM users WHERE id = ?').run(userIdNum);

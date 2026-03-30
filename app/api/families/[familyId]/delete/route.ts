@@ -21,24 +21,33 @@ export async function POST(
     const dbPath = process.env.DB_PATH || './family.db';
     const db = new Database(dbPath);
 
-    // 检查用户是否是家族成员并获取角色
-    const memberInfo = db.prepare(`
-      SELECT role FROM family_members 
-      WHERE family_id = ? AND user_id = ? AND status = 'approved'
-    `).get(familyIdNum, user.id) as { role: string } | undefined;
+    // 检查权限：
+    // 1. 超级管理员（系统管理员，is_admin = 1）可以删除任何家族
+    // 2. 家族管理员只能删除自己家族
+    const isSuperAdmin = user.is_admin === 1;
+    
+    if (!isSuperAdmin) {
+      const memberInfo = db.prepare(`
+        SELECT role FROM family_members 
+        WHERE family_id = ? AND user_id = ? AND status = 'approved'
+      `).get(familyIdNum, user.id) as { role: string } | undefined;
 
-    if (!memberInfo) {
-      console.log(`[DELETE FAMILY] User ${user.id} not a member of family ${familyIdNum}`);
-      db.close();
-      return NextResponse.json({ success: false, error: '你不是该家族成员' }, { status: 403 });
+      if (!memberInfo) {
+        console.log(`[DELETE FAMILY] User ${user.id} not a member of family ${familyIdNum}`);
+        db.close();
+        return NextResponse.json({ success: false, error: '你不是该家族成员' }, { status: 403 });
+      }
+
+      // 只有管理员可以删除家族
+      if (memberInfo.role !== 'admin') {
+        console.log(`[DELETE FAMILY] User ${user.id} not admin`);
+        db.close();
+        return NextResponse.json({ success: false, error: '只有管理员可以删除家族' }, { status: 403 });
+      }
     }
 
-    // 只有管理员可以删除家族
-    if (memberInfo.role !== 'admin') {
-      console.log(`[DELETE FAMILY] User ${user.id} not admin`);
-      db.close();
-      return NextResponse.json({ success: false, error: '只有管理员可以删除家族' }, { status: 403 });
-    }
+    // 超级管理员或家族管理员可以删除
+    console.log(`[DELETE FAMILY] Permission check passed for user ${user.id}`);
 
     // 开始删除家族相关数据
     // SQLite 不支持外键级联删除，需要手动删除所有相关数据
@@ -92,11 +101,18 @@ export async function POST(
       console.warn('[DELETE FAMILY] Delete birthday reminders failed:', (e as Error).message); 
     }
 
-    // 7. 删除家庭相册数据（如果插件表存在）
+    // 7. 删除家庭相册数据（如果插件表存在）- 使用新的插件表名前缀
     try {
       console.log('[DELETE FAMILY] Deleting album data...');
-      db.prepare(`DELETE FROM family_album_photos WHERE family_id = ?`).run(familyIdNum);
-      db.prepare(`DELETE FROM family_albums WHERE family_id = ?`).run(familyId);
+      // 删除照片点赞和评论
+      const photos: { id: number }[] = db.prepare(`SELECT id FROM plugin_album_photos WHERE family_id = ?`).all(familyIdNum) as { id: number }[];
+      for (const photo of photos) {
+        db.prepare(`DELETE FROM plugin_album_likes WHERE photo_id = ?`).run(photo.id);
+        db.prepare(`DELETE FROM plugin_album_comments WHERE photo_id = ?`).run(photo.id);
+      }
+      db.prepare(`DELETE FROM plugin_album_photos WHERE family_id = ?`).run(familyIdNum);
+      // 删除相册
+      db.prepare(`DELETE FROM plugin_album_albums WHERE family_id = ?`).run(familyIdNum);
     } catch (e) { 
       console.warn('[DELETE FAMILY] Delete album failed:', (e as Error).message); 
     }

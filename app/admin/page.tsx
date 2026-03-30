@@ -4,6 +4,7 @@ import AdminUserTable from '@/components/AdminUserTable';
 import AdminFamilyTable from '@/components/AdminFamilyTable';
 import { db } from '@/lib/db';
 import { Users, Home, Clock, MessageSquare } from 'lucide-react';
+import CreateFamilyButtonAndModal from './CreateFamilyModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -179,8 +180,9 @@ export default async function AdminPage() {
 
         {/* Family Management */}
         <div>
-          <div className="mb-6">
+          <div className="mb-6 flex justify-between items-center">
             <h2 className="text-3xl font-bold text-gray-900">家族管理</h2>
+            <CreateFamilyButtonAndModal />
           </div>
 
           <AdminFamilyTable families={initialFamilies} />
