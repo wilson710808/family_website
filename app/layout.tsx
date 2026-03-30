@@ -17,13 +17,13 @@ export const viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   // 从 cookie 读取语言，保证服务端和客户端初始值一致
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const savedLang = cookieStore.get('language')?.value;
   const initialLang = (savedLang === 'zh-CN' || savedLang === 'zh-TW') ? savedLang : 'zh-TW';
 
