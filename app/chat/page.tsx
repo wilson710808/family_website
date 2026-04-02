@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import Layout from '@/components/Layout';
 import { Send, Users, MessageSquare, Clock, Bot, Check, CheckCheck } from 'lucide-react';
-import { useI18n } from '@/lib/i18n';
 
 interface ChatMessage {
   id: number;
@@ -47,7 +46,6 @@ function ChatContent() {
   const [connected, setConnected] = useState(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { t } = useI18n();
 
   // 记录今天是否已经打招呼
   const hasGreetedToday = (): boolean => {
@@ -327,7 +325,7 @@ function ChatContent() {
             <p className="text-gray-500 mb-6">请从家族页面进入聊天室</p>
             <a 
               href="/families" 
-              className="inline-block px-6 py-3 bg-family-500 text-white rounded-lg hover:bg-family-600 font-medium"
+              className="inline-block px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium"
             >
               前往家族页面
             </a>
@@ -466,7 +464,7 @@ function ChatContent() {
                 className="flex items-center px-6 py-3 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
               >
                 <Send className="h-5 w-5 mr-2" />
-                {t('send')}
+                发送
               </button>
             </form>
           </div>
@@ -476,7 +474,7 @@ function ChatContent() {
         <div className="lg:block hidden bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="px-4 py-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-family-500" />
+              <Users className="h-5 w-5 text-green-500" />
               <h3 className="font-bold text-gray-900">
                 在線成员 ({onlineCount})
               </h3>

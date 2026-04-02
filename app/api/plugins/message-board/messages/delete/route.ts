@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { isEnabled } from '../../../../../plugins/message-board';
+import { isEnabled } from '../../../../../../plugins/message-board';
 import { db } from '@/lib/db';
 import { getCurrentUser, isUserInFamily } from '@/lib/auth';
 
