@@ -5,5 +5,5 @@ cd /root/.openclaw/workspace/family-portal
 export PORT=443
 # 用完整路径启动，保证 sudo 能找到 node
 echo "Node path: $(which node)"
-echo "Npx path: $(which npx)"
-exec $(which node) $(which npx) tsx server.ts
+echo "Starting server on port 443..."
+exec npx tsx server.ts
