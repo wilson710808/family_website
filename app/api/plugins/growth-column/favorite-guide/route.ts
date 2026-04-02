@@ -38,7 +38,9 @@ export async function GET(request: Request) {
       );
     }
 
-    // 如果有缓存的完整导览，直接返回
+    const bookTitle = (favorite as any).book_name;
+
+    // 优先级 1: 如果收藏本身有缓存的完整导览，直接返回
     if ((favorite as any).full_guide) {
       try {
         const fullGuide = JSON.parse((favorite as any).full_guide);
@@ -47,21 +49,50 @@ export async function GET(request: Request) {
           success: true,
           found: true,
           cached: true,
+          cacheSource: 'favorite',
           data: fullGuide,
           favoriteId: (favorite as any).id,
           status: (favorite as any).status
         });
       } catch (parseError) {
-        console.warn('解析缓存的JSON失败:', parseError);
+        console.warn('解析收藏缓存的JSON失败:', parseError);
+        // 解析失败，fallthrough 检查全局缓存
+      }
+    }
+
+    // 优先级 2: 检查全局公用缓存（所有用户共享的已生成导览）
+    const globalCache = db.prepare(`
+      SELECT full_guide FROM plugin_growth_global_guide_cache
+      WHERE book_name = ?
+    `).get(bookTitle);
+
+    if (globalCache && (globalCache as any).full_guide) {
+      try {
+        const fullGuide = JSON.parse((globalCache as any).full_guide);
+        db.close();
+        console.log(`[FavoriteGuide] 从全局公用缓存读取: ${bookTitle}`);
+        return NextResponse.json({
+          success: true,
+          found: true,
+          cached: true,
+          cacheSource: 'global',
+          data: fullGuide,
+          favoriteId: (favorite as any).id,
+          status: (favorite as any).status
+        });
+      } catch (parseError) {
+        console.warn('解析全局缓存的JSON失败:', parseError);
         // 解析失败，fallthrough
       }
     }
 
+    // 没有任何缓存，返回基本信息让前端跳转到搜索页重新生成
     db.close();
     return NextResponse.json({
       success: true,
       found: true,
       cached: false,
+      cacheSource: null,
       data: null,
       favoriteId: (favorite as any).id,
       bookName: (favorite as any).book_name,

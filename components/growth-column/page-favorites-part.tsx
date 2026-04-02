@@ -1,6 +1,6 @@
 'use client';
 
-import { Heart, Trash2, ArrowLeft } from 'lucide-react';
+import { Heart, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
 interface BookGuide {
@@ -59,142 +59,35 @@ export default function PageFavoritesPart({
   familyId
 }: PageFavoritesPartProps) {
   const [loadingCacheId, setLoadingCacheId] = useState<number | null>(null);
-  const [selectedGuide, setSelectedGuide] = useState<BookGuide | null>(null);
+  const [expandedGuideId, setExpandedGuideId] = useState<number | null>(null);
+  const [expandedGuide, setExpandedGuide] = useState<BookGuide | null>(null);
   const filteredFavorites = filterCategory === '全部'
     ? favorites
     : favorites.filter(item => item.category === filterCategory);
 
   if (activeTab !== 'favorites') return null;
 
-  // 如果已经选中了要显示的导览，直接在收藏页显示
-  if (selectedGuide) {
-    function renderRating(rating: number) {
-      return (
-        <div className="flex items-center gap-1">
-          {[1, 2, 3, 4, 5].map(i => (
-            <svg key={i} className={`w-4 h-4 ${i <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-            </svg>
-          ))}
-          <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
-        </div>
-      );
-    }
-
+  function renderRating(rating: number) {
     return (
-      <div className="space-y-4">
-        {/* 返回收藏列表按钮 */}
-        <button
-          onClick={() => setSelectedGuide(null)}
-          className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          返回收藏列表
-        </button>
-
-        {/* 导览内容卡片 - 和搜索页相同的样式 */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-purple-500 to-purple-400 text-white p-6">
-            <div className="flex gap-6 items-start">
-              {/* Book Cover Image */}
-              <div className="flex-shrink-0">
-                <img
-                  src={`https://covers.openlibrary.org/b/title/${encodeURIComponent(selectedGuide.title)}-M.jpg`}
-                  alt={selectedGuide.title}
-                  className="w-32 h-48 object-cover rounded-lg shadow-md"
-                  onError={(e) => {
-                    // 如果找不到封面，用占位图
-                    (e.target as HTMLImageElement).src = `https://placehold.co/128x192/eeeeee/999999?text=${encodeURIComponent(selectedGuide.title)}`;
-                  }}
-                />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold">{selectedGuide.title}</h2>
-                <p className="mt-1 opacity-90">{selectedGuide.author}</p>
-                <div className="flex items-center gap-3 mt-3">
-                  <span className="px-2 py-1 bg-white/20 rounded text-xs">{selectedGuide.category}</span>
-                  <span className="text-sm">{selectedGuide.readingTime}</span>
-                  <span className="text-sm">{selectedGuide.difficulty}</span>
-                </div>
-                <div className="flex flex-col items-start gap-2 mt-4">
-                  {renderRating(selectedGuide.rating)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 space-y-6">
-            {/* Summary */}
-            <div>
-              <h3 className="text-sm font-semibold text-purple-600 mb-2 uppercase tracking-wide">內容簡介</h3>
-              <p className="text-gray-700 leading-relaxed text-base">{selectedGuide.summary}</p>
-            </div>
-
-            {/* Key Points */}
-            <div>
-              <h3 className="text-sm font-semibold text-purple-600 mb-3 uppercase tracking-wide">核心觀點</h3>
-              <ul className="space-y-3">
-                {selectedGuide.keyPoints.map((point, idx) => (
-                  <li key={idx} className="flex gap-3 items-start">
-                    <span className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                      {idx + 1}
-                    </span>
-                    <span className="text-gray-700 pt-0.5 text-base">{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Inspiration */}
-            <div>
-              <h3 className="text-sm font-semibold text-purple-600 mb-2 uppercase tracking-wide">讀後啟發</h3>
-              <p className="text-gray-700 leading-relaxed text-base">{selectedGuide.inspiration}</p>
-            </div>
-
-            {/* Quotes */}
-            {selectedGuide.quotes && selectedGuide.quotes.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-purple-600 mb-3 uppercase tracking-wide">書中金句</h3>
-                <div className="space-y-2">
-                  {selectedGuide.quotes.map((quote, idx) => (
-                    <blockquote key={idx} className="pl-4 border-l-4 border-purple-200 italic text-gray-600 text-base">
-                      {quote}
-                    </blockquote>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 實際生活應用範例 */}
-            {selectedGuide.practicalExamples && selectedGuide.practicalExamples.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-purple-600 mb-3 uppercase tracking-wide">實際生活應用範例</h3>
-                <div className="space-y-4">
-                  {selectedGuide.practicalExamples.map((example, idx) => (
-                    <div key={idx} className="bg-gray-50 rounded-lg p-4">
-                      <div className="mb-2">
-                        <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded">
-                          場景 {idx + 1}
-                        </span>
-                      </div>
-                      <p className="text-gray-800 font-medium mb-2">{example.scenario}</p>
-                      <div className="pl-3 border-l-2 border-purple-200">
-                        <p className="text-gray-700 text-base">{example.advice}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map(i => (
+          <svg key={i} className={`w-4 h-4 ${i <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        ))}
+        <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
       </div>
     );
   }
 
-  // 收藏列表视图
-  async function loadFromFavoriteCache(item: FavoriteItem) {
+  async function toggleExpand(item: FavoriteItem) {
+    // 如果已经展开，点击则收起
+    if (expandedGuideId === item.id) {
+      setExpandedGuideId(null);
+      setExpandedGuide(null);
+      return;
+    }
+
     setLoadingCacheId(item.id);
     setIsSearching(true);
     setIsFavorite(true);
@@ -205,9 +98,10 @@ export default function PageFavoritesPart({
       const data = await res.json();
 
       if (data.success && data.data) {
-        // 直接在当前收藏页显示，不需要跳转到搜索标签
-        console.log(`[GrowthColumn] 从缓存加载导览，在收藏页直接显示: ${item.book_name}`);
-        setSelectedGuide(data.data);
+        // 在当前收藏项下方展开显示
+        console.log(`[GrowthColumn] 从缓存加载导览，在收藏列表下方展开: ${item.book_name}`);
+        setExpandedGuide(data.data);
+        setExpandedGuideId(item.id);
         setLoadingCacheId(null);
         setIsSearching(false);
         return;
@@ -219,6 +113,7 @@ export default function PageFavoritesPart({
       handleSearch();
       setActiveTab('search');
       setLoadingCacheId(null);
+      setIsSearching(false);
     } catch (error) {
       console.error('从缓存加载失败:', error);
       // 出错跳转到搜索页
@@ -243,8 +138,6 @@ export default function PageFavoritesPart({
               key={cat}
               onClick={() => {
                 // filterCategory is set in parent component
-                // This is just for rendering the filter buttons here
-                // The actual state change is handled by the parent
                 const parentSetFilter = (window as any).__growthColumnSetFilterCategory;
                 if (typeof parentSetFilter === 'function') {
                   parentSetFilter(cat);
@@ -268,74 +161,204 @@ export default function PageFavoritesPart({
         </div>
       ) : (
         <div className="divide-y">
-          {filteredFavorites.map(item => (
-            <div
-              key={item.id}
-              className={`p-4 hover:bg-gray-50 ${item.status === 1 ? 'bg-green-50' : ''}`}
-            >
-              <div className="flex justify-between items-center">
-                <div className="cursor-pointer flex-1" onClick={() => loadFromFavoriteCache(item)}>
-                  <h4 className="font-medium flex items-center gap-2">
-                    {item.book_name}
-                    {loadingCacheId === item.id && (
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full animate-pulse">
-                        讀取中...
-                      </span>
-                    )}
-                    {item.status === 1 && (
-                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                        已讀
-                      </span>
-                    )}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    {item.author && <span className="text-sm text-gray-500">{item.author}</span>}
-                    {item.category && (
-                      <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
-                        {item.category}
-                      </span>
-                    )}
+          {filteredFavorites.map(item => {
+            const isExpanded = expandedGuideId === item.id;
+            return (
+              <div key={item.id} className={`divide-y ${isExpanded ? 'bg-gray-50' : ''}`}>
+                {/* 收藏项列表 - 始终显示 */}
+                <div
+                  className={`p-4 hover:bg-gray-100 cursor-pointer ${item.status === 1 ? 'bg-green-50' : ''}`}
+                  onClick={() => toggleExpand(item)}
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <h4 className="font-medium flex items-center gap-2">
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4 text-gray-500" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-gray-500" />
+                        )}
+                        {item.book_name}
+                        {loadingCacheId === item.id && (
+                          <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full animate-pulse">
+                            讀取中...
+                          </span>
+                        )}
+                        {item.status === 1 && (
+                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                            已讀
+                          </span>
+                        )}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-1 pl-6">
+                        {item.author && <span className="text-sm text-gray-500">{item.author}</span>}
+                        {item.category && (
+                          <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
+                            {item.category}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleReadStatus(item);
+                        }}
+                        className={`p-2 rounded-lg ${
+                          item.status === 1 
+                            ? 'text-yellow-600 hover:bg-yellow-50' 
+                            : 'text-green-600 hover:bg-green-50'
+                        }`}
+                        title={item.status === 1 ? '標記為未讀' : '標記為已讀'}
+                      >
+                        {item.status === 1 ? (
+                          <span className="text-xs font-medium">↺</span>
+                        ) : (
+                          <span className="text-xs font-medium">✓</span>
+                        )}
+                      </button>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await fetch(`/api/plugins/growth-column/favorites?id=${item.id}`, {
+                              method: 'DELETE'
+                            });
+                            // 如果删除的是当前展开的，收起它
+                            if (expandedGuideId === item.id) {
+                              setExpandedGuideId(null);
+                              setExpandedGuide(null);
+                            }
+                            await fetchFavorites();
+                          } catch (error) {
+                            console.error('Delete failed:', error);
+                          }
+                        }}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleReadStatus(item);
-                    }}
-                    className={`p-2 rounded-lg ${
-                      item.status === 1 
-                        ? 'text-yellow-600 hover:bg-yellow-50' 
-                        : 'text-green-600 hover:bg-green-50'
-                    }`}
-                    title={item.status === 1 ? '標記為未讀' : '標記為已讀'}
-                  >
-                    {item.status === 1 ? (
-                      <span className="text-xs font-medium">↺</span>
-                    ) : (
-                      <span className="text-xs font-medium">✓</span>
-                    )}
-                  </button>
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        await fetch(`/api/plugins/growth-column/favorites?id=${item.id}`, {
-                          method: 'DELETE'
-                        });
-                        await fetchFavorites();
-                      } catch (error) {
-                        console.error('Delete failed:', error);
-                      }
-                    }}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+
+                {/* 展开显示导览内容 */}
+                {isExpanded && expandedGuide && (
+                  <div className="p-6 bg-white">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-purple-500 to-purple-400 text-white p-6 rounded-lg mb-6">
+                      <div className="flex gap-6 items-start">
+                        {/* Book Cover Image */}
+                        <div className="flex-shrink-0">
+                          <img
+                            src={`https://covers.openlibrary.org/b/title/${encodeURIComponent(expandedGuide.title)}-M.jpg`}
+                            alt={expandedGuide.title}
+                            className="w-32 h-48 object-cover rounded-lg shadow-md"
+                            onError={(e) => {
+                              // 如果找不到封面，用占位图
+                              (e.target as HTMLImageElement).src = `https://placehold.co/128x192/eeeeee/999999?text=${encodeURIComponent(expandedGuide.title)}`;
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h2 className="text-2xl font-bold">{expandedGuide.title}</h2>
+                          <p className="mt-1 opacity-90">{expandedGuide.author}</p>
+                          <div className="flex items-center gap-3 mt-3">
+                            <span className="px-2 py-1 bg-white/20 rounded text-xs">{expandedGuide.category}</span>
+                            <span className="text-sm">{expandedGuide.readingTime}</span>
+                            <span className="text-sm">{expandedGuide.difficulty}</span>
+                          </div>
+                          <div className="flex flex-col items-start gap-2 mt-4">
+                            {renderRating(expandedGuide.rating)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* Summary */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-purple-600 mb-2 uppercase tracking-wide">內容簡介</h3>
+                        <p className="text-gray-700 leading-relaxed text-base">{expandedGuide.summary}</p>
+                      </div>
+
+                      {/* Key Points */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-purple-600 mb-3 uppercase tracking-wide">核心觀點</h3>
+                        <ul className="space-y-3">
+                          {expandedGuide.keyPoints.map((point, idx) => (
+                            <li key={idx} className="flex gap-3 items-start">
+                              <span className="flex-shrink-0 w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                {idx + 1}
+                              </span>
+                              <span className="text-gray-700 pt-0.5 text-base">{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Inspiration */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-purple-600 mb-2 uppercase tracking-wide">讀後啟發</h3>
+                        <p className="text-gray-700 leading-relaxed text-base">{expandedGuide.inspiration}</p>
+                      </div>
+
+                      {/* Quotes */}
+                      {expandedGuide.quotes && expandedGuide.quotes.length > 0 && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-purple-600 mb-3 uppercase tracking-wide">書中金句</h3>
+                          <div className="space-y-2">
+                            {expandedGuide.quotes.map((quote, idx) => (
+                              <blockquote key={idx} className="pl-4 border-l-4 border-purple-200 italic text-gray-600 text-base">
+                                {quote}
+                              </blockquote>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 實際生活應用範例 */}
+                      {expandedGuide.practicalExamples && expandedGuide.practicalExamples.length > 0 && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-purple-600 mb-3 uppercase tracking-wide">實際生活應用範例</h3>
+                          <div className="space-y-4">
+                            {expandedGuide.practicalExamples.map((example, idx) => (
+                              <div key={idx} className="bg-gray-50 rounded-lg p-4">
+                                <div className="mb-2">
+                                  <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded">
+                                    場景 {idx + 1}
+                                  </span>
+                                </div>
+                                <p className="text-gray-800 font-medium mb-2">{example.scenario}</p>
+                                <div className="pl-3 border-l-2 border-purple-200">
+                                  <p className="text-gray-700 text-base">{example.advice}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 收起按钮 */}
+                      <div className="pt-4 border-t text-center">
+                        <button
+                          onClick={() => {
+                            setExpandedGuideId(null);
+                            setExpandedGuide(null);
+                          }}
+                          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-sm transition-colors"
+                        >
+                          <ChevronUp className="w-4 h-4 inline mr-1" />
+                          收起導覽
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
