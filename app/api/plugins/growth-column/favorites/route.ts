@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { familyId, userId, bookName, author, category } = await request.json();
+    const { familyId, userId, bookName, author, category, fullGuide } = await request.json();
     const dbPath = process.env.DB_PATH || './family.db';
     const db = new Database(dbPath);
 
@@ -60,10 +60,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, action: 'removed' });
     }
 
+    // 如果有完整导览，保存到缓存
+    const fullGuideJson = fullGuide ? JSON.stringify(fullGuide) : null;
+
     db.prepare(`
-      INSERT INTO plugin_growth_book_favorites (family_id, user_id, book_name, author, category, status)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(familyId || 1, userId || null, bookName, author || null, category || null, 0);
+      INSERT INTO plugin_growth_book_favorites (family_id, user_id, book_name, author, category, full_guide, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(familyId || 1, userId || null, bookName, author || null, category || null, fullGuideJson, 0);
 
     db.close();
     return NextResponse.json({ success: true, action: 'added' });

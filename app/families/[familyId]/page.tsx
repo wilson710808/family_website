@@ -2,8 +2,9 @@ import { getCurrentUser, isUserInFamily } from '@/lib/auth';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Copy, Star } from 'lucide-react';
+import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Star } from 'lucide-react';
 import FamilyDeleteButton from '@/components/FamilyDeleteButton';
+import CopyReferralButton from '@/components/CopyReferralButton';
 import { db } from '@/lib/db';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 
@@ -159,9 +160,9 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
           <div className="bg-gradient-to-r from-family-500 to-family-600 h-32 relative">
             {family.role === 'admin' && (
               <>
-                <button className="absolute top-4 right-16 bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg backdrop-blur-sm transition-colors">
+                <Link href={`/families/${familyId}/settings`} className="absolute top-4 right-16 bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg backdrop-blur-sm transition-colors inline-block">
                   <Settings className="h-5 w-5" />
-                </button>
+                </Link>
                 <FamilyDeleteButton familyId={familyId} />
               </>
             )}
@@ -194,13 +195,7 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
                     <p className="text-2xl font-bold text-blue-600 font-mono">{family.referral_code}</p>
                     <p className="text-sm text-blue-600 mt-1">把这个码发给家人，他们注册时输入就能加入家族</p>
                   </div>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(family.referral_code)}
-                    className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    title="复制推荐码"
-                  >
-                    <Copy className="h-6 w-6" />
-                  </button>
+                  <CopyReferralButton code={family.referral_code} />
                 </div>
               </div>
             )}

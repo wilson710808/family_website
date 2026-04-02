@@ -18,8 +18,8 @@ export function initDatabase(db: InstanceType<typeof Database>): void {
   if (!isEnabled()) return;
 
   try {
-    // 使用绝对路径避免大小写问题
-    const schemaPath = path.join('/root/.openclaw/workspace/family-portal/plugins/growth-column', 'schema.sql');
+    // 使用相对路径从项目根目录，避免 Turbopack 构建时路径大小写转换问题
+    const schemaPath = path.join(process.cwd(), 'plugins/growth-column/schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf8');
 
     db.exec(schema);

@@ -231,7 +231,7 @@ function GrowthColumnContent() {
     }
   }
 
-  async function handleSearch(e?: React.FormEvent) {
+  async function handleSearch(e?: React.FormEvent, forceRegenerate: boolean = true) {
     if (e) e.preventDefault();
     if (!bookName.trim()) return;
 
@@ -242,7 +242,12 @@ function GrowthColumnContent() {
       const res = await fetch(`/api/plugins/growth-column/guide`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookName: bookName.trim(), familyId })
+        body: JSON.stringify({ 
+          bookName: bookName.trim(), 
+          familyId,
+          userId: user?.id,
+          forceRegenerate // 用户主动点击搜索时强制重新生成，覆盖缓存
+        })
       });
 
       const data = await res.json();
@@ -251,6 +256,9 @@ function GrowthColumnContent() {
         // 检查是否已收藏
         const fav = favorites.find(f => f.book_name === data.data.title);
         setIsFavorite(!!fav);
+        if (data.fromCache) {
+          console.log(`[GrowthColumn] 从全局缓存读取导览: ${bookName.trim()}`);
+        }
         await fetchHistory();
       } else {
         alert(data.message || '搜索失败');
@@ -729,9 +737,13 @@ function GrowthColumnContent() {
           filterCategory={filterCategory}
           setBookName={setBookName}
           handleSearch={handleSearch}
+          setResult={setResult}
+          setIsSearching={setIsSearching}
+          setIsFavorite={setIsFavorite}
           setActiveTab={setActiveTab}
           toggleReadStatus={toggleReadStatus}
           fetchFavorites={fetchFavorites}
+          familyId={familyId}
         />
 
 

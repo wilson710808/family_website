@@ -3,4 +3,7 @@ export NVM_DIR="/root/.nvm"
 source "$NVM_DIR/nvm.sh"
 cd /root/.openclaw/workspace/family-portal
 export PORT=443
-exec npm run start:custom
+# 用完整路径启动，保证 sudo 能找到 node
+echo "Node path: $(which node)"
+echo "Npx path: $(which npx)"
+exec $(which node) $(which npx) tsx server.ts

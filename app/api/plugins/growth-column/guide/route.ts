@@ -315,39 +315,111 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { bookName, familyId, userId } = await request.json();
+    const { bookName, familyId, userId, forceRegenerate } = await request.json();
 
     if (!bookName || !bookName.trim()) {
       return NextResponse.json({ error: '請提供書名' }, { status: 400 });
     }
 
-    const guide = await generateBookGuide(bookName.trim());
+    const trimmedBookName = bookName.trim();
+    const dbPath = process.env.DB_PATH || './family.db';
+    const db = new Database(dbPath);
+    let guide: any;
+    let fromCache = false;
 
-    // 保存到阅读历史（如果有数据库连接）
+    // 先检查全局缓存（非强制重新生成时）
+    if (!forceRegenerate) {
+      const cached = db.prepare(`
+        SELECT full_guide FROM plugin_growth_global_guide_cache
+        WHERE book_name = ?
+      `).get(trimmedBookName) as { full_guide?: string };
+
+      if (cached?.full_guide) {
+        try {
+          guide = JSON.parse(cached.full_guide);
+          fromCache = true;
+          console.log(`[GrowthColumn] 全局缓存命中: ${trimmedBookName}`);
+        } catch (parseError) {
+          console.warn(`[GrowthColumn] 缓存解析失败，将重新生成: ${trimmedBookName}`);
+          guide = null;
+        }
+      }
+    } else {
+      console.log(`[GrowthColumn] 强制重新生成: ${trimmedBookName}`);
+    }
+
+    // 缓存未命中或强制重新生成，调用 AI 生成
+    if (!guide) {
+      guide = await generateBookGuide(trimmedBookName);
+      // 保存/更新全局缓存
+      const fullGuideJson = JSON.stringify(guide);
+      const existingCache = db.prepare(`
+        SELECT id, generated_count FROM plugin_growth_global_guide_cache
+        WHERE book_name = ?
+      `).get(trimmedBookName);
+
+      if (existingCache) {
+        // 更新已有缓存
+        const count = (existingCache as any).generated_count + 1;
+        db.prepare(`
+          UPDATE plugin_growth_global_guide_cache
+          SET full_guide = ?, author = ?, category = ?, generated_count = ?, updated_at = CURRENT_TIMESTAMP
+          WHERE book_name = ?
+        `).run(fullGuideJson, guide.author || null, guide.category || null, count, trimmedBookName);
+        console.log(`[GrowthColumn] 已更新全局缓存: ${trimmedBookName} (生成次数: ${count})`);
+      } else {
+        // 插入新缓存
+        db.prepare(`
+          INSERT INTO plugin_growth_global_guide_cache (book_name, full_guide, author, category)
+          VALUES (?, ?, ?, ?)
+        `).run(trimmedBookName, fullGuideJson, guide.author || null, guide.category || null);
+        console.log(`[GrowthColumn] 已插入新全局缓存: ${trimmedBookName}`);
+      }
+    }
+
+    // 保存到用户个人阅读历史，并更新收藏的 full_guide 缓存
     try {
-      const dbPath = process.env.DB_PATH || './family.db';
-      const db = new Database(dbPath);
-
-      // 先检查是否已存在
-      const existing = db.prepare(`
+      // 先检查是否已存在历史
+      const existingHistory = db.prepare(`
         SELECT id FROM plugin_growth_book_history
         WHERE family_id = ? AND book_name = ? AND user_id = ?
-      `).get(familyId || 1, bookName.trim(), userId || null);
+      `).get(familyId || 1, trimmedBookName, userId || null);
 
-      if (!existing) {
+      if (!existingHistory) {
         db.prepare(`
           INSERT INTO plugin_growth_book_history (family_id, user_id, book_name, author, category)
           VALUES (?, ?, ?, ?, ?)
-        `).run(familyId || 1, userId || null, bookName.trim(), guide.author || null, guide.category || null);
+        `).run(familyId || 1, userId || null, trimmedBookName, guide.author || null, guide.category || null);
+      }
+
+      // 检查是否已收藏，如果已收藏则更新 full_guide 缓存
+      const existingFavorite = db.prepare(`
+        SELECT id FROM plugin_growth_book_favorites
+        WHERE family_id = ? AND book_name = ? AND user_id = ?
+      `).get(familyId || 1, trimmedBookName, userId || null);
+
+      if (existingFavorite) {
+        // 更新收藏，保存完整导览内容
+        const fullGuideJson = JSON.stringify(guide);
+        db.prepare(`
+          UPDATE plugin_growth_book_favorites
+          SET full_guide = ?, author = ?, category = ?
+          WHERE id = ?
+        `).run(fullGuideJson, guide.author || null, guide.category || null, (existingFavorite as any).id);
+        console.log(`[GrowthColumn] 已更新收藏缓存: ${trimmedBookName}`);
       }
 
       db.close();
     } catch (dbError) {
-      console.warn('保存阅读历史失败:', dbError);
+      console.warn('保存历史/更新收藏缓存失败:', dbError);
       // 不影响主流程
     }
 
-    return NextResponse.json({ success: true, data: guide });
+    return NextResponse.json({ 
+      success: true, 
+      data: guide,
+      fromCache: fromCache
+    });
   } catch (error: any) {
     console.error('生成导讀失败:', error);
     return NextResponse.json(

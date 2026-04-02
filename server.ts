@@ -10,7 +10,7 @@ const { socketManager } = require('./lib/socket.ts');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || '0.0.0.0';
-const port = parseInt(process.env.PORT || '3000', 10);
+const port = parseInt(process.env.PORT || '443', 10);
 
 // HTTPS 配置 - 当证书存在时启用 HTTPS
 let httpsOptions: { key: Buffer; cert: Buffer; ca?: Buffer } | null = null;

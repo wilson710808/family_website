@@ -63,8 +63,8 @@ export function initDatabase() {
     `).get();
     
     if (!tableExists) {
-      // 使用绝对路径避免构建时大小写问题
-      const schemaPath = '/root/.openclaw/workspace/family-portal/plugins/family-album/schema.sql';
+      // 使用相对路径从项目根目录，避免 Turbopack 构建时路径大小写转换问题
+      const schemaPath = require('path').join(process.cwd(), 'plugins/family-album/schema.sql');
       const schema = require('fs').readFileSync(schemaPath, 'utf8');
       db.exec(schema);
       console.log('[FamilyAlbumPlugin] 数据库初始化完成');

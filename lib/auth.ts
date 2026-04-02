@@ -45,7 +45,7 @@ const DEFAULT_ADMIN_USER: User = {
  */
 export async function getCurrentUser(): Promise<User> {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('auth-token');
     
     // 如果没有 token，返回默认管理员（访客模式）
