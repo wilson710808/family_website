@@ -147,6 +147,11 @@ function GrowthColumnContent() {
   };
   const [quickBooks, setQuickBooks] = useState<string[]>(getInitialQuickBooks());
 
+  // 场景推荐相关状态
+  const [userScenario, setUserScenario] = useState<string>('');
+  const [scenarioRecommendLoading, setScenarioRecommendLoading] = useState<boolean>(false);
+  const [scenarioRecommends, setScenarioRecommends] = useState<Array<{bookName: string; reason: string}>>([]);
+
   // 获取url参数
   const [familyId, setFamilyId] = useState<number>(1);
 
@@ -378,6 +383,42 @@ function GrowthColumnContent() {
     setActiveTab('search');
   }
 
+  // 根据用户场景推荐书籍
+  async function handleScenarioRecommend() {
+    if (!userScenario.trim()) {
+      alert('請描述你目前的困擾或場景，例如：「我無法堅持養成習慣，推薦適合的書」');
+      return;
+    }
+
+    setScenarioRecommendLoading(true);
+
+    try {
+      const res = await fetch(`/api/plugins/growth-column/scenario-recommend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: userScenario.trim(), familyId })
+      });
+
+      const data = await res.json();
+      if (data.success && data.recommendations) {
+        setScenarioRecommends(data.recommendations);
+      } else {
+        alert(data.message || '推薦失敗，請重試');
+      }
+    } catch (error) {
+      console.error('Scenario recommendation failed:', error);
+      alert('推薦失敗，請稍後重試');
+    } finally {
+      setScenarioRecommendLoading(false);
+    }
+  }
+
+  // 点击场景推荐的书名，直接搜索生成导览
+  function handleScenarioBookClick(bookName: string) {
+    setBookName(bookName);
+    handleSearch();
+  }
+
   function renderRating(rating: number) {
     return (
       <div className="flex items-center gap-1">
@@ -509,6 +550,50 @@ function GrowthColumnContent() {
                   {isSearching ? '搜尋中...' : '搜尋'}
                 </button>
               </form>
+
+              {/* 场景推荐 - 根据用户困扰推荐书籍 */}
+              <div className="mt-6 pt-4 border-t">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                  根據你的困擾推薦書籍
+                </h4>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={userScenario}
+                    onChange={e => setUserScenario(e.target.value)}
+                    placeholder="描述你的困扰或场景，例如：我无法坚持养成习惯..."
+                    className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200 text-sm"
+                  />
+                  <button
+                    onClick={handleScenarioRecommend}
+                    disabled={scenarioRecommendLoading || !userScenario.trim()}
+                    className="bg-purple-100 disabled:bg-gray-300 disabled:text-gray-500 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-200 whitespace-nowrap text-sm flex items-center gap-2"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${scenarioRecommendLoading ? 'animate-spin' : ''}`} />
+                    {scenarioRecommendLoading ? '推薦中...' : 'AI推薦'}
+                  </button>
+                </div>
+
+                {/* 场景推荐结果 */}
+                {scenarioRecommends.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {scenarioRecommends.map((rec, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleScenarioBookClick(rec.bookName)}
+                        className="w-full text-left p-3 bg-gray-50 hover:bg-purple-50 rounded-lg transition-colors border border-transparent hover:border-purple-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-900">{rec.bookName}</span>
+                          <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">点击生成导览</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">{rec.reason}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Quick Tags */}
               <div className="mt-4 flex flex-wrap gap-2 items-center">
