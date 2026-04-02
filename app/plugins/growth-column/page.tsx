@@ -551,18 +551,18 @@ function GrowthColumnContent() {
                 </button>
               </form>
 
-              {/* 场景推荐 - 根据用户困扰推荐书籍 */}
+              {/* 场景推荐 - 根据用户需求推荐书籍 */}
               <div className="mt-6 pt-4 border-t">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  根據你的困擾推薦書籍
+                  根據你的需求推薦書籍
                 </h4>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={userScenario}
                     onChange={e => setUserScenario(e.target.value)}
-                    placeholder="描述你的困扰或场景，例如：我无法坚持养成习惯..."
+                    placeholder="描述你的需求或场景，例如：我想要培養堅持的習慣..."
                     className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200 text-sm"
                   />
                   <button
