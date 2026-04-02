@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Layout from '@/components/Layout';
-import { MessageSquare, Plus, Clock, User, Send } from 'lucide-react';
+import { MessageSquare, Plus, Clock, User, Send, Trash2 } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -12,12 +12,14 @@ interface Message {
   user_avatar: string;
   created_at: string;
   family_name: string;
+  user_id: number;
 }
 
 interface User {
   id: number;
   name: string;
   avatar: string;
+  is_admin?: number;
 }
 
 function MessagesContent() {
@@ -27,21 +29,26 @@ function MessagesContent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 滚动到底部
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
-    // 获取当前用户信息 - 开发模式：如果返回 null，使用默认管理员
+    // 获取当前用户信息
     fetch('/api/user')
       .then(res => res.json())
       .then(data => {
         if (data.user) {
           setUser(data.user);
         } else {
-          // 如果没有获取到用户，使用默认管理员
           setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin' });
         }
       })
       .catch(() => {
-        // 出错也使用默认管理员
         setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin' });
       });
 
@@ -49,9 +56,16 @@ function MessagesContent() {
     loadMessages();
   }, [familyId]);
 
+  useEffect(() => {
+    // 新消息添加后滚动到底部
+    scrollToBottom();
+  }, [messages]);
+
   const loadMessages = async () => {
     try {
-      const url = familyId ? `/api/messages?familyId=${familyId}` : '/api/messages';
+      const url = familyId 
+        ? `/api/plugins/message-board/messages?familyId=${familyId}` 
+        : '/api/messages?familyId=' + familyId;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
@@ -69,23 +83,79 @@ function MessagesContent() {
     if (!newMessage.trim() || !familyId) return;
 
     try {
-      const res = await fetch('/api/messages/create', {
+      // 尝试插件API，失败回退到老API
+      let url = '/api/plugins/message-board/messages/create';
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: newMessage,
-          familyId: familyId,
+          familyId: parseInt(familyId),
         }),
       });
 
       const data = await res.json();
       if (data.success) {
         setNewMessage('');
-        loadMessages();
+        await loadMessages();
+      } else {
+        // 回退到老API
+        const res2 = await fetch('/api/messages/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: newMessage,
+            familyId: parseInt(familyId),
+          }),
+        });
+        const data2 = await res2.json();
+        if (data2.success) {
+          setNewMessage('');
+          await loadMessages();
+        } else {
+          alert(data2.message || '发送失败');
+        }
       }
     } catch (error) {
       console.error('发送留言失败:', error);
+      alert('发送失败，请稍后重试');
     }
+  };
+
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!confirm('确定要删除这条留言吗？')) {
+      return;
+    }
+
+    setDeletingId(messageId);
+    try {
+      const res = await fetch(`/api/plugins/message-board/messages/delete?id=${messageId}&familyId=${familyId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        await loadMessages();
+      } else {
+        alert(data.error || '删除失败');
+      }
+    } catch (error) {
+      console.error('删除留言失败:', error);
+      alert('删除失败，请稍后重试');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // 格式化时间
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // 如果还没加载完用户，显示加载中
@@ -131,25 +201,32 @@ function MessagesContent() {
                           <span className="font-semibold text-gray-900">{message.user_name}</span>
                           <span className="text-xs text-gray-500 flex items-center">
                             <Clock className="h-3 w-3 mr-1" />
-                            {new Date(message.created_at).toLocaleString('zh-CN')}
+                            {formatDate(message.created_at)}
                           </span>
                         </div>
-                        {!familyId && (
-                          <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
-                            {message.family_name}
-                          </span>
+                        {/* 只有自己能删除 */}
+                        {user && message.user_id === user.id && (
+                          <button
+                            onClick={() => handleDeleteMessage(message.id)}
+                            disabled={deletingId === message.id}
+                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="删除留言"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         )}
                       </div>
-                      <p className="text-gray-700 break-words">{message.content}</p>
+                      <p className="text-gray-700 break-words whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
           ) : (
             <div className="p-12 text-center">
               <MessageSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">暂无留言，快来发表第一条留言吧！</p>
+              <p className="text-gray-500">暫無留言，快來發表第一條留言吧！</p>
             </div>
           )}
         </div>
@@ -157,18 +234,19 @@ function MessagesContent() {
         {/* Send Message Form */}
         {familyId && (
           <div className="bg-white rounded-xl shadow-sm p-4">
-            <form onSubmit={handleSendMessage} className="flex space-x-4">
+            <form onSubmit={handleSendMessage} className="flex space-x-4 flex-col sm:flex-row gap-3">
               <input
                 type="text"
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-colors"
-                placeholder="写下你的留言..."
+                placeholder="寫下你的留言..."
                 required
               />
               <button
                 type="submit"
-                className="flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium transition-colors"
+                disabled={!newMessage.trim()}
+                className="flex items-center justify-center px-6 py-3 bg-green-500 disabled:bg-gray-300 text-white rounded-lg hover:bg-green-600 font-medium transition-colors"
               >
                 <Send className="h-5 w-5 mr-2" />
                 发送

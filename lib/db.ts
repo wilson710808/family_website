@@ -9,6 +9,7 @@ const db = new Database('family.db', {
 import { initDatabase as initBirthday } from '../plugins/birthday-reminder';
 import { initDatabase as initAlbum } from '../plugins/family-album';
 import { initDatabase as initGrowthColumn } from '../plugins/growth-column';
+import { initDatabase as initMessageBoard } from '../plugins/message-board';
 
 // 按顺序初始化各个插件
 if (typeof initBirthday === 'function') {
@@ -19,6 +20,9 @@ if (typeof initAlbum === 'function') {
 }
 if (typeof initGrowthColumn === 'function') {
   initGrowthColumn(db);
+}
+if (typeof initMessageBoard === 'function') {
+  initMessageBoard(db);
 }
 
 console.log('[PluginSystem] 插件初始化完成');
