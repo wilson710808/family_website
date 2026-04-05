@@ -125,3 +125,29 @@
 - 主版本号：重大功能更新，不兼容变更
 - 次版本号：新功能增加，向下兼容
 - 修订号：Bug修复，小功能优化
+
+---
+## v1.3.0 (2026-04-05)
+
+### ✨ 新增功能
+- 🤖 **AI 家族管家插件** (完全可插拔设计)
+  - 支持上下文理解（最近 30 条消息）
+  - 家族记忆功能（独立存储每个家族信息）
+  - 智能触发：@管家/问候/问题/感谢/情绪/冲突
+  - 冲突化解：检测攻击性语言自动安抚
+  - AI 模型：NVIDIA NIM (Llama 3.1 8B)
+  - 通过环境变量 `PLUGIN_FAMILY_BUTLER=false` 可完全禁用
+  - 独立管理页面 `/plugins/butler`
+
+### 🔐 新增环境变量
+- `BUTLER_API_KEY` - NVIDIA NIM API Key
+- `BUTLER_BASE_URL` - API 地址（默认：https://integrate.api.nvidia.com/v1）
+- `BUTLER_MODEL` - 模型名称（默认：meta/llama-3.1-8b-instruct）
+- `PLUGIN_FAMILY_BUTLER` - 插件开关
+
+### 📁 新增文件
+- `plugins/family-butler/` - 管家核心模块
+- `app/api/plugins/butler/` - 管家 API
+- `test-butler-api.js` - AI 测试脚本
+- `.env.example` - 环境变量示例
+
