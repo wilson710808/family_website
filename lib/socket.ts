@@ -140,19 +140,12 @@ class SocketManager {
             const todaysBirthdays = getTodaysBirthdays(data.familyId);
             const { isHoliday, name: holidayName } = isTodayHoliday();
             console.log(`[FamilyButler] 上下文: events=${upcomingEvents.length}, reminders=${upcomingReminders.length}, birthdays=${todaysBirthdays.length}, holiday=${isHoliday}`);
-const upcomingEvents = getUpcomingAnnouncements(db, data.familyId);
-      const upcomingReminders = getUpcomingReminders(db, data.familyId);
-      const todaysBirthdays = getTodaysBirthdays(data.familyId);
-      const { isHoliday, name: holidayName } = isTodayHoliday();
-      
-      console.log(`[FamilyButler] 上下文: events=${upcomingEvents.length}, reminders=${upcomingReminders.length}, birthdays=${todaysBirthdays.length}, holiday=${isHoliday}`);
-      
       // 獲取家庭畫像和歷史摘要
       const memberProfiles = getFamilyMemberProfiles(db, data.familyId);
       const recentSummaries = getRecentDailySummaries(db, data.familyId, 3);
       console.log(`[FamilyButler] 家庭畫像: members=${memberProfiles.length}, summaries=${recentSummaries.length}`);
       
-      // 直接調用 AI 生成回覆(不需要繞過 HTTP)
+      // 直接調用 AI 生成回覆
       const reply = await generateButlerReply({
         familyId: data.familyId,
         userId: data.userId,
@@ -177,11 +170,6 @@ const upcomingEvents = getUpcomingAnnouncements(db, data.familyId);
           recentSummaries: recentSummaries.map((s: any) => s.summary_text),
         },
       });
-                holidayName: isHoliday ? holidayName : undefined,
-                upcomingEvents,
-                upcomingReminders,
-              },
-            });
 
             console.log(`[FamilyButler] 生成回覆成功: ${reply.slice(0, 50)}...`);
             // 廣播管家回覆到聊天室
