@@ -224,8 +224,8 @@ function GrowthColumnContent() {
 
   async function fetchFavorites() {
     try {
-      console.log('Fetching favorites for familyId:', familyId);
-      const res = await fetch(`/api/plugins/growth-column/favorites?familyId=${familyId}`);
+      console.log('Fetching favorites for familyId:', familyId, 'userId:', user?.id);
+      const res = await fetch(`/api/plugins/growth-column/favorites?familyId=${familyId}&userId=${user?.id || ''}`);
       const data = await res.json();
       console.log('Favorites response:', data);
       if (data.success) {
