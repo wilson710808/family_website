@@ -377,8 +377,8 @@ class SocketManager {
     // 保存管家回覆到 chat_messages 表（這樣用戶可以看到歷史）
     try {
       const stmt = db.prepare(`
-        INSERT INTO chat_messages (family_id, user_id, user_name, content, created_at)
-        VALUES (?, 0, '聊天室管家', ?, ?)
+        INSERT INTO chat_messages (family_id, user_id, content, created_at)
+        VALUES (?, 0, ?, ?)
       `);
       stmt.run(familyId, content, createdAt);
     } catch (error) {
@@ -411,7 +411,7 @@ class SocketManager {
       const rows = stmt.all(familyId);
       // 反轉回正確順序(最早到最新)
       return rows.reverse().map((row: any) => ({
-        userName: row.user_name,
+        userName: row.user_id === 0 ? '聊天室管家' : row.user_name,
         content: row.content,
       }));
     } catch (error) {
