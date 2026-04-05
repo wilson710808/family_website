@@ -11,12 +11,18 @@ import {
   getUpcomingAnnouncements,
   getUpcomingReminders,
   isTodayHoliday,
+  saveButlerReply,
+  saveChatMessage,
+  getTodayChatMessages,
+  getFamilyMemberProfiles,
+  getRecentDailySummaries,
 } from '../plugins/family-butler';
 import { getTodaysBirthdays } from '../plugins/birthday-reminder';
 import {
   generateButlerReply,
   generateBirthdayGreeting,
   generateHolidayGreeting,
+  generateDailySummary,
 } from '../plugins/family-butler/ai-service';
 
 interface OnlineUser {
@@ -312,15 +318,30 @@ class SocketManager {
 
   // 發送管家消息到家族聊天室
   private sendButlerMessage(familyId: number, content: string) {
+    const messageId = Date.now() + Math.random();
+    
+    // 廣播到聊天室
     this.io?.to(`family:${familyId}`).emit('chat-message', {
       userId: 0,
       userName: '聊天室管家',
       avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=butler',
       content,
-      messageId: Date.now() + Math.random(),
+      messageId,
       createdAt: new Date().toISOString(),
       isButler: true,
     });
+    
+    // 保存管家回覆到數據庫（用戶可以查看歷史）
+    try {
+      saveButlerReply(db, {
+        family_id: familyId,
+        message_id: Math.floor(messageId),
+        content,
+        trigger_type: 'auto',
+      });
+    } catch (error) {
+      console.error('[FamilyButler] 保存管家回覆失敗:', error);
+    }
   }
 
   // 獲取最近消息給管家作為上下文
