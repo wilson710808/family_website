@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server';
 import { isEnabled } from '../../../../../plugins/growth-column';
 
-// 使用 OpenAI 官方 TTS（NVIDIA API 不支持 TTS）
+// 檢查是否是 NVIDIA API Key（NVIDIA 不支持 TTS）
+function isNvidiaKey(key: string | undefined): boolean {
+  return !!(key && key.startsWith('nvapi-'));
+}
+
+// 使用 OpenAI 官方 TTS
 async function generateSpeechOpenAI(text: string): Promise<Buffer> {
   const openaiBaseUrl = 'https://api.openai.com/v1';
-  const openaiApiKey = process.env.OPENAI_TTS_KEY || process.env.OPENAI_API_KEY;
+  // 使用專門的 TTS Key，如果沒有則嘗試普通 API Key（但不能是 NVIDIA Key）
+  const openaiApiKey = process.env.OPENAI_TTS_KEY || 
+    (isNvidiaKey(process.env.OPENAI_API_KEY) ? undefined : process.env.OPENAI_API_KEY);
   
   if (!openaiApiKey) {
-    throw new Error('未配置 OPENAI_TTS_KEY 或 OPENAI_API_KEY');
+    throw new Error('未配置有效的 OPENAI_TTS_KEY（NVIDIA API Key 不支持 TTS）');
   }
   
   const response = await fetch(`${openaiBaseUrl}/audio/speech`, {
@@ -33,7 +40,7 @@ async function generateSpeechOpenAI(text: string): Promise<Buffer> {
   return Buffer.from(arrayBuffer);
 }
 
-// 使用 ElevenLabs 生成語音（後備）
+// 使用 ElevenLabs 生成語音
 async function generateSpeechElevenLabs(text: string): Promise<Buffer> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   const voiceId = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';
@@ -78,31 +85,47 @@ export async function POST(request: Request) {
   }
   
   try {
-    const { text, provider = 'openai' } = await request.json();
+    const { text } = await request.json();
     
     if (!text || !text.trim()) {
       return NextResponse.json({ error: '請提供文字內容' }, { status: 400 });
     }
     
     let audioBuffer: Buffer;
+    const hasOpenAITTS = process.env.OPENAI_TTS_KEY || 
+      (process.env.OPENAI_API_KEY && !isNvidiaKey(process.env.OPENAI_API_KEY));
+    const hasElevenLabs = !!process.env.ELEVENLABS_API_KEY;
     
-    // 優先使用 OpenAI TTS，因為 NVIDIA API 不支持 TTS
-    if (process.env.OPENAI_TTS_KEY || process.env.OPENAI_API_KEY) {
+    // 優先使用 OpenAI TTS
+    if (hasOpenAITTS) {
       try {
         audioBuffer = await generateSpeechOpenAI(text);
       } catch (error: any) {
-        console.warn('OpenAI TTS 失敗，嘗試 ElevenLabs:', error.message);
-        if (process.env.ELEVENLABS_API_KEY) {
+        console.warn('OpenAI TTS 失敗:', error.message);
+        if (hasElevenLabs) {
+          console.log('嘗試 ElevenLabs...');
           audioBuffer = await generateSpeechElevenLabs(text);
         } else {
           throw error;
         }
       }
-    } else if (process.env.ELEVENLABS_API_KEY) {
-      audioBuffer = await generateSpeechElevenLabs(text);
+    } else if (hasElevenLabs) {
+      // 嘗試 ElevenLabs
+      try {
+        audioBuffer = await generateSpeechElevenLabs(text);
+      } catch (error: any) {
+        console.error('ElevenLabs TTS 失敗:', error.message);
+        return NextResponse.json(
+          { error: '語音生成失敗', message: `ElevenLabs: ${error.message}。請配置有效的 OPENAI_TTS_KEY 或 ELEVENLABS_API_KEY` },
+          { status: 500 }
+        );
+      }
     } else {
       return NextResponse.json(
-        { error: '服務未配置', message: '需要配置 OPENAI_TTS_KEY 或 ELEVENLABS_API_KEY' },
+        { 
+          error: '服務未配置', 
+          message: 'TTS 服務需要配置 OPENAI_TTS_KEY（真正的 OpenAI Key，不是 NVIDIA）或 ELEVENLABS_API_KEY' 
+        },
         { status: 503 }
       );
     }
