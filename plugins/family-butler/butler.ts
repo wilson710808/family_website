@@ -67,7 +67,7 @@ export function buildContext(messages: ChatMessage[]): string {
 
 // ============ 家族記憶 ============
 
-export function getFamilyMemories(db: Database, familyId: number): string {
+export function getFamilyMemories(db: any, familyId: number): string {
   const memories = db.prepare(`
     SELECT category, content FROM plugin_butler_memories
     WHERE family_id = ?
@@ -80,7 +80,7 @@ export function getFamilyMemories(db: Database, familyId: number): string {
   return memories.map(m => `- [${m.category}] ${m.content}`).join('\n');
 }
 
-export function saveMemory(db: Database, familyId: number, category: string, content: string, userId: number): void {
+export function saveMemory(db: any, familyId: number, category: string, content: string, userId: number): void {
   db.prepare(`
     INSERT INTO plugin_butler_memories (family_id, category, content, created_by)
     VALUES (?, ?, ?, ?)
@@ -90,7 +90,7 @@ export function saveMemory(db: Database, familyId: number, category: string, con
 // ============ AI 回覆生成 ============
 
 interface GenerateReplyParams {
-  db: Database;
+  db: any;
   familyId: number;
   messages: ChatMessage[];
   userMessage: string;
@@ -178,7 +178,7 @@ export async function generateReply(params: GenerateReplyParams): Promise<string
 
 // ============ 回覆記錄 ============
 
-function saveReply(db: Database, familyId: number, messageId: number, content: string, triggerType: string): void {
+function saveReply(db: any, familyId: number, messageId: number, content: string, triggerType: string): void {
   try {
     db.prepare(`
       INSERT INTO plugin_butler_replies (family_id, message_id, content, trigger_type)

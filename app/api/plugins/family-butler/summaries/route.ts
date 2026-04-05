@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     // 獲取該年度所有聊天記錄
-    const chatMemories = getChatMemoryByYear(db, familyId, year);
+    const chatMemories = getChatMemoryByYear(db, familyId, year) as any[];
 
     if (chatMemories.length === 0) {
       return NextResponse.json(
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     }
 
     // 轉換格式
-    const chatData = chatMemories.map(m => ({
+    const chatData = chatMemories.map((m: any) => ({
       userName: m.user_name,
       content: m.content,
       date: m.created_at,

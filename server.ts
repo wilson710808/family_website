@@ -37,7 +37,7 @@ if (fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
 }
 
 // 初始化 Next.js
-const app = next({ dev, hostname, port });
+const app = next({ dev, hostname, port, turbopack: false });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
