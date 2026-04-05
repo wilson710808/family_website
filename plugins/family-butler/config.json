@@ -1,0 +1,22 @@
+{
+  "name": "family-butler",
+  "displayName": "家族管家",
+  "description": "AI 智能家族管家，具備上下文理解和家族記憶",
+  "version": "1.0.0",
+  "enabled": true,
+  "triggers": {
+    "mention": ["@管家", "@小幫手", "管家", "小幫手"],
+    "greeting": ["早安", "午安", "晚安", "大家早上好", "大家晚安"],
+    "question": ["怎麼辦", "怎麼說", "覺得呢", "你覺得", "好不好", "可以嗎", "為什麼", "是什麼", "什麼意思", "建議", "推薦", "幫我", "幫忙"],
+    "thanks": ["謝謝", "感謝", "thanks"],
+    "emotion": ["好累", "好煩", "無聊", "開心", "難過", "生氣"]
+  },
+  "ai": {
+    "baseUrl": "https://integrate.api.nvidia.com/v1",
+    "model": "meta/llama-3.1-8b-instruct",
+    "maxTokens": 300,
+    "temperature": 0.75,
+    "timeout": 30000,
+    "contextMessages": 30
+  }
+}
