@@ -1,0 +1,490 @@
+Node path: /root/.nvm/versions/node/v22.22.1/bin/node
+Starting server on port 443...
+✅ 成長專欄插件數據庫初始化完成
+✅ 留言板插件數據庫初始化完成
+[PluginSystem] 插件初始化完成
+> HTTPS certificates found, enabling HTTPS
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /root/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /root/.openclaw/workspace/family-portal/package-lock.json
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[Socket] Initialized
+[FamilyButler] 啟動定時任務檢查
+> Ready on https://0.0.0.0:443
+> Socket.IO initialized ✓
+ GET /actuator/gateway/routes 404 in 924ms (compile: 625ms, render: 299ms)
+ GET /.git/config 404 in 73ms (compile: 6ms, render: 66ms)
+ GET /Dr0v 404 in 52ms (compile: 5ms, render: 47ms)
+ PROPFIND / 307 in 310ms (compile: 150ms, render: 160ms)
+ GET /.git/config 404 in 58ms (compile: 6ms, render: 52ms)
+ GET /vpn/index.html 404 in 50ms (compile: 5ms, render: 45ms)
+ GET / 307 in 58ms (compile: 5ms, render: 53ms)
+ POST /cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/bin/sh 405 in 549ms (compile: 512ms, render: 37ms)
+ GET / 307 in 61ms (compile: 4ms, render: 57ms)
+✅ 成長專欄插件數據庫初始化完成
+✅ 留言板插件數據庫初始化完成
+[PluginSystem] 插件初始化完成
+ GET /dashboard 200 in 393ms (compile: 81ms, render: 313ms)
+ GET /chat?familyId=6 200 in 272ms (compile: 114ms, render: 158ms)
+✅ 成長專欄插件數據庫初始化完成
+✅ 留言板插件數據庫初始化完成
+[PluginSystem] 插件初始化完成
+ GET /api/user 200 in 177ms (compile: 115ms, render: 62ms)
+ GET /api/chat?familyId=6&userId=4 200 in 55ms (compile: 49ms, render: 6ms)
+⚠ Cross origin request detected from 43.135.184.31 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[Socket] User connected: 4JchbeP6Puaxmsz9AAAB
+[Socket] User here (4) joined family 6
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: 4JchbeP6Puaxmsz9AAAB
+[Socket] User connected: lOo4FasGoyzDPIB2AAAD
+[Socket] User here (4) joined family 6
+ GET /plugins/family-butler?familyId=1 200 in 111ms (compile: 54ms, render: 56ms)
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: lOo4FasGoyzDPIB2AAAD
+ GET /api/plugins/family-butler/reminders?familyId=1 200 in 61ms (compile: 51ms, render: 10ms)
+ GET /api/user 200 in 19ms (compile: 3ms, render: 16ms)
+ GET /api/plugins/family-butler/reminders?familyId=1 200 in 7ms (compile: 3ms, render: 4ms)
+ GET /api/user 200 in 18ms (compile: 2ms, render: 16ms)
+ GET /chat 200 in 43ms (compile: 12ms, render: 31ms)
+ GET /api/user 200 in 16ms (compile: 2ms, render: 14ms)
+ GET /api/families 200 in 61ms (compile: 52ms, render: 9ms)
+ GET /chat?familyId=6 200 in 34ms (compile: 8ms, render: 25ms)
+ GET /api/user 200 in 17ms (compile: 2ms, render: 15ms)
+ GET /api/chat?familyId=6&userId=4 200 in 7ms (compile: 3ms, render: 4ms)
+ GET /api/chat?familyId=6&userId=4 200 in 6ms (compile: 2ms, render: 4ms)
+ GET /api/user 200 in 19ms (compile: 2ms, render: 16ms)
+[Socket] User connected: VEPtlJ8XkEc6V-cqAAAG
+[Socket] User here (4) joined family 6
+ GET /api/families 200 in 10ms (compile: 5ms, render: 6ms)
+ GET /api/chat?familyId=6&userId=4 200 in 5ms (compile: 1746µs, render: 3ms)
+[Socket] User connected: OecvWxHdDS1wK5XRAAAI
+ GET /chat?familyId=6 200 in 29ms (compile: 8ms, render: 21ms)
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: VEPtlJ8XkEc6V-cqAAAG
+[Socket] User here (4) joined family 6
+ POST /api/chat/send 200 in 77ms (compile: 55ms, render: 22ms)
+[FamilyButler] 需要回覆: 管家給我人生建議 (by here)
+[FamilyButler] 獲取最近消息失敗: SqliteError: no such column: user_name
+    at SocketManager.getRecentMessagesForButler (lib/socket.ts:326:23)
+    at Socket.<anonymous> (lib/socket.ts:124:41) {
+  code: 'SQLITE_ERROR'
+}
+[FamilyButler] 獲取到 0 條最近消息作為上下文
+[FamilyButler] 上下文: events=0, reminders=0, birthdays=0, holiday=false
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+ POST /api/plugins/family-butler/detection 200 in 737ms (compile: 188ms, render: 550ms)
+[FamilyButler] 生成回覆成功: 有事相顧，我很樂意幫助你! 如果你需要人生建議，我的話一定是滿滿的正向能量。今天就先從一個小小的問題...
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 386ms (compile: 2ms, render: 383ms)
+ POST /api/chat/send 200 in 19ms (compile: 3ms, render: 16ms)
+[FamilyButler] shouldInitiateReply: family=6, diff=480.0min, should=false
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+ POST /api/plugins/family-butler/detection 200 in 600ms (compile: 1994µs, render: 598ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 153ms (compile: 3ms, render: 150ms)
+ POST /api/chat/send 200 in 19ms (compile: 3ms, render: 16ms)
+[FamilyButler] shouldInitiateReply: family=6, diff=480.0min, should=false
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+ POST /api/plugins/family-butler/detection 200 in 558ms (compile: 2ms, render: 556ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 106ms (compile: 2ms, render: 104ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 102ms (compile: 2ms, render: 100ms)
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: OecvWxHdDS1wK5XRAAAI
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 114ms (compile: 2ms, render: 111ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 92ms (compile: 1923µs, render: 90ms)
+[Socket] User connected: pE7kwF1WxEjX-jnnAAAK
+[Socket] User here (4) joined family 6
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 103ms (compile: 3ms, render: 100ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 98ms (compile: 2ms, render: 96ms)
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: pE7kwF1WxEjX-jnnAAAK
+ GET /.env 404 in 47ms (compile: 5ms, render: 42ms)
+ GET / 307 in 75ms (compile: 12ms, render: 64ms)
+ GET /dashboard 200 in 88ms (compile: 3ms, render: 85ms)
+ GET /sitemap.xml 404 in 53ms (compile: 6ms, render: 48ms)
+ GET /robots.txt 404 in 42ms (compile: 3ms, render: 39ms)
+ GET / 307 in 51ms (compile: 4ms, render: 48ms)
+ GET / 307 in 54ms (compile: 4ms, render: 50ms)
+ GET /.env.uat 404 in 44ms (compile: 5ms, render: 39ms)
+ GET /config/.git/config 404 in 74ms (compile: 4ms, render: 70ms)
+ GET /dev/.git/config 404 in 52ms (compile: 3ms, render: 49ms)
+ GET /config.json 404 in 58ms (compile: 3ms, render: 55ms)
+ GET /.env.bak 404 in 54ms (compile: 3ms, render: 50ms)
+ GET /.env.ci 404 in 101ms (compile: 4ms, render: 97ms)
+ GET /.env.prod 404 in 52ms (compile: 4ms, render: 48ms)
+ GET /files/.git/config 404 in 46ms (compile: 3ms, render: 43ms)
+ GET /public/.git/config 404 in 53ms (compile: 3ms, render: 50ms)
+ GET /.env.backup 404 in 46ms (compile: 3ms, render: 43ms)
+ GET /.env.qa 404 in 48ms (compile: 3ms, render: 45ms)
+ GET /.env.save 404 in 146ms (compile: 12ms, render: 134ms)
+ GET /.git/config 404 in 40ms (compile: 3ms, render: 37ms)
+ GET /cms/.git/config 404 in 44ms (compile: 3ms, render: 41ms)
+ GET /.env.dev 404 in 44ms (compile: 3ms, render: 41ms)
+ GET /.env.preprod 404 in 42ms (compile: 3ms, render: 39ms)
+ GET /.env.sandbox 404 in 51ms (compile: 3ms, render: 48ms)
+ GET /media../.git/config 404 in 35ms (compile: 3ms, render: 32ms)
+ GET /api/.git/config 404 in 43ms (compile: 3ms, render: 41ms)
+ GET /www/.git/config 404 in 40ms (compile: 3ms, render: 37ms)
+ GET /.envrc 404 in 46ms (compile: 3ms, render: 43ms)
+ GET /.env.secret 404 in 65ms (compile: 3ms, render: 61ms)
+ GET /assets../.git/config 404 in 37ms (compile: 3ms, render: 34ms)
+ GET /configuration/.env 404 in 39ms (compile: 3ms, render: 36ms)
+ GET /prod/.env 404 in 44ms (compile: 3ms, render: 41ms)
+ GET /admin/.git/config 404 in 45ms (compile: 3ms, render: 42ms)
+ GET /.env.dev.local 404 in 42ms (compile: 3ms, render: 39ms)
+ GET /docker-compose.prod.yml 404 in 35ms (compile: 3ms, render: 32ms)
+ GET /.env.staging.local 404 in 43ms (compile: 3ms, render: 40ms)
+ GET /.env.template 404 in 39ms (compile: 3ms, render: 36ms)
+ GET /data/.git/config 404 in 43ms (compile: 3ms, render: 40ms)
+ GET /core/.git/config 404 in 64ms (compile: 3ms, render: 61ms)
+ GET /static../.git/config 404 in 36ms (compile: 3ms, render: 33ms)
+ GET /.env.stage 404 in 41ms (compile: 3ms, render: 38ms)
+ GET /.env.test 404 in 43ms (compile: 3ms, render: 40ms)
+ GET /settings/.env 404 in 58ms (compile: 3ms, render: 55ms)
+ GET /.env.production.local 404 in 47ms (compile: 4ms, render: 43ms)
+ GET /.env_sample 404 in 54ms (compile: 5ms, render: 49ms)
+ GET /app/.git/config 404 in 43ms (compile: 5ms, render: 38ms)
+ GET /project/.git/config 404 in 54ms (compile: 4ms, render: 50ms)
+ GET /.env 404 in 41ms (compile: 3ms, render: 38ms)
+ GET /.env.config 404 in 46ms (compile: 3ms, render: 43ms)
+ GET /.env.default 404 in 44ms (compile: 5ms, render: 39ms)
+ GET /build/.env 404 in 54ms (compile: 3ms, render: 51ms)
+ GET /.env.development.local 404 in 43ms (compile: 3ms, render: 40ms)
+ GET /.env.prod.local 404 in 58ms (compile: 4ms, render: 54ms)
+ GET /api/.env 404 in 47ms (compile: 3ms, render: 44ms)
+ GET /server/.git/config 404 in 57ms (compile: 3ms, render: 54ms)
+ GET /src/.git/config 404 in 42ms (compile: 3ms, render: 39ms)
+ GET /media/.git/config 404 in 42ms (compile: 3ms, render: 39ms)
+ GET /.aws/credentials 404 in 53ms (compile: 3ms, render: 49ms)
+ GET /.env.production 404 in 44ms (compile: 4ms, render: 40ms)
+ GET /.env.testing 404 in 59ms (compile: 3ms, render: 56ms)
+ GET /config/.env 404 in 35ms (compile: 3ms, render: 32ms)
+ GET /.env.testing.local 404 in 40ms (compile: 3ms, render: 37ms)
+ GET /backup/.git/config 404 in 40ms (compile: 3ms, render: 37ms)
+ GET /.env.dist 404 in 52ms (compile: 3ms, render: 49ms)
+ GET /.env.live 404 in 45ms (compile: 3ms, render: 42ms)
+ GET /.env.local 404 in 34ms (compile: 3ms, render: 31ms)
+ GET / 307 in 55ms (compile: 5ms, render: 50ms)
+ GET /dashboard 200 in 61ms (compile: 3ms, render: 58ms)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+ POST / 404 in 612ms (compile: 3ms, render: 609ms)
+ GET / 307 in 54ms (compile: 6ms, render: 48ms)
+ GET /dashboard 200 in 67ms (compile: 2ms, render: 64ms)
+ GET /robots.txt 404 in 50ms (compile: 4ms, render: 45ms)
+ GET /owa/auth/x.js 404 in 49ms (compile: 3ms, render: 46ms)
+ POST /cgi-bin/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/.%2e/bin/sh 405 in 32ms (compile: 5ms, render: 27ms)
+ GET /gcp_credentials.json 404 in 39ms (compile: 4ms, render: 35ms)
+ GET /.env 404 in 41ms (compile: 4ms, render: 37ms)
+ GET /eventmanager 404 in 45ms (compile: 3ms, render: 42ms)
+ GET / 307 in 52ms (compile: 4ms, render: 49ms)
+ GET /dashboard 200 in 73ms (compile: 3ms, render: 70ms)
+ POST /ajax 404 in 90ms (compile: 6ms, render: 84ms)
+ GET / 307 in 53ms (compile: 4ms, render: 49ms)
+ PROPFIND / 307 in 75ms (compile: 3ms, render: 72ms)
+ GET / 307 in 51ms (compile: 2ms, render: 49ms)
+ GET /dashboard 200 in 66ms (compile: 4ms, render: 62ms)
+ GET /chat?familyId=6 200 in 64ms (compile: 10ms, render: 54ms)
+ GET /api/user 200 in 19ms (compile: 2ms, render: 17ms)
+ GET /api/chat?familyId=6&userId=4 200 in 6ms (compile: 2ms, render: 4ms)
+[Socket] User connected: 35zcT_k60nf2lQpXAAAM
+[Socket] User here (4) joined family 6
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 231ms (compile: 3ms, render: 228ms)
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: 35zcT_k60nf2lQpXAAAM
+ GET / 307 in 55ms (compile: 3ms, render: 52ms)
+ GET / 307 in 77ms (compile: 2ms, render: 74ms)
+ GET /dashboard 200 in 78ms (compile: 4ms, render: 74ms)
+ GET /api/plugins/birthday/upcoming?familyId=6&daysAhead=30 200 in 133ms (compile: 76ms, render: 57ms)
+ GET /api/plugins/album/photos?familyId=6&recent=true&limit=8 200 in 128ms (compile: 112ms, render: 16ms)
+ GET /dashboard 200 in 73ms (compile: 3ms, render: 71ms)
+ GET /SDK/webLanguage 404 in 55ms (compile: 4ms, render: 51ms)
+ GET / 307 in 59ms (compile: 5ms, render: 54ms)
+ GET /dashboard 200 in 69ms (compile: 3ms, render: 66ms)
+ GET /.env.production 404 in 40ms (compile: 4ms, render: 36ms)
+ GET / 307 in 57ms (compile: 5ms, render: 52ms)
+ GET /dashboard 200 in 78ms (compile: 3ms, render: 75ms)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+ POST / 404 in 583ms (compile: 4ms, render: 579ms)
+ GET / 307 in 60ms (compile: 6ms, render: 54ms)
+ GET / 307 in 58ms (compile: 3ms, render: 55ms)
+ GET / 307 in 57ms (compile: 2ms, render: 54ms)
+ GET /dashboard 200 in 90ms (compile: 2ms, render: 87ms)
+ GET /api/v2/static/not.found 404 in 44ms (compile: 7ms, render: 37ms)
+ GET /remote/logincheck 404 in 46ms (compile: 5ms, render: 41ms)
+ GET /fonts/ftnt-icons.woff 404 in 45ms (compile: 4ms, render: 41ms)
+ GET /login?redir=/ng 200 in 299ms (compile: 80ms, render: 219ms)
+ GET /lang/custom/sbin/init 404 in 48ms (compile: 4ms, render: 44ms)
+ GET /static/lang/custom/sbin/init 404 in 50ms (compile: 3ms, render: 47ms)
+ GET /lang/legacy/filechecksum 404 in 43ms (compile: 5ms, render: 39ms)
+ GET /migadmin/lang/legacy/legacy/filechecksum 404 in 54ms (compile: 4ms, render: 50ms)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment.
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+    at ignore-listed frames
+ POST / 404 in 617ms (compile: 4ms, render: 613ms)
+ GET / 307 in 60ms (compile: 6ms, render: 54ms)
+ GET /dashboard 200 in 72ms (compile: 3ms, render: 69ms)
+ GET / 307 in 60ms (compile: 2ms, render: 58ms)
+ GET /dashboard 200 in 89ms (compile: 3ms, render: 86ms)
+ GET /security.txt 404 in 46ms (compile: 5ms, render: 41ms)
+ GET /.well-known/security.txt 404 in 42ms (compile: 4ms, render: 38ms)
+ GET /.env 404 in 52ms (compile: 4ms, render: 48ms)
+ GET /.git/config 404 in 40ms (compile: 4ms, render: 36ms)
+ GET / 307 in 57ms (compile: 4ms, render: 53ms)
+ GET /anthropic.json 404 in 46ms (compile: 6ms, render: 40ms)
+ GET / 307 in 53ms (compile: 3ms, render: 50ms)
+ GET / 307 in 137ms (compile: 2ms, render: 134ms)
+ GET /dashboard 200 in 79ms (compile: 10ms, render: 69ms)
+ GET / 307 in 57ms (compile: 2ms, render: 54ms)
+ GET /dashboard 200 in 58ms (compile: 3ms, render: 55ms)
+ GET /cdn-cgi/trace 404 in 41ms (compile: 7ms, render: 34ms)
+ GET /vpn/index.html 404 in 51ms (compile: 4ms, render: 47ms)
+ GET /admin_ui/mas/ent/login.html 404 in 56ms (compile: 4ms, render: 52ms)
+ GET /logon/LogonPoint/tmindex.html 404 in 43ms (compile: 4ms, render: 39ms)
+ GET / 307 in 49ms (compile: 4ms, render: 44ms)
+ GET /welcome 404 in 40ms (compile: 5ms, render: 35ms)
+ GET /?XDEBUG_SESSION_START=phpstorm 307 in 54ms (compile: 5ms, render: 48ms)
+ GET /dashboard 200 in 56ms (compile: 4ms, render: 53ms)
+ GET /chat?familyId=6 200 in 65ms (compile: 13ms, render: 52ms)
+ GET /api/user 200 in 23ms (compile: 3ms, render: 21ms)
+ GET /api/chat?familyId=6&userId=4 200 in 6ms (compile: 2ms, render: 4ms)
+[Socket] User connected: LuABE0ZjfZ97ilOLAAAO
+[Socket] User here (4) joined family 6
+ GET /chat?familyId=6 200 in 57ms (compile: 10ms, render: 47ms)
+ GET /api/user 200 in 14ms (compile: 2ms, render: 12ms)
+ GET /api/chat?familyId=6&userId=4 200 in 5ms (compile: 2ms, render: 3ms)
+[Socket] User connected: zF05FjW8AUJLWqoMAAAQ
+[Socket] User here (4) joined family 6
+ POST /api/chat/send 200 in 21ms (compile: 3ms, render: 18ms)
+[FamilyButler] 需要回覆: 管家，請給我人生建議 (by here)
+[FamilyButler] 獲取最近消息失敗: SqliteError: no such column: user_name
+    at SocketManager.getRecentMessagesForButler (lib/socket.ts:326:23)
+    at Socket.<anonymous> (lib/socket.ts:124:41) {
+  code: 'SQLITE_ERROR'
+}
+[FamilyButler] 獲取到 0 條最近消息作為上下文
+[FamilyButler] 上下文: events=0, reminders=0, birthdays=0, holiday=false
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+[FamilyButler] 生成回覆成功: 生活總是在不斷變化，你可以選擇如何面對它！想一想你真正喜歡的事情，然後一步步往前走。記得要為自己慶祝...
+ POST /api/plugins/family-butler/detection 200 in 774ms (compile: 5ms, render: 769ms)
+ POST /api/plugins/family-butler/detection 200 in 638ms (compile: 2ms, render: 636ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 144ms (compile: 2ms, render: 142ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 123ms (compile: 3ms, render: 121ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 412ms (compile: 127ms, render: 285ms)
+ POST /api/chat/send 200 in 17ms (compile: 2ms, render: 15ms)
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+[FamilyButler] shouldInitiateReply: family=6, diff=480.0min, should=false
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 106ms (compile: 2ms, render: 104ms)
+ POST /api/plugins/family-butler/detection 200 in 1677ms (compile: 2ms, render: 1674ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 99ms (compile: 2ms, render: 97ms)
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: LuABE0ZjfZ97ilOLAAAO
+ POST /api/chat/send 200 in 19ms (compile: 4ms, render: 15ms)
+[FamilyButler] callNVIDIA: apiKey length=70, model=meta/llama-3.1-8b-instruct, url=https://integrate.api.nvidia.com/v1/chat/completions
+[FamilyButler] shouldInitiateReply: family=6, diff=480.0min, should=false
+ POST /api/plugins/family-butler/detection 200 in 453ms (compile: 3ms, render: 450ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 140ms (compile: 2ms, render: 138ms)
+标记已读失败: SqliteError: FOREIGN KEY constraint failed
+    at POST (app/api/chat/route.ts:57:8)
+    at async Server.requestHandler (server.ts:47:7)
+  55 |       INSERT OR IGNORE INTO chat_message_reads (message_id, family_id, user_id)
+  56 |       VALUES (?, ?, ?)
+> 57 |     `).run(messageId, familyId, userId);
+     |        ^
+  58 |
+  59 |     // 获取更新后的已读计数
+  60 |     const readCount = db.prepare(` {
+  code: 'SQLITE_CONSTRAINT_FOREIGNKEY'
+}
+ POST /api/chat 500 in 107ms (compile: 2ms, render: 105ms)
+[Socket] User here disconnected from family 6
+[Socket] User disconnected: zF05FjW8AUJLWqoMAAAQ

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import Layout from '@/components/Layout';
 import { Send, Users, MessageSquare, Clock, Bot, Check, CheckCheck } from 'lucide-react';
@@ -46,6 +46,7 @@ function ChatContent() {
   const [connected, setConnected] = useState(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // 记录今天是否已经打招呼
   const hasGreetedToday = (): boolean => {
@@ -99,13 +100,24 @@ function ChatContent() {
     });
   };
 
-  // 获取当前用户
+  // 获取当前用户和用户家族
   useEffect(() => {
     fetch('/api/user')
       .then(res => res.json())
-      .then(data => {
+      .then(async data => {
         if (data.user) {
           setUser(data.user);
+          
+          // 如果还没有 familyId，获取用户的家族列表尝试自动跳转
+          if (!familyId) {
+            const res = await fetch('/api/families');
+            const familiesData = await res.json();
+            if (familiesData.families && familiesData.families.length === 1) {
+              // 用户只有一个家族，自动跳转到该家族聊天室
+              const singleFamily = familiesData.families[0];
+              router.replace(`/chat?familyId=${singleFamily.id}`);
+            }
+          }
         } else {
           setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', is_admin: 1 });
         }
@@ -113,9 +125,9 @@ function ChatContent() {
       .catch(() => {
         setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin', is_admin: 1 });
       });
-  }, []);
+  }, [familyId, router]);
 
-  // 加载历史消息
+  // 加载历史消息 - 等待 user 准备好了才加载
   useEffect(() => {
     if (!familyId || !user) return;
 
@@ -272,6 +284,81 @@ function ChatContent() {
           messageId: data.message.id,
           createdAt: data.message.created_at,
         });
+
+        // 家族管家：自動檢測任務提醒
+        try {
+          fetch('/api/plugins/family-butler/detection', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'task',
+              message: content,
+              familyId: Number(familyId),
+              userId: user.id,
+              userName: user.name,
+            }),
+          }).then(res => res.json()).then(result => {
+            if (result.success && result.detection?.hasTask && result.detection.confidence >= 0.7) {
+              // 檢測到任務，管家發送確認消息
+              const taskDate = result.detection.taskDate;
+              const taskContent = result.detection.taskContent || content;
+              socket?.emit('butler-greeting', {
+                familyId: Number(familyId),
+                content: `✅ 我已幫大家記錄提醒：「${taskContent}」將在 ${taskDate} 提醒大家，不會忘記哦！`,
+              });
+            }
+          });
+        } catch (taskError) {
+          console.error('[Butler] 任務檢測失敗:', taskError);
+        }
+
+        // 家族管家：定期進行情緒檢測（每發5條消息檢測一次）
+        if (Math.random() < 0.2) { // 20% 概率檢測，避免太頻繁
+          const recentMessages = messages.slice(-10).map(m => ({
+            userId: m.user_id,
+            userName: m.user_name,
+            content: m.content,
+          }));
+          try {
+            fetch('/api/plugins/family-butler/detection', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'sentiment',
+                messages: recentMessages,
+                familyId: Number(familyId),
+              }),
+            }).then(res => res.json()).then(result => {
+              if (result.success && result.detection) {
+                const { hasConflict, hasNegativeEmotion, conflictLevel, suggestedIntervention } = result.detection;
+                if ((hasConflict && conflictLevel > 0.6) || (hasNegativeEmotion && conflictLevel > 0.4)) {
+                  // 需要調解，管家發言緩和氣氛
+                  if (suggestedIntervention) {
+                    socket?.emit('butler-greeting', {
+                      familyId: Number(familyId),
+                      content: suggestedIntervention,
+                    });
+                  } else {
+                    // 默認調解詞
+                    const defaultMediations = [
+                      '😊 感覺大家討論得很熱烈呢，有話慢慢說，一家人以和為貴哦～',
+                      '💖 大家都是一家人，有什麼問題坐下來慢慢溝通，一定能解決的！',
+                      '🤗 有不同的意見很正常，但記得保持冷靜哦，我們永遠是一家人！',
+                      '❤️ 每個人看法不一樣很正常，互相尊重理解，家和萬事興呀！',
+                    ];
+                    const mediation = defaultMediations[Math.floor(Math.random() * defaultMediations.length)];
+                    socket?.emit('butler-greeting', {
+                      familyId: Number(familyId),
+                      content: mediation,
+                    });
+                  }
+                }
+              }
+            });
+          } catch (sentimentError) {
+            console.error('[Butler] 情緒檢測失敗:', sentimentError);
+          }
+        }
       }
     } catch (error) {
       console.error('发送失败:', error);

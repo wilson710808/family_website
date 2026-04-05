@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { getCurrentUser, addContributionPoints } from '@/lib/auth';
+// 导入家族管家功能
+import { isEnabled as isButlerEnabled } from '@/plugins/family-butler';
+import { saveChatMemory } from '@/plugins/family-butler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +32,22 @@ export async function POST(request: NextRequest) {
       JOIN users u ON cm.user_id = u.id
       WHERE cm.id = ?
     `).get(result.lastInsertRowid as number);
+
+    // 如果家族管家啟用，保存聊天記憶用於後續總結和檢索
+    if (isButlerEnabled()) {
+      try {
+        const msg = message as any;
+        saveChatMemory(db, {
+          family_id: Number(familyId),
+          message_id: msg.id,
+          user_id: user.id,
+          user_name: user.name,
+          content: content.trim(),
+        });
+      } catch (butlerError) {
+        console.error('[FamilyButler] 保存聊天記憶失敗:', butlerError);
+      }
+    }
 
     return NextResponse.json({
       success: true,

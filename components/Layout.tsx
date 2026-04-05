@@ -3,10 +3,12 @@
 import { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Users, Bell, MessageSquare, BookOpen, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Home, Users, Bell, MessageSquare, BookOpen, Bot, Settings, LogOut, Menu, X } from 'lucide-react';
 import ElderFriendlyButton from './ElderFriendlyButton';
+import VersionBadge from './VersionBadge';
 import { useI18n } from '@/lib/i18n';
 import { isEnabled as isGrowthColumnEnabled } from '../plugins/growth-column/index.client';
+import { isEnabled as isFamilyButlerEnabled } from '../plugins/family-butler/index.client';
 
 interface LayoutProps {
   children: ReactNode;
@@ -39,15 +41,25 @@ export default function Layout({ children, user }: LayoutProps) {
     { name: t('chat'), href: '/chat', icon: MessageSquare },
   ];
   
-  // 成長專欄插件只有启用了才添加到导航中（真正的插拔体验）
+  // 獲取第一個家族ID（從cookie或默認）
+  const getDefaultFamilyHrefWithId = (path: string) => {
+    // 默認帶 familyId=1，實際使用時會正確處理
+    return `${path}?familyId=1`;
+  };
+
+  // 插件只有启用了才添加到导航中（真正的插拔体验）
   const navigation = [...baseNavigation];
   if (isGrowthColumnEnabled()) {
-    navigation.push({ name: '成長專欄', href: getDefaultFamilyHref(), icon: BookOpen });
+    navigation.push({ name: '成長專欄', href: getDefaultFamilyHrefWithId('/plugins/growth-column'), icon: BookOpen });
+  }
+  if (isFamilyButlerEnabled()) {
+    navigation.push({ name: '家族管家', href: getDefaultFamilyHrefWithId('/plugins/family-butler'), icon: Bot });
   }
 
-  // 底部导航：成长专栏启用时显示全部 6 个，不启用时显示 5 个
-  // 5/6 个在移动端都能放下，每个按钮依然有足够空间
-  const bottomNavigation = navigation.slice(0, isGrowthColumnEnabled() ? 6 : 5);
+  // 底部导航：根据启用插件数量动态设置列数，保证都在同一行
+  const enabledPluginsCount = [isGrowthColumnEnabled(), isFamilyButlerEnabled()].filter(Boolean).length;
+  const totalItems = baseNavigation.length + enabledPluginsCount;
+  const bottomNavigation = navigation.slice(0, totalItems);
 
   // 管理员专属导航
   const adminNavigation = [
@@ -254,9 +266,13 @@ export default function Layout({ children, user }: LayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation - 动态设置列数，成长专栏启用时显示 6 列 */}
+      {/* Mobile Bottom Navigation - 动态设置列数，根据启用插件数量 */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 h-20">
-        <div className={`grid h-full ${isGrowthColumnEnabled() ? 'grid-cols-6' : 'grid-cols-5'}`}>
+        <div className={`grid h-full ${
+          totalItems === 5 ? 'grid-cols-5' :
+          totalItems === 6 ? 'grid-cols-6' :
+          totalItems === 7 ? 'grid-cols-7' : 'grid-cols-5'
+        }`}>
           {bottomNavigation.map(item => {
             const Icon = item.icon;
             // For growth-column, match startsWith because it has query params ?familyId=xxx
@@ -281,6 +297,9 @@ export default function Layout({ children, user }: LayoutProps) {
 
       {/* Mobile Bottom Padding */}
       <div className="h-20 lg:hidden" />
+      
+      {/* Version Badge */}
+      <VersionBadge />
     </div>
   );
 }
