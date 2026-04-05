@@ -418,7 +418,7 @@ class SocketManager {
       const stmt = db.prepare(`
           SELECT cm.user_id, cm.content, u.name as user_name FROM chat_messages cm LEFT JOIN users u ON cm.user_id = u.id
           WHERE cm.family_id = ?
-          ORDER BY cm.created_at DESC
+          ORDER BY created_at DESC
           LIMIT 10
         `);
       const rows = stmt.all(familyId);
@@ -458,7 +458,7 @@ class SocketManager {
       const stmt = db.prepare(`
         SELECT user_id, created_at FROM chat_messages
         WHERE cm.family_id = ?
-        ORDER BY cm.created_at DESC
+        ORDER BY created_at DESC
         LIMIT 1
       `);
       const lastMessage = stmt.get(familyId) as any;
@@ -575,7 +575,7 @@ class SocketManager {
         WHERE cm.family_id = ?
         AND content LIKE ?
         AND created_at >= datetime('now', '-30 days')
-        ORDER BY cm.created_at DESC
+        ORDER BY created_at DESC
       `);
       const rows = stmt.all(familyId, `%${userName}%`);
       relatedMessages.push(...rows);
