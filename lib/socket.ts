@@ -416,9 +416,9 @@ class SocketManager {
     // 從數據庫獲取最近10條消息(better-sqlite3 是同步 API)
     try {
       const stmt = db.prepare(`
-          SELECT user_name, content, user_id FROM chat_messages
-          WHERE family_id = ?
-          ORDER BY created_at DESC
+          SELECT cm.user_id, cm.content, u.name as user_name FROM chat_messages cm LEFT JOIN users u ON cm.user_id = u.id
+          WHERE cm.family_id = ?
+          ORDER BY cm.created_at DESC
           LIMIT 10
         `);
       const rows = stmt.all(familyId);
@@ -439,7 +439,7 @@ class SocketManager {
     try {
       const stmt = db.prepare(`
         SELECT COUNT(*) as count FROM chat_messages
-        WHERE family_id = ? AND user_id = 0
+        WHERE cm.family_id = ? AND user_id = 0
         AND created_at >= datetime('now', '-10 minutes')
       `);
       const result = stmt.get(familyId) as any;
@@ -457,8 +457,8 @@ class SocketManager {
       // 獲取最後一條消息
       const stmt = db.prepare(`
         SELECT user_id, created_at FROM chat_messages
-        WHERE family_id = ?
-        ORDER BY created_at DESC
+        WHERE cm.family_id = ?
+        ORDER BY cm.created_at DESC
         LIMIT 1
       `);
       const lastMessage = stmt.get(familyId) as any;
@@ -554,7 +554,7 @@ class SocketManager {
     try {
       const stmt = db.prepare(`
         SELECT * FROM plugin_butler_announcements
-        WHERE family_id = ?
+        WHERE cm.family_id = ?
         AND (event_date >= date('now') OR event_date IS NULL)
         AND content LIKE ?
         ORDER BY event_date ASC
@@ -572,10 +572,10 @@ class SocketManager {
       // 留言板本身沒有過期概念,但可以查找最近 30 天內提到該用戶的消息
       const stmt = db.prepare(`
         SELECT id, content, created_at FROM messages
-        WHERE family_id = ?
+        WHERE cm.family_id = ?
         AND content LIKE ?
         AND created_at >= datetime('now', '-30 days')
-        ORDER BY created_at DESC
+        ORDER BY cm.created_at DESC
       `);
       const rows = stmt.all(familyId, `%${userName}%`);
       relatedMessages.push(...rows);
@@ -588,7 +588,7 @@ class SocketManager {
     try {
       const stmt = db.prepare(`
         SELECT * FROM plugin_butler_scheduled_reminders
-        WHERE family_id = ?
+        WHERE cm.family_id = ?
         AND remind_date >= date('now')
         AND (content LIKE ? OR creator_id = ?)
         ORDER BY remind_date ASC
