@@ -303,20 +303,62 @@ class SocketManager {
         console.log(`[FamilyButler] 已發送${name}祝福`);
       }
 
-      // 6. 檢查是否年底，生成年度總結（台北時區）
-      const isLastDayOfYear = taipeiNow.getUTCMonth() === 11 && taipeiNow.getUTCDate() === 31;
-      if (isLastDayOfYear) {
-        // 每年12月31日生成年度總結
-        // TODO: 為每個有聊天記錄的家族生成年度總結
-        console.log('[FamilyButler] 今天是年底，準備生成年度總結');
-      }
-
-    } catch (error) {
-      console.error('[FamilyButler] 定時通知檢查失敗:', error);
+// 6. 檢查是否年底，生成年度總結（台北時區）
+    const isLastDayOfYear = taipeiNow.getUTCMonth() === 11 && taipeiNow.getUTCDate() === 31;
+    if (isLastDayOfYear) {
+      console.log('[FamilyButler] 今天是年底，準備生成年度總結');
     }
+    
+    // 7. 每天凌晨2點生成昨日摘要（台北時區）
+    const hour = taipeiNow.getUTCHours();
+    if (hour === 2) {
+      // 重新獲取所有活躍家族
+      const allFamilyIds = new Set<number>();
+      for (const user of this.onlineUsers.values()) {
+        allFamilyIds.add(user.familyId);
+      }
+      
+      for (const familyId of allFamilyIds) {
+        try {
+          const { saveDailySummary } = await import('../plugins/family-butler');
+          
+          // 檢查是否已經有昨日的摘要
+          const yesterday = new Date(taipeiNow.getTime() - 24 * 60 * 60 * 1000);
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          
+          // 獲取昨日的聊天消息
+          const yesterdayMessages = getTodayChatMessages(db, familyId);
+          
+          if (yesterdayMessages.length > 5) {
+            // 只有足夠的聊天才生成摘要
+            const summaryResult = await generateDailySummary(
+              yesterdayMessages.map((m: any) => ({
+                user_name: m.user_name,
+                content: m.content,
+                created_at: m.created_at,
+              }))
+            );
+            
+            saveDailySummary(db, {
+              family_id: familyId,
+              summary_date: yesterdayStr,
+              summary_text: summaryResult.summary_text,
+              key_topics: summaryResult.key_topics,
+              key_members: summaryResult.key_members,
+              mood_score: summaryResult.mood_score,
+            });
+            
+            console.log(`[FamilyButler] 已為家族 ${familyId} 生成昨日摘要`);
+          }
+        } catch (error) {
+          console.error(`[FamilyButler] 生成家族 ${familyId} 摘要失敗:`, error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[FamilyButler] 定時通知檢查失敗:', error);
   }
-
-  // 發送管家消息到家族聊天室
+}
   private sendButlerMessage(familyId: number, content: string) {
     const messageId = Date.now() + Math.random();
     
