@@ -140,18 +140,43 @@ class SocketManager {
             const todaysBirthdays = getTodaysBirthdays(data.familyId);
             const { isHoliday, name: holidayName } = isTodayHoliday();
             console.log(`[FamilyButler] 上下文: events=${upcomingEvents.length}, reminders=${upcomingReminders.length}, birthdays=${todaysBirthdays.length}, holiday=${isHoliday}`);
-
-            // 直接調用 AI 生成回覆(不需要繞過 HTTP)
-            const reply = await generateButlerReply({
-              familyId: data.familyId,
-              userId: data.userId,
-              userName: data.userName,
-              message: data.content,
-              recentMessages: recentMessages,
-              context: {
-                hasBirthdayToday: todaysBirthdays.length > 0,
-                birthdayPerson: todaysBirthdays.length > 0 ? todaysBirthdays[0].title : undefined,
-                isHoliday,
+const upcomingEvents = getUpcomingAnnouncements(db, data.familyId);
+      const upcomingReminders = getUpcomingReminders(db, data.familyId);
+      const todaysBirthdays = getTodaysBirthdays(data.familyId);
+      const { isHoliday, name: holidayName } = isTodayHoliday();
+      
+      console.log(`[FamilyButler] 上下文: events=${upcomingEvents.length}, reminders=${upcomingReminders.length}, birthdays=${todaysBirthdays.length}, holiday=${isHoliday}`);
+      
+      // 獲取家庭畫像和歷史摘要
+      const memberProfiles = getFamilyMemberProfiles(db, data.familyId);
+      const recentSummaries = getRecentDailySummaries(db, data.familyId, 3);
+      console.log(`[FamilyButler] 家庭畫像: members=${memberProfiles.length}, summaries=${recentSummaries.length}`);
+      
+      // 直接調用 AI 生成回覆(不需要繞過 HTTP)
+      const reply = await generateButlerReply({
+        familyId: data.familyId,
+        userId: data.userId,
+        userName: data.userName,
+        message: data.content,
+        recentMessages: recentMessages,
+        context: {
+          hasBirthdayToday: todaysBirthdays.length > 0,
+          birthdayPerson: todaysBirthdays.length > 0 ? todaysBirthdays[0].title : undefined,
+          isHoliday,
+          holidayName: isHoliday ? holidayName : undefined,
+          upcomingEvents,
+          upcomingReminders,
+        },
+        familyProfile: {
+          memberProfiles: memberProfiles.map((p: any) => ({
+            user_name: p.user_name,
+            personality_traits: p.personality_traits ? JSON.parse(p.personality_traits) : [],
+            concerns: p.concerns ? JSON.parse(p.concerns) : [],
+            achievements: p.achievements ? JSON.parse(p.achievements) : [],
+          })),
+          recentSummaries: recentSummaries.map((s: any) => s.summary_text),
+        },
+      });
                 holidayName: isHoliday ? holidayName : undefined,
                 upcomingEvents,
                 upcomingReminders,
