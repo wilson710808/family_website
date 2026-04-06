@@ -57,10 +57,9 @@ const PLUGINS = [
     id: 'stock',
     name: '投資助手',
     icon: <TrendingUp className="h-8 w-8" />,
-    description: 'StockAI 整合（開發中）',
+    description: 'StockAI 美股分析',
     color: 'orange',
-    href: '#',
-    disabled: true,
+    href: '/plugins/stock',
   },
 ];
 
