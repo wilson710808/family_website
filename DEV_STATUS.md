@@ -20,7 +20,10 @@
 - ✅ **家族树插件**
   - 添加/编辑/删除成员
   - 可折叠树形视图
-- ✅ 插件系统 (birthday/album/growth-column/message-board/butler/calendar/tree)
+- ✅ **StockAI 整合**
+  - iframe 嵌入投资助手
+  - 实时股价、K线图、AI分析
+- ✅ 插件系统 (birthday/album/growth-column/message-board/butler/calendar/tree/stock)
 - ✅ 即时聊天 (Socket.IO)
 - ✅ 家族管理 (创建/邀请码/角色)
 - ✅ 公告栏
@@ -29,16 +32,12 @@
 - ✅ 国际化 (简/繁中文)
 
 ### 正在开发
-- 🔄 StockAI 整合
+- 无
 
 ### 待开发
-- ⏳ StockAI 整合 (进行中)
 - ⏳ 家族树可视化 (图形化展示)
 - ⏳ 数据导出 (家族数据备份)
-
-### 已知问题
-- ⚠️ 认证中间件已关闭 (无权限控制)
-- ⚠️ 家族数据无隔离 (所有人可访问所有家族)
+- ⏳ 权限系统 (家族数据隔离)
 
 ## 修改记录
 
@@ -47,6 +46,7 @@
 | 2026-04-05 | OpenClaw | 家族管家 AI 接入 | 28364af |
 | 2026-04-05 | OpenClaw | 新增 DEV_STATUS.md | 5ef4647 |
 | 2026-04-05 | OpenClaw | 管家管理页面 + 日历 + 家族树 | 05b49b5 |
+| 2026-04-05 | OpenClaw | StockAI 整合 | d4ab6c9 |
 
 ## 文件结构
 
@@ -58,12 +58,14 @@ family_website/
 │   │   └── plugins/
 │   │       ├── butler/     # 管家 API (reply/memories/greeting)
 │   │       ├── calendar/   # 日历 API
-│   │       └── tree/       # 家族树 API
+│   │       ├── tree/       # 家族树 API
+│   │       └── stock/      # StockAI 配置
 │   ├── plugins/
 │   │   ├── page.tsx       # 功能中心
 │   │   ├── butler/        # 管家管理页面
 │   │   ├── calendar/      # 日历页面
-│   │   └── tree/          # 家族树页面
+│   │   ├── tree/          # 家族树页面
+│   │   └── stock/         # StockAI 页面
 ├── plugins/
 │   ├── birthday-reminder/  # 生日提醒
 │   ├── family-album/       # 家族相册
@@ -71,6 +73,7 @@ family_website/
 │   ├── message-board/      # 留言板
 │   ├── family-butler/      # AI 管家
 │   ├── event-calendar/     # 事件日历
-│   └── family-tree/        # 家族树
+│   ├── family-tree/        # 家族树
+│   └── stock-assistant/    # StockAI 整合
 └── DEV_STATUS.md           # 本文件
 ```
