@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, Bell, MessageSquare, Plus, Calendar, Clock } from 'lucide-react';
+import { Users, Bell, MessageSquare, Plus, Calendar, Clock, Grid } from 'lucide-react';
 import Layout from '@/components/Layout';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 import { useI18n } from '@/lib/i18n';
@@ -44,7 +44,15 @@ export default function DashboardClient({
                 </span>
               </ElderFriendlyButton>
             </Link>
-            <Link href="/announcements">
+            <Link href="/plugins">
+          <ElderFriendlyButton variant="primary" size="lg" className="bg-family-600 border border-family-400 hover:bg-family-700">
+            <span className="flex items-center">
+              <Grid className="h-6 w-6 mr-2" />
+              功能中心
+            </span>
+          </ElderFriendlyButton>
+        </Link>
+        <Link href="/announcements">
               <ElderFriendlyButton variant="primary" size="lg" className="bg-family-600 border border-family-400 hover:bg-family-700">
                 <span className="flex items-center">
                   <Bell className="h-6 w-6 mr-2" />
