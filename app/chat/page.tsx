@@ -174,19 +174,17 @@ function ChatContent() {
         avatar: user.avatar,
       });
 
-      // 检查是否需要管家打招呼
+      // 检查是否需要管家打招呼（AI 生成，带上下文）
       if (!hasGreetedToday()) {
-        const greetings = [
-          `🎉 欢迎 ${user.name} 来到我们的家族聊天室！今天过得怎么样呀？😊`,
-          `👋 ${user.name} 来了！热烈欢迎～ 今天有什么想跟大家分享的吗？`,
-          `💖 ${user.name} 好呀！很高兴你今天来到聊天室，快来跟家人们聊聊天吧！`,
-          `🌟 欢迎 ${user.name} 加入我们！今天天气真好，一起来聊聊吧～`,
-        ];
-        const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-        socket?.emit('butler-greeting', {
-          familyId: Number(familyId),
-          content: randomGreeting,
-        });
+        // 触发 AI 管家打招呼
+        fetch('/api/plugins/butler/greeting', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            familyId: Number(familyId),
+            userName: user.name,
+          }),
+        }).catch(err => console.error('管家打招呼失败:', err));
         markGreetedToday();
       }
     });

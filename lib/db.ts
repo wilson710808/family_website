@@ -11,6 +11,8 @@ import { initDatabase as initAlbum } from '../plugins/family-album';
 import { initDatabase as initGrowthColumn } from '../plugins/growth-column';
 import { initDatabase as initMessageBoard } from '../plugins/message-board';
 import { initDatabase as initButler } from '../plugins/family-butler';
+import { initDatabase as initCalendar } from '../plugins/event-calendar';
+import { initDatabase as initFamilyTree } from '../plugins/family-tree';
 
 // 按顺序初始化各个插件
 if (typeof initBirthday === 'function') {
@@ -27,6 +29,12 @@ if (typeof initMessageBoard === 'function') {
 }
 if (typeof initButler === 'function') {
   initButler(db);
+}
+if (typeof initCalendar === 'function') {
+  initCalendar(db);
+}
+if (typeof initFamilyTree === 'function') {
+  initFamilyTree(db);
 }
 
 console.log('[PluginSystem] 插件初始化完成');

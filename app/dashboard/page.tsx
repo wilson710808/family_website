@@ -36,8 +36,21 @@ async function getRecentActivities(userId: number) {
     LIMIT 5
   `).all(...familyIds);
 
+  // 获取即将到来的日历事件
+  let calendarEvents: any[] = [];
+  try {
+    calendarEvents = db.prepare(`
+      SELECT e.*, u.name as user_name, 'event' as type
+      FROM plugin_calendar_events e
+      LEFT JOIN users u ON e.created_by = u.id
+      WHERE e.family_id IN (${placeholders}) AND e.start_at >= datetime('now')
+      ORDER BY e.start_at ASC
+      LIMIT 5
+    `).all(...familyIds) as any[];
+  } catch {}
+
   // 合并并按时间排序
-  const allActivities = [...announcements, ...messages].sort((a: any, b: any) => 
+  const allActivities = [...announcements, ...messages, ...calendarEvents].sort((a: any, b: any) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   ).slice(0, 10);
 
