@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Layout from '@/components/Layout';
-import { TreePine, Plus, ChevronDown, ChevronRight, User, Users, Trash2, Edit, Heart } from 'lucide-react';
+import { TreePine, Plus, ChevronDown, ChevronRight, User, Users, Trash2, Edit, Heart, Eye, List } from 'lucide-react';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
+import FamilyTreeGraph from '@/components/FamilyTreeGraph';
 import LargeInput from '@/components/LargeInput';
 import LargeTextarea from '@/components/LargeTextarea';
 
@@ -36,12 +37,14 @@ const GENERATIONS = ['祖父母', '父母', '自己', '子女', '孫子女', '�
 function FamilyTreePageContent() {
   const searchParams = useSearchParams();
   const familyId = searchParams.get('familyId');
+  
   const [user, setUser] = useState<User | null>(null);
   const [members, setMembers] = useState<TreeMember[]>([]);
   const [tree, setTree] = useState<TreeMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [showAddForm, setShowAddForm] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'graph'>('graph');
   const [selectedMember, setSelectedMember] = useState<TreeMember | null>(null);
   const [newMember, setNewMember] = useState({
     name: '',
@@ -104,7 +107,6 @@ function FamilyTreePageContent() {
 
   const handleAddMember = async () => {
     if (!newMember.name.trim() || !familyId) return;
-
     setSaving(true);
     try {
       const res = await fetch('/api/plugins/tree', {
@@ -123,7 +125,6 @@ function FamilyTreePageContent() {
           generation: newMember.generation,
         }),
       });
-
       if (res.ok) {
         setShowAddForm(false);
         setNewMember({
@@ -148,7 +149,6 @@ function FamilyTreePageContent() {
 
   const handleDeleteMember = async (id: number) => {
     if (!confirm('確定要刪除這個成員嗎？')) return;
-
     try {
       await fetch(`/api/plugins/tree?id=${id}`, { method: 'DELETE' });
       setSelectedMember(null);
@@ -161,7 +161,7 @@ function FamilyTreePageContent() {
   const renderMemberCard = (member: TreeMember, level: number = 0) => {
     const hasChildren = member.children && member.children.length > 0;
     const isExpanded = expanded.has(member.id);
-
+    
     return (
       <div key={member.id} className="relative">
         <div
@@ -181,7 +181,6 @@ function FamilyTreePageContent() {
                 <User className="h-8 w-8" />
               )}
             </div>
-
             {/* 信息 */}
             <div className="flex-1">
               <div className="flex items-center space-x-2">
@@ -195,7 +194,6 @@ function FamilyTreePageContent() {
                 {member.relationship && <span className="ml-2">· {member.relationship}</span>}
               </div>
             </div>
-
             {/* 展开/折叠 */}
             {hasChildren && (
               <button
@@ -213,7 +211,6 @@ function FamilyTreePageContent() {
               </button>
             )}
           </div>
-
           {/* 配偶 */}
           {member.spouse && (
             <div className="mt-3 pl-4 border-l-2 border-pink-200">
@@ -224,7 +221,6 @@ function FamilyTreePageContent() {
             </div>
           )}
         </div>
-
         {/* 子代 */}
         {hasChildren && isExpanded && (
           <div className="ml-8 mt-3 pl-4 border-l-2 border-blue-200 space-y-3">
@@ -298,7 +294,44 @@ function FamilyTreePageContent() {
           </div>
         ) : (
           <div className="space-y-4">
-            {tree.map(member => renderMemberCard(member))}
+            {/* 视图切换 */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setViewMode('graph')}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                  viewMode === 'graph' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Eye className="w-4 h-4" />
+                圖形視圖
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                  viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                列表視圖
+              </button>
+            </div>
+
+            {/* 图形化视图 */}
+            {viewMode === 'graph' && (
+              <div className="bg-white rounded-xl shadow-sm h-[600px] overflow-hidden">
+                <FamilyTreeGraph 
+                  members={members} 
+                  onMemberClick={(member) => setSelectedMember(member)}
+                />
+              </div>
+            )}
+
+            {/* 列表视图 */}
+            {viewMode === 'list' && (
+              <div className="space-y-4">
+                {tree.map(member => renderMemberCard(member))}
+              </div>
+            )}
           </div>
         )}
 
@@ -307,7 +340,6 @@ function FamilyTreePageContent() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">添加家族成員</h3>
-
               <div className="space-y-5">
                 <div>
                   <label className="block text-lg font-medium text-gray-700 mb-2">姓名</label>
@@ -317,7 +349,6 @@ function FamilyTreePageContent() {
                     placeholder="請輸入姓名"
                   />
                 </div>
-
                 <div>
                   <label className="block text-lg font-medium text-gray-700 mb-2">性別</label>
                   <div className="grid grid-cols-2 gap-3">
@@ -341,7 +372,6 @@ function FamilyTreePageContent() {
                     </button>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-lg font-medium text-gray-700 mb-2">出生年</label>
@@ -364,7 +394,6 @@ function FamilyTreePageContent() {
                     />
                   </div>
                 </div>
-
                 <div>
                   <label className="block text-lg font-medium text-gray-700 mb-2">在家族中的稱謂</label>
                   <select
@@ -387,7 +416,6 @@ function FamilyTreePageContent() {
                     <option value="孫女">孫女</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-lg font-medium text-gray-700 mb-2">世代</label>
                   <select
@@ -400,7 +428,6 @@ function FamilyTreePageContent() {
                     ))}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-lg font-medium text-gray-700 mb-2">簡介（選填）</label>
                   <LargeTextarea
@@ -411,7 +438,6 @@ function FamilyTreePageContent() {
                   />
                 </div>
               </div>
-
               <div className="flex space-x-3 mt-6">
                 <ElderFriendlyButton variant="secondary" onClick={() => setShowAddForm(false)} className="flex-1">
                   取消
@@ -449,7 +475,6 @@ function FamilyTreePageContent() {
                   ✕
                 </button>
               </div>
-
               <div className="space-y-3">
                 {selectedMember.birth_year && (
                   <div className="text-gray-700">
@@ -465,16 +490,11 @@ function FamilyTreePageContent() {
                   </div>
                 )}
               </div>
-
               <div className="flex space-x-3 mt-6">
                 <ElderFriendlyButton variant="secondary" onClick={() => setSelectedMember(null)} className="flex-1">
                   關閉
                 </ElderFriendlyButton>
-                <ElderFriendlyButton
-                  variant="danger"
-                  onClick={() => handleDeleteMember(selectedMember.id)}
-                  className="flex-1"
-                >
+                <ElderFriendlyButton variant="danger" onClick={() => handleDeleteMember(selectedMember.id)} className="flex-1">
                   <Trash2 className="h-5 w-5 mr-2" />
                   刪除
                 </ElderFriendlyButton>
