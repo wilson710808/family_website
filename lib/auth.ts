@@ -41,9 +41,9 @@ const DEFAULT_ADMIN_USER: User = {
 
 /**
  * 从 cookie 中读取 JWT token，获取当前登录用户
- * 如果没有 token 或 token 无效，返回默认管理员用户（向后兼容）
+ * 如果没有 token 或 token 无效，返回 null
  */
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser(): Promise<User | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('auth-token');

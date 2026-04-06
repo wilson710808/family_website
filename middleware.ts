@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
+import Database from 'better-sqlite3';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const DB_PATH = process.cwd() + '/family.db';
 
 /**
  * 家族数据隔离中间件
@@ -35,16 +37,16 @@ export async function middleware(request: NextRequest) {
     const decoded = jwt.verify(token.value, JWT_SECRET) as { userId: number };
     const userId = decoded.userId;
 
-    // 动态导入 db（避免 SSR 问题）
-    const { db } = await import('./lib/db');
-    const Database = (await import('better-sqlite3')).default;
-    const localDb = new Database('family.db');
+    // 直接创建数据库连接
+    const localDb = new Database(DB_PATH, { readonly: true });
 
     // 检查用户是否是家族成员
     const member = localDb.prepare(`
       SELECT id FROM family_members
       WHERE family_id = ? AND user_id = ? AND status = 'approved'
     `).get(familyId, userId);
+
+    localDb.close();
 
     if (!member) {
       // 不是家族成员，禁止访问
@@ -58,6 +60,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   } catch (error) {
     // token 无效，重定向
+    console.error('Middleware error:', error);
     return NextResponse.redirect(new URL('/', request.url));
   }
 }
