@@ -7,7 +7,13 @@ export const viewport = {
 };
 
 export default async function HomePage() {
-  // 自动登录：始终获取管理员用户，直接跳转到仪表板
-  // 不需要注册和登录，所有访问者都直接以管理员身份进入
+  const user = await getCurrentUser();
+
+  // 如果未登录，显示登录页面
+  if (!user) {
+    redirect('/login');
+  }
+
+  // 已登录，跳转到仪表板
   redirect('/dashboard');
 }

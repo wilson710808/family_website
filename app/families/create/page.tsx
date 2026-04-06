@@ -8,6 +8,12 @@ export const viewport = {
 };
 
 export default async function CreateFamilyPage() {
-  // 完全移除认证检查 - 始终允许访问
+  const user = await getCurrentUser();
+
+  // 未登录重定向到登录页
+  if (!user) {
+    redirect('/login');
+  }
+
   return <CreateFamilyClient />;
 }

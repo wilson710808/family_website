@@ -48,12 +48,9 @@ export async function getCurrentUser(): Promise<User> {
     const cookieStore = await cookies();
     const token = cookieStore.get('auth-token');
     
-    // 如果没有 token，返回默认管理员（访客模式）
+    // 如果没有 token，返回 null（表示未登录）
     if (!token) {
-      const user = db.prepare(
-        'SELECT id, email, name, avatar, is_admin, created_at, login_total, login_30d, last_login FROM users WHERE email = ?'
-      ).get('admin@family.com') as User;
-      return user || DEFAULT_ADMIN_USER;
+      return null;
     }
     
     // 验证 JWT token
@@ -70,46 +67,43 @@ export async function getCurrentUser(): Promise<User> {
         return user;
       }
     } catch (jwtError) {
-      // token 无效或过期，回退到默认管理员
+      // token 无效或过期，返回 null
       console.error('JWT 验证失败:', jwtError);
+      return null;
     }
     
-    // 如果找不到用户，返回默认管理员
-    const defaultUser = db.prepare(
-      'SELECT id, email, name, avatar, is_admin, created_at, login_total, login_30d, last_login FROM users WHERE email = ?'
-    ).get('admin@family.com') as User;
-    return defaultUser || DEFAULT_ADMIN_USER;
+    // 如果找不到用户，返回 null
+    return null;
   } catch {
-    return DEFAULT_ADMIN_USER;
+    return null;
   }
 }
 
 /**
- * 跳过用户验证，始终返回 true
- * 任何用户都可以访问任何家族
+ * 验证用户是否为家族成员
  */
 export async function isUserInFamily(userId: number, familyId: number): Promise<boolean> {
-  return true;
+  const member = db.prepare(`
+    SELECT id FROM family_members
+    WHERE family_id = ? AND user_id = ? AND status = 'approved'
+  `).get(familyId, userId);
+  return !!member;
 }
 
 /**
- * 返回所有家族，不做用户过滤
- * 所有家族都对所有人可见
+ * 返回用户所属的家族
+ * 只有 approved 状态的成员才能看到家族
  */
 export async function getUserFamilies(userId: number): Promise<Family[]> {
   const families = db.prepare(`
-    SELECT f.*, fm.role, fm.status
+    SELECT f.*, fm.role, fm.status, fm.relationship, fm.contribution_points, fm.contribution_stars
     FROM families f
-    LEFT JOIN family_members fm ON f.id = fm.family_id AND fm.user_id = ?
+    INNER JOIN family_members fm ON f.id = fm.family_id
+    WHERE fm.user_id = ? AND fm.status = 'approved'
     ORDER BY f.created_at DESC
   `).all(userId) as Family[];
   
-  // 所有家族默认批准，角色设为管理员
-  return families.map(f => ({ 
-    ...f, 
-    status: f.status || 'approved', 
-    role: f.role || 'admin' 
-  }));
+  return families;
 }
 
 /**

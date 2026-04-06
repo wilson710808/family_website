@@ -91,8 +91,13 @@ async function getSystemStats() {
 }
 
 export default async function AdminPage() {
-  // 完全移除认证检查 - 所有人都可以访问管理后台
   const user = await getCurrentUser();
+
+  // 未登录重定向到登录页
+  if (!user) {
+    redirect('/login');
+  }
+
   const initialUsers = await getAllUsers();
   const initialFamilies = await getAllFamilies();
   const stats = await getSystemStats();
