@@ -67,7 +67,7 @@ async function callNVIDIAWithHistory(
       model: DEFAULT_MODEL,
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
       temperature,
-      max_tokens: 1024,
+      max_tokens: 2048,
       stream: false,
     }),
   });
@@ -184,11 +184,11 @@ export async function generateButlerReply(request: ExtendedAIReplyRequest): Prom
   }
 
   systemPrompt += `\n最近的聊天記錄：\n`;
-  recentMessages.slice(-10).forEach(msg => {
+  recentMessages.slice(-15).forEach(msg => {
     systemPrompt += `${msg.userName}: ${msg.content}\n`;
   });
 
-  systemPrompt += `\n用戶最新發言：${message}\n\n請給出你的回覆：`;
+  systemPrompt += `\n用戶最新發言：${message}\n\n請根據以上完整的聊天上下文，理解話題脈絡和發言者的情境，給出一個有共鳴、有溫度、能延續對話的回覆：`;
 
   try {
     const messages: Array<{role: string; content: string}> = [];

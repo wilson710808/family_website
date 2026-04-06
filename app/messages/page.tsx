@@ -64,8 +64,8 @@ function MessagesContent() {
   const loadMessages = async () => {
     try {
       const url = familyId 
-        ? `/api/plugins/message-board/messages?familyId=${familyId}` 
-        : '/api/messages?familyId=' + familyId;
+        ? `/api/messages?familyId=${familyId}` 
+        : '/api/messages';
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
