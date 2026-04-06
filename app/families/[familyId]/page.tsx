@@ -5,6 +5,8 @@ import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft, Users, Bell, MessageSquare, Send, UserPlus, Settings, Star } from 'lucide-react';
 import FamilyDeleteButton from '@/components/FamilyDeleteButton';
 import CopyReferralButton from '@/components/CopyReferralButton';
+import LeaveFamilyButton from '@/components/LeaveFamilyButton';
+import ExportDataButton from '@/components/ExportDataButton';
 import { db } from '@/lib/db';
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 
@@ -183,7 +185,14 @@ export default async function FamilyDetailPage({ params }: FamilyPageProps) {
                     </span>
                   </ElderFriendlyButton>
                 </Link>
-              </div>
+          <ExportDataButton familyId={familyIdNum} familyName={family.name} />
+          <LeaveFamilyButton 
+            familyId={familyIdNum} 
+            familyName={family.name} 
+            isCreator={family.creator_id === user.id}
+            role={family.role}
+          />
+        </div>
             </div>
 
             {/* Referral Code */}
