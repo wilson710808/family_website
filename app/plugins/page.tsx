@@ -1,6 +1,6 @@
 'use client';
 
-import { Brain, Bot, Calendar, TreePine, TrendingUp } from 'lucide-react';
+import { Brain, Bot, Calendar, TreePine, TrendingUp, Folder } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -12,6 +12,14 @@ const PLUGINS = [
     description: 'AI 智能管家，記住家族的重要資訊',
     color: 'blue',
     href: '/plugins/butler',
+  },
+  {
+    id: 'documents',
+    name: '文檔庫',
+    icon: <Folder className="h-8 w-8" />,
+    description: '家族文件上傳與分享',
+    color: 'yellow',
+    href: '/plugins/documents',
   },
   {
     id: 'birthday',
@@ -69,6 +77,7 @@ const COLOR_CLASSES: Record<string, { bg: string; text: string; border: string }
   green: { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' },
   purple: { bg: 'bg-purple-100', text: 'text-purple-600', border: 'border-purple-200' },
   orange: { bg: 'bg-orange-100', text: 'text-orange-600', border: 'border-orange-200' },
+  yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' },
 };
 
 function PluginsPageContent() {
@@ -88,18 +97,12 @@ function PluginsPageContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {PLUGINS.map((plugin) => {
             const colors = COLOR_CLASSES[plugin.color];
-            const href = (plugin as any).disabled ? '#' : `${plugin.href}?familyId=${familyId}`;
-
+            const href = `${plugin.href}?familyId=${familyId}`;
             return (
               <Link
                 key={plugin.id}
                 href={href}
-                className={`block bg-white rounded-xl shadow-sm p-6 border-2 transition-all ${
-                  (plugin as any).disabled
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:shadow-md hover:border-gray-300'
-                } ${colors.border}`}
-                onClick={(e) => (plugin as any).disabled && e.preventDefault()}
+                className={`block bg-white rounded-xl shadow-sm p-6 border-2 transition-all hover:shadow-md hover:border-gray-300 ${colors.border}`}
               >
                 <div className="flex items-start space-x-4">
                   <div className={`p-3 rounded-xl ${colors.bg} ${colors.text}`}>

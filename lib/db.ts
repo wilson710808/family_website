@@ -1,9 +1,7 @@
 import Database from 'better-sqlite3';
 
 // 自动初始化所有可插拔插件
-const db = new Database('family.db', {
-  fileMustExist: true,
-});
+const db = new Database('family.db', { fileMustExist: true });
 
 // 自动初始化所有启用的插件
 import { initDatabase as initBirthday } from '../plugins/birthday-reminder';
@@ -14,6 +12,7 @@ import { initDatabase as initButler } from '../plugins/family-butler';
 import { initDatabase as initCalendar } from '../plugins/event-calendar';
 import { initDatabase as initFamilyTree } from '../plugins/family-tree';
 import { initDatabase as initNotification } from '../plugins/notification';
+import { initDatabase as initDocumentLibrary } from '../plugins/document-library';
 
 // 按顺序初始化各个插件
 if (typeof initBirthday === 'function') {
@@ -39,6 +38,9 @@ if (typeof initFamilyTree === 'function') {
 }
 if (typeof initNotification === 'function') {
   initNotification(db);
+}
+if (typeof initDocumentLibrary === 'function') {
+  initDocumentLibrary(db);
 }
 
 console.log('[PluginSystem] 插件初始化完成');
