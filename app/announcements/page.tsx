@@ -3,7 +3,8 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Layout from '@/components/Layout';
-import { Bell, Plus, Clock, User } from 'lucide-react';
+import { Bell, Plus, Clock, User, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface Announcement {
   id: number;
@@ -20,43 +21,66 @@ interface User {
   avatar: string;
 }
 
+interface Family {
+  id: number;
+  name: string;
+}
+
 function AnnouncementsContent() {
   const searchParams = useSearchParams();
-  const familyId = searchParams.get('familyId');
+  const urlFamilyId = searchParams.get('familyId');
+  
   const [user, setUser] = useState<User | null>(null);
+  const [families, setFamilies] = useState<Family[]>([]);
+  const [selectedFamilyId, setSelectedFamilyId] = useState<string>(urlFamilyId || '');
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ title: '', content: '', familyId: familyId || '' });
+  const [formData, setFormData] = useState({ title: '', content: '' });
 
   useEffect(() => {
-    // 获取当前用户信息 - 开发模式：如果返回 null，使用默认管理员
+    // 获取用户信息
     fetch('/api/user')
       .then(res => res.json())
       .then(data => {
         if (data.user) {
           setUser(data.user);
         } else {
-          // 如果没有获取到用户，使用默认管理员
-          setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin' });
+          setUser({ id: 1, name: '系统管理员', avatar: '' });
         }
       })
       .catch(() => {
-        // 出错也使用默认管理员
-        setUser({ id: 1, name: '系统管理员', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin' });
+        setUser({ id: 1, name: '系统管理员', avatar: '' });
       });
 
-    // 加载公告列表
-    loadAnnouncements();
-  }, [familyId]);
+    // 获取用户的家族列表
+    fetch('/api/families')
+      .then(res => res.json())
+      .then(data => {
+        if (data.families && data.families.length > 0) {
+          const approved = data.families.filter((f: any) => f.status === 'approved');
+          setFamilies(approved);
+          if (!selectedFamilyId && approved.length > 0) {
+            setSelectedFamilyId(String(approved[0].id));
+          }
+        }
+      })
+      .catch(console.error);
+  }, [selectedFamilyId]);
+
+  useEffect(() => {
+    if (selectedFamilyId) {
+      loadAnnouncements();
+    }
+  }, [selectedFamilyId]);
 
   const loadAnnouncements = async () => {
+    setLoading(true);
     try {
-      const url = familyId ? `/api/announcements?familyId=${familyId}` : '/api/announcements';
-      const res = await fetch(url);
+      const res = await fetch(`/api/announcements?familyId=${selectedFamilyId}`);
       const data = await res.json();
       if (data.success) {
-        setAnnouncements(data.announcements);
+        setAnnouncements(data.announcements || []);
       }
     } catch (error) {
       console.error('加载公告失败:', error);
@@ -67,97 +91,144 @@ function AnnouncementsContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.content.trim() || !formData.familyId) return;
+    if (!formData.title.trim() || !formData.content.trim() || !selectedFamilyId) {
+      alert('请填写完整信息');
+      return;
+    }
 
     try {
       const res = await fetch('/api/announcements/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          content: formData.content,
+          familyId: selectedFamilyId,
+        }),
       });
-
       const data = await res.json();
       if (data.success) {
         setShowForm(false);
-        setFormData({ title: '', content: '', familyId: familyId || '' });
+        setFormData({ title: '', content: '' });
         loadAnnouncements();
+        alert('公告发布成功！');
+      } else {
+        alert('发布失败: ' + (data.error || '未知错误'));
       }
     } catch (error) {
       console.error('发布公告失败:', error);
+      alert('发布失败，请重试');
     }
   };
 
-  // 如果还没加载完用户，显示加载中
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="text-xl text-gray-500 ml-4">加载中...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
     <Layout user={user}>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <Bell className="h-8 w-8 mr-2 text-blue-500" />
-            公告栏
-          </h1>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            发布公告
-          </button>
+      <div className="max-w-4xl mx-auto space-y-6 p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/families">
+              <button className="p-2 hover:bg-gray-100 rounded-lg">
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+            </Link>
+            <div className="flex items-center gap-2">
+              <Bell className="w-8 h-8 text-blue-500" />
+              <h1 className="text-3xl font-bold text-gray-900">公告欄</h1>
+            </div>
+          </div>
+          {selectedFamilyId && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            >
+              <Plus className="w-5 h-5" />
+              發布公告
+            </button>
+          )}
         </div>
 
+        {/* Family Selector */}
+        {families.length > 1 && (
+          <div className="flex gap-2 flex-wrap">
+            {families.map(family => (
+              <button
+                key={family.id}
+                onClick={() => setSelectedFamilyId(String(family.id))}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  selectedFamilyId === String(family.id)
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {family.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* No Family Warning */}
+        {families.length === 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+            <p className="text-yellow-800">您還沒有加入任何家族，請先加入家族後再發布公告</p>
+            <Link href="/families" className="text-blue-500 underline mt-2 inline-block">
+              前往家族頁面
+            </Link>
+          </div>
+        )}
+
         {/* Publish Form */}
-        {showForm && (
+        {showForm && selectedFamilyId && (
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">发布新公告</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">發布新公告</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  公告标题 <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  公告標題 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                  placeholder="请输入公告标题"
+                  onChange={e => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="請輸入公告標題"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  公告内容 <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  公告內容 <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.content}
-                  onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors resize-none"
-                  placeholder="请输入公告内容"
+                  onChange={e => setFormData({ ...formData, content: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={5}
+                  placeholder="請輸入公告內容"
                   required
                 />
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
+                  className="flex-1 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 >
-                  发布公告
+                  發布
                 </button>
               </div>
             </form>
@@ -165,45 +236,35 @@ function AnnouncementsContent() {
         )}
 
         {/* Announcements List */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          {loading ? (
-            <div className="p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-500">加载中...</p>
-            </div>
-          ) : announcements.length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {announcements.map(announcement => (
-                <div key={announcement.id} className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900">{announcement.title}</h3>
-                    <span className="text-sm text-gray-500 flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {new Date(announcement.created_at).toLocaleString('zh-CN')}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 mb-4">{announcement.content}</p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 mr-1" />
-                      <span>发布者：{announcement.user_name}</span>
-                    </div>
-                    {!familyId && (
-                      <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
-                        {announcement.family_name}
-                      </span>
-                    )}
-                  </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+          </div>
+        ) : announcements.length > 0 ? (
+          <div className="space-y-4">
+            {announcements.map((a) => (
+              <div key={a.id} className="bg-white rounded-xl shadow-sm p-6">
+                <h3 className="text-xl font-semibold text-gray-900">{a.title}</h3>
+                <p className="text-gray-600 mt-2 whitespace-pre-wrap">{a.content}</p>
+                <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <User className="w-4 h-4" />
+                    {a.user_name}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {new Date(a.created_at).toLocaleString('zh-TW')}
+                  </span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-12 text-center">
-              <Bell className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">暂无公告</p>
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        ) : selectedFamilyId ? (
+          <div className="text-center py-12 text-gray-500">
+            <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <p>暫無公告</p>
+          </div>
+        ) : null}
       </div>
     </Layout>
   );
@@ -211,9 +272,11 @@ function AnnouncementsContent() {
 
 export default function AnnouncementsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
-      <p className="text-xl text-gray-500">加载中...</p>
-    </div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    }>
       <AnnouncementsContent />
     </Suspense>
   );
