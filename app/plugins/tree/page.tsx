@@ -321,7 +321,7 @@ function FamilyTreePageContent() {
               <div className="bg-white rounded-xl shadow-sm h-[600px] overflow-hidden">
                 <FamilyTreeGraph 
                   members={members} 
-                  onMemberClick={(member) => setSelectedMember(member)}
+                  onMemberClick={(member: any) => setSelectedMember(member)}
                 />
               </div>
             )}
@@ -345,7 +345,7 @@ function FamilyTreePageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">姓名</label>
                   <LargeInput
                     value={newMember.name}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(value: string) => setNewMember(prev => ({ ...prev, name: value }))}
                     placeholder="請輸入姓名"
                   />
                 </div>
@@ -378,7 +378,7 @@ function FamilyTreePageContent() {
                     <input
                       type="number"
                       value={newMember.birthYear}
-                      onChange={(e) => setNewMember(prev => ({ ...prev, birthYear: e.target.value }))}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMember(prev => ({ ...prev, birthYear: e.target.value }))}
                       placeholder="例：1980"
                       className="w-full p-3 border border-gray-300 rounded-lg text-lg"
                     />
@@ -388,7 +388,7 @@ function FamilyTreePageContent() {
                     <input
                       type="number"
                       value={newMember.deathYear}
-                      onChange={(e) => setNewMember(prev => ({ ...prev, deathYear: e.target.value }))}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMember(prev => ({ ...prev, deathYear: e.target.value }))}
                       placeholder="留空表示在世"
                       className="w-full p-3 border border-gray-300 rounded-lg text-lg"
                     />
@@ -398,7 +398,7 @@ function FamilyTreePageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">在家族中的稱謂</label>
                   <select
                     value={newMember.relationship}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, relationship: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewMember(prev => ({ ...prev, relationship: e.target.value }))}
                     className="w-full p-3 border border-gray-300 rounded-lg text-lg"
                   >
                     <option value="">請選擇</option>
@@ -420,7 +420,7 @@ function FamilyTreePageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">世代</label>
                   <select
                     value={newMember.generation}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, generation: Number(e.target.value) }))}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewMember(prev => ({ ...prev, generation: Number(e.target.value) }))}
                     className="w-full p-3 border border-gray-300 rounded-lg text-lg"
                   >
                     {GENERATIONS.map((gen, i) => (
@@ -432,7 +432,7 @@ function FamilyTreePageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">簡介（選填）</label>
                   <LargeTextarea
                     value={newMember.bio}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, bio: e.target.value }))}
+                    onChange={(value: string) => setNewMember(prev => ({ ...prev, bio: value }))}
                     placeholder="其他補充說明..."
                     rows={2}
                   />

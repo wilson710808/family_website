@@ -120,6 +120,7 @@ async function getRecentMessages(familyId: number) {
 export default async function FamilyDetailPage({ params }: FamilyPageProps) {
   // 完全移除认证检查 - 始终使用默认管理员用户
   const user = await getCurrentUser();
+  if (!user) redirect('/login');
   const { familyId } = await params;
   const familyIdNum = parseInt(familyId);
 

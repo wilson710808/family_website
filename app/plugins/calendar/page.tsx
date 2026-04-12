@@ -7,7 +7,7 @@ import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, Users, Trash2
 import ElderFriendlyButton from '@/components/ElderFriendlyButton';
 import LargeInput from '@/components/LargeInput';
 import LargeTextarea from '@/components/LargeTextarea';
-import { isEnabled, EVENT_TYPES, type EventType } from '@/plugins/event-calendar';
+import { EVENT_TYPES, type EventType } from '@/plugins/event-calendar/types';
 
 interface Event {
   id: number;
@@ -359,7 +359,7 @@ function CalendarPageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">事件標題</label>
                   <LargeInput
                     value={newEvent.title}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(value: string) => setNewEvent(prev => ({ ...prev, title: value }))}
                     placeholder="例如：小明生日派對"
                   />
                 </div>
@@ -398,7 +398,7 @@ function CalendarPageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">地點（選填）</label>
                   <LargeInput
                     value={newEvent.location}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
+                    onChange={(value: string) => setNewEvent(prev => ({ ...prev, location: value }))}
                     placeholder="例如：家裡"
                   />
                 </div>
@@ -407,7 +407,7 @@ function CalendarPageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">備註（選填）</label>
                   <LargeTextarea
                     value={newEvent.description}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(value: string) => setNewEvent(prev => ({ ...prev, description: value }))}
                     placeholder="其他備註..."
                     rows={2}
                   />

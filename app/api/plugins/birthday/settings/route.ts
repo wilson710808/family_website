@@ -13,6 +13,9 @@ export async function GET(request: Request) {
 
   try {
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const { searchParams } = new URL(request.url);
     const familyId = Number(searchParams.get('familyId'));
 
@@ -46,6 +49,9 @@ export async function POST(request: Request) {
 
   try {
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const body = await request.json();
     const { familyId, ...settings } = body;
 

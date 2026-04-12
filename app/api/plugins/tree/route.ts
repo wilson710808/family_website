@@ -38,6 +38,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const body = await request.json();
 
     const { familyId, name, gender, birthYear, deathYear, relationship, bio, avatar, parentIds, spouseId, generation } = body;

@@ -54,7 +54,7 @@ export function isEnabled(): boolean {
 }
 
 // 初始化數據庫
-export function initDatabase(db: InstanceType<typeof Database>): void {
+export function initDatabase(db: any): void {
   if (!isEnabled()) return;
 
   try {
@@ -73,7 +73,7 @@ export function initDatabase(db: InstanceType<typeof Database>): void {
 }
 
 // 創建成員
-export function createMember(db: Database, member: {
+export function createMember(db: any, member: {
   family_id: number;
   name: string;
   gender: 'male' | 'female';
@@ -109,7 +109,7 @@ export function createMember(db: Database, member: {
 }
 
 // 更新成員
-export function updateMember(db: Database, id: number, data: Partial<TreeMember>): boolean {
+export function updateMember(db: any, id: number, data: Partial<TreeMember>): boolean {
   const fields = Object.keys(data).filter(k => !['id', 'created_at'].includes(k));
   if (fields.length === 0) return false;
 
@@ -121,7 +121,7 @@ export function updateMember(db: Database, id: number, data: Partial<TreeMember>
 }
 
 // 刪除成員
-export function deleteMember(db: Database, id: number): boolean {
+export function deleteMember(db: any, id: number): boolean {
   // 先清除配偶關聯
   db.prepare('UPDATE plugin_tree_members SET spouse_id = NULL WHERE spouse_id = ?').run(id);
   // 清除子代父級關聯
@@ -142,7 +142,7 @@ export function deleteMember(db: Database, id: number): boolean {
 }
 
 // 獲取所有成員
-export function getFamilyMembers(db: Database, familyId: number): TreeMember[] {
+export function getFamilyMembers(db: any, familyId: number): TreeMember[] {
   return db.prepare(`
     SELECT * FROM plugin_tree_members
     WHERE family_id = ?
@@ -190,7 +190,7 @@ export function buildTree(members: TreeMember[]): TreeMember[] {
 }
 
 // 獲取成員詳情
-export function getMember(db: Database, id: number): TreeMember | null {
+export function getMember(db: any, id: number): TreeMember | null {
   return db.prepare('SELECT * FROM plugin_tree_members WHERE id = ?').get(id) as TreeMember | null;
 }
 

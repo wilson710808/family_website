@@ -9,6 +9,9 @@ export async function POST(
   try {
     // 完全移除认证检查
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const { familyId } = await params;
     const formData = await request.formData();
     const action = formData.get('action') as string;

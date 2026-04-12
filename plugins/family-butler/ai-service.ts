@@ -184,7 +184,7 @@ export async function generateButlerReply(request: ExtendedAIReplyRequest): Prom
   }
 
   systemPrompt += `\n最近的聊天記錄：\n`;
-  recentMessages.slice(-15).forEach(msg => {
+  recentMessages.slice(-30).forEach(msg => {
     systemPrompt += `${msg.userName}: ${msg.content}\n`;
   });
 

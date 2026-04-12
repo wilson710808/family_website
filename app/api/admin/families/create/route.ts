@@ -7,6 +7,9 @@ export async function POST(
 ) {
   try {
     const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const { name, description, avatar } = await request.json();
 
     // 检查权限：只有超级管理员可以创建家族

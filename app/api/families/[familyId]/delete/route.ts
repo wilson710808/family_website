@@ -7,6 +7,9 @@ export async function POST(
 ) {
   try {
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const { familyId } = await params;
     const familyIdNum = parseInt(familyId);
     console.log(`[DELETE FAMILY] Attempting to delete family id=${familyIdNum} by user=${user.id}`);

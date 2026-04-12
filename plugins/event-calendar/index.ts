@@ -53,7 +53,7 @@ export function isEnabled(): boolean {
 }
 
 // 初始化數據庫
-export function initDatabase(db: InstanceType<typeof Database>): void {
+export function initDatabase(db: any): void {
   if (!isEnabled()) return;
 
   try {
@@ -72,7 +72,7 @@ export function initDatabase(db: InstanceType<typeof Database>): void {
 }
 
 // 創建事件
-export function createEvent(db: Database, event: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'>): number {
+export function createEvent(db: any, event: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'>): number {
   const stmt = db.prepare(`
     INSERT INTO plugin_calendar_events
     (family_id, title, description, event_type, location, start_at, end_at, is_all_day, is_recurring, recurrence_rule, created_by)
@@ -95,7 +95,7 @@ export function createEvent(db: Database, event: Omit<CalendarEvent, 'id' | 'cre
 }
 
 // 更新事件
-export function updateEvent(db: Database, id: number, data: Partial<CalendarEvent>): boolean {
+export function updateEvent(db: any, id: number, data: Partial<CalendarEvent>): boolean {
   const fields = Object.keys(data).filter(k => !['id', 'created_at'].includes(k));
   if (fields.length === 0) return false;
 
@@ -108,12 +108,12 @@ export function updateEvent(db: Database, id: number, data: Partial<CalendarEven
 }
 
 // 刪除事件
-export function deleteEvent(db: Database, id: number): boolean {
+export function deleteEvent(db: any, id: number): boolean {
   return db.prepare('DELETE FROM plugin_calendar_events WHERE id = ?').run(id).changes > 0;
 }
 
 // 獲取單個事件
-export function getEvent(db: Database, id: number): CalendarEvent | null {
+export function getEvent(db: any, id: number): CalendarEvent | null {
   return db.prepare(`
     SELECT e.*, u.name as created_by_name
     FROM plugin_calendar_events e
@@ -123,7 +123,7 @@ export function getEvent(db: Database, id: number): CalendarEvent | null {
 }
 
 // 獲取家族事件（按時間範圍）
-export function getFamilyEvents(db: Database, familyId: number, startDate?: string, endDate?: string): CalendarEvent[] {
+export function getFamilyEvents(db: any, familyId: number, startDate?: string, endDate?: string): CalendarEvent[] {
   let sql = `
     SELECT e.*, u.name as created_by_name
     FROM plugin_calendar_events e
@@ -147,7 +147,7 @@ export function getFamilyEvents(db: Database, familyId: number, startDate?: stri
 }
 
 // 獲取即將到來的事件
-export function getUpcomingEvents(db: Database, familyId: number, limit: number = 10): CalendarEvent[] {
+export function getUpcomingEvents(db: any, familyId: number, limit: number = 10): CalendarEvent[] {
   return db.prepare(`
     SELECT e.*, u.name as created_by_name
     FROM plugin_calendar_events e
@@ -159,7 +159,7 @@ export function getUpcomingEvents(db: Database, familyId: number, limit: number 
 }
 
 // 添加參與者
-export function addParticipant(db: Database, eventId: number, userId: number): void {
+export function addParticipant(db: any, eventId: number, userId: number): void {
   db.prepare(`
     INSERT OR IGNORE INTO plugin_calendar_participants (event_id, user_id)
     VALUES (?, ?)
@@ -167,7 +167,7 @@ export function addParticipant(db: Database, eventId: number, userId: number): v
 }
 
 // 更新參與狀態
-export function updateParticipantStatus(db: Database, eventId: number, userId: number, status: 'accepted' | 'declined'): void {
+export function updateParticipantStatus(db: any, eventId: number, userId: number, status: 'accepted' | 'declined'): void {
   db.prepare(`
     UPDATE plugin_calendar_participants
     SET status = ?, responded_at = CURRENT_TIMESTAMP
@@ -176,7 +176,7 @@ export function updateParticipantStatus(db: Database, eventId: number, userId: n
 }
 
 // 獲取事件參與者
-export function getEventParticipants(db: Database, eventId: number): EventParticipant[] {
+export function getEventParticipants(db: any, eventId: number): EventParticipant[] {
   return db.prepare(`
     SELECT p.*, u.name as user_name, u.avatar as user_avatar
     FROM plugin_calendar_participants p

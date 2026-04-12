@@ -5,6 +5,9 @@ import { db } from '@/lib/db';
 export async function GET() {
   try {
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     
     // 更新登录统计
     if (user?.id) {

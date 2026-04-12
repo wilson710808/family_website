@@ -6,6 +6,9 @@ export async function GET(request: Request) {
   try {
     // 完全移除认证检查 - 允许所有人访问
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const { searchParams } = new URL(request.url);
     const familyId = searchParams.get('familyId');
 

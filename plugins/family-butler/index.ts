@@ -18,7 +18,7 @@ export function isEnabled(): boolean {
 }
 
 // 初始化數據庫
-export function initDatabase(db: InstanceType<typeof Database>): void {
+export function initDatabase(db: any): void {
   if (!isEnabled()) return;
 
   try {

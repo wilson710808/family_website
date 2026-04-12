@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import Layout from '@/components/Layout';
 import AdminUserTable from '@/components/AdminUserTable';
 import AdminFamilyTable from '@/components/AdminFamilyTable';

@@ -277,7 +277,7 @@ function ButlerPageContent() {
                   <label className="block text-lg font-medium text-gray-700 mb-2">內容</label>
                   <LargeTextarea
                     value={newContent}
-                    onChange={(e) => setNewContent(e.target.value)}
+                    onChange={(value: string) => setNewContent(value)}
                     placeholder="例如：爸爸喜歡喝茶、媽媽的生日是 3 月 15 日..."
                     rows={3}
                   />

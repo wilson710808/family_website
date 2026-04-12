@@ -6,6 +6,9 @@ export async function POST(request: Request) {
   try {
     // 完全移除认证检查 - 允许所有人发布公告
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const { title, content, familyId } = await request.json();
 
     if (!title?.trim() || !content?.trim() || !familyId) {

@@ -88,18 +88,18 @@ function PluginsPageContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {PLUGINS.map((plugin) => {
             const colors = COLOR_CLASSES[plugin.color];
-            const href = plugin.disabled ? '#' : `${plugin.href}?familyId=${familyId}`;
+            const href = (plugin as any).disabled ? '#' : `${plugin.href}?familyId=${familyId}`;
 
             return (
               <Link
                 key={plugin.id}
                 href={href}
                 className={`block bg-white rounded-xl shadow-sm p-6 border-2 transition-all ${
-                  plugin.disabled
+                  (plugin as any).disabled
                     ? 'opacity-50 cursor-not-allowed'
                     : 'hover:shadow-md hover:border-gray-300'
                 } ${colors.border}`}
-                onClick={(e) => plugin.disabled && e.preventDefault()}
+                onClick={(e) => (plugin as any).disabled && e.preventDefault()}
               >
                 <div className="flex items-start space-x-4">
                   <div className={`p-3 rounded-xl ${colors.bg} ${colors.text}`}>

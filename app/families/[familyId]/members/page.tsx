@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
 import { ArrowLeft, Users, Star } from 'lucide-react';
@@ -69,6 +70,7 @@ async function getFamilyMembers(familyId: number) {
 
 export default async function FamilyMembersPage({ params }: MembersPageProps) {
   const user = await getCurrentUser();
+  if (!user) redirect('/login');
   const { familyId } = await params;
   const familyIdNum = parseInt(familyId);
 

@@ -5,6 +5,9 @@ import { getCurrentUser, addContributionPoints } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+  }
     const { familyId, content } = await request.json();
 
     if (!familyId || !content?.trim()) {
