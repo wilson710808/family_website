@@ -2,7 +2,6 @@
  * 家族树插件
  * 可插拔設計，通過環境變量控制啟用/禁用
  */
-
 import type Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
@@ -21,8 +20,8 @@ export interface TreeMember {
   spouse_id: number | null;
   generation: number;
   sort_order: number;
-  user_id: number | null; // 关联的用户账号ID
-  is_registered: number; // 是否已注册用户 (0=否, 1=是)
+  user_id: number | null;
+  is_registered: number;
   created_by: number;
   created_at: string;
   updated_at: string;
@@ -49,16 +48,12 @@ export const RELATIONSHIPS = [
   { value: 'other', label: '其他' },
 ];
 
-// 檢查插件是否啟用
 export function isEnabled(): boolean {
-  return process.env.PLUGIN_FAMILY_TREE !== 'false' &&
-         process.env.DISABLE_PLUGIN_FAMILY_TREE !== 'true';
+  return process.env.PLUGIN_FAMILY_TREE !== 'false' && process.env.DISABLE_PLUGIN_FAMILY_TREE !== 'true';
 }
 
-// 初始化數據庫
-export function initDatabase(db: any): void {
+export function initDatabase(db: Database.Database): void {
   if (!isEnabled()) return;
-
   try {
     const schemaPath = path.join(process.cwd(), 'plugins/family-tree/schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf8');
@@ -74,8 +69,7 @@ export function initDatabase(db: any): void {
   }
 }
 
-// 創建成員
-export function createMember(db: any, member: {
+export function createMember(db: Database.Database, member: {
   family_id: number;
   name: string;
   gender: 'male' | 'female';
@@ -87,8 +81,8 @@ export function createMember(db: any, member: {
   parent_ids?: string;
   spouse_id?: number;
   generation?: number;
-  user_id?: number; // 关联用户账号
-  is_registered?: number; // 是否已注册用户
+  user_id?: number;
+  is_registered?: number;
   created_by: number;
 }): number {
   const result = db.prepare(`
@@ -114,23 +108,17 @@ export function createMember(db: any, member: {
   return Number(result.lastInsertRowid);
 }
 
-// 更新成員
-export function updateMember(db: any, id: number, data: Partial<TreeMember>): boolean {
+export function updateMember(db: Database.Database, id: number, data: Partial<TreeMember>): boolean {
   const fields = Object.keys(data).filter(k => !['id', 'created_at'].includes(k));
   if (fields.length === 0) return false;
-
   const setClause = fields.map(k => `${k} = ?`).join(', ') + ', updated_at = CURRENT_TIMESTAMP';
   const values = fields.map(k => (data as any)[k]);
   values.push(id);
-
   return db.prepare(`UPDATE plugin_tree_members SET ${setClause} WHERE id = ?`).run(...values).changes > 0;
 }
 
-// 刪除成員
-export function deleteMember(db: any, id: number): boolean {
-  // 先清除配偶關聯
+export function deleteMember(db: Database.Database, id: number): boolean {
   db.prepare('UPDATE plugin_tree_members SET spouse_id = NULL WHERE spouse_id = ?').run(id);
-  // 清除子代父級關聯
   const member = db.prepare('SELECT * FROM plugin_tree_members WHERE id = ?').get(id) as TreeMember | undefined;
   if (member) {
     const members = db.prepare('SELECT id, parent_ids FROM plugin_tree_members WHERE family_id = ?').all(member.family_id) as { id: number; parent_ids: string | null }[];
@@ -147,34 +135,27 @@ export function deleteMember(db: any, id: number): boolean {
   return db.prepare('DELETE FROM plugin_tree_members WHERE id = ?').run(id).changes > 0;
 }
 
-// 獲取所有成員
-export function getFamilyMembers(db: any, familyId: number): TreeMember[] {
+export function getFamilyMembers(db: Database.Database, familyId: number): TreeMember[] {
   return db.prepare(`
-    SELECT * FROM plugin_tree_members
-    WHERE family_id = ?
-    ORDER BY generation, sort_order, id
+    SELECT * FROM plugin_tree_members WHERE family_id = ? ORDER BY generation, sort_order, id
   `).all(familyId) as TreeMember[];
 }
 
-// 構建樹結構
 export function buildTree(members: TreeMember[]): TreeMember[] {
   const memberMap = new Map<number, TreeMember>();
   const roots: TreeMember[] = [];
 
-  // 初始化 map
   members.forEach(m => {
     m.children = [];
     memberMap.set(m.id, m);
   });
 
-  // 設置配偶
   members.forEach(m => {
     if (m.spouse_id && memberMap.has(m.spouse_id)) {
       m.spouse = memberMap.get(m.spouse_id)!;
     }
   });
 
-  // 構建樹
   members.forEach(m => {
     if (!m.parent_ids) {
       roots.push(m);
@@ -195,54 +176,30 @@ export function buildTree(members: TreeMember[]): TreeMember[] {
   return roots;
 }
 
-// 獲取成員詳情
-export function getMember(db: any, id: number): TreeMember | null {
+export function getMember(db: Database.Database, id: number): TreeMember | null {
   return db.prepare('SELECT * FROM plugin_tree_members WHERE id = ?').get(id) as TreeMember | null;
 }
 
-// 根據用戶ID獲取家族樹成員
-export function getMemberByUserId(db: any, familyId: number, userId: number): TreeMember | null {
-  return db.prepare('
-    SELECT * FROM plugin_tree_members WHERE family_id = ? AND user_id = ?
-  ').get(familyId, userId) as TreeMember | null;
+export function getMemberByUserId(db: Database.Database, familyId: number, userId: number): TreeMember | null {
+  return db.prepare('SELECT * FROM plugin_tree_members WHERE family_id = ? AND user_id = ?').get(familyId, userId) as TreeMember | null;
 }
 
-// 綁定用戶賬號到家族樹成員
-export function bindUserToMember(db: any, memberId: number, userId: number): boolean {
-  const result = db.prepare(`
-    UPDATE plugin_tree_members
-    SET user_id = ?, is_registered = 1, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `).run(userId, memberId);
+export function bindUserToMember(db: Database.Database, memberId: number, userId: number): boolean {
+  const result = db.prepare('UPDATE plugin_tree_members SET user_id = ?, is_registered = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId, memberId);
   return result.changes > 0;
 }
 
-// 解綁用戶賬號
-export function unbindUserFromMember(db: any, memberId: number): boolean {
-  const result = db.prepare(`
-    UPDATE plugin_tree_members
-    SET user_id = NULL, is_registered = 0, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `).run(memberId);
+export function unbindUserFromMember(db: Database.Database, memberId: number): boolean {
+  const result = db.prepare('UPDATE plugin_tree_members SET user_id = NULL, is_registered = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(memberId);
   return result.changes > 0;
 }
 
-// 獲取家族中所有已註冊用戶的成員
-export function getRegisteredMembers(db: any, familyId: number): TreeMember[] {
-  return db.prepare(`
-    SELECT * FROM plugin_tree_members
-    WHERE family_id = ? AND is_registered = 1
-    ORDER BY generation, sort_order, id
-  `).all(familyId) as TreeMember[];
+export function getRegisteredMembers(db: Database.Database, familyId: number): TreeMember[] {
+  return db.prepare('SELECT * FROM plugin_tree_members WHERE family_id = ? AND is_registered = 1 ORDER BY generation, sort_order, id').all(familyId) as TreeMember[];
 }
 
-// 獲取家族中所有未註冊的成員（可邀請註冊）
-export function getUnregisteredMembers(db: any, familyId: number): TreeMember[] {
-  return db.prepare(`
-    SELECT * FROM plugin_tree_members
-    WHERE family_id = ? AND (is_registered = 0 OR is_registered IS NULL)
-    ORDER BY generation, sort_order, id
-  `).all(familyId) as TreeMember[];
+export function getUnregisteredMembers(db: Database.Database, familyId: number): TreeMember[] {
+  return db.prepare('SELECT * FROM plugin_tree_members WHERE family_id = ? AND (is_registered = 0 OR is_registered IS NULL) ORDER BY generation, sort_order, id').all(familyId) as TreeMember[];
 }
 
 export default {
@@ -257,7 +214,6 @@ export default {
   getFamilyMembers,
   buildTree,
   getMember,
-  // 用戶綁定相關
   getMemberByUserId,
   bindUserToMember,
   unbindUserFromMember,
