@@ -13,6 +13,7 @@ import { initDatabase as initCalendar } from '../plugins/event-calendar';
 import { initDatabase as initFamilyTree } from '../plugins/family-tree';
 import { initDatabase as initNotification } from '../plugins/notification';
 import { initDatabase as initDocumentLibrary } from '../plugins/document-library';
+import { initDatabase as initStatsPanel } from '../plugins/stats-panel';
 
 // 按顺序初始化各个插件
 if (typeof initBirthday === 'function') {
@@ -41,6 +42,9 @@ if (typeof initNotification === 'function') {
 }
 if (typeof initDocumentLibrary === 'function') {
   initDocumentLibrary(db);
+}
+if (typeof initStatsPanel === 'function') {
+  initStatsPanel(db);
 }
 
 console.log('[PluginSystem] 插件初始化完成');

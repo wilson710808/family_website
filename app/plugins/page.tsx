@@ -1,6 +1,6 @@
 'use client';
 
-import { Brain, Bot, Calendar, TreePine, TrendingUp, Folder } from 'lucide-react';
+import { Brain, Bot, Calendar, TreePine, TrendingUp, Folder, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -12,6 +12,14 @@ const PLUGINS = [
     description: 'AI 智能管家，記住家族的重要資訊',
     color: 'blue',
     href: '/plugins/butler',
+  },
+  {
+    id: 'stats',
+    name: '統計面板',
+    icon: <BarChart3 className="h-8 w-8" />,
+    description: '活躍度統計、貢獻排行',
+    color: 'purple',
+    href: '/plugins/stats',
   },
   {
     id: 'documents',
