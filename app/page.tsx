@@ -14,6 +14,6 @@ export default async function HomePage() {
     redirect('/login');
   }
 
-  // 已登录，跳转到仪表板
-  redirect('/dashboard');
+  // 已登录，跳转到个人首页
+  redirect('/home');
 }

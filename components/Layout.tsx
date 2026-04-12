@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Home, Users, Bell, MessageSquare, BookOpen, Bot, Settings, LogOut, Menu, X } from 'lucide-react';
 import ElderFriendlyButton from './ElderFriendlyButton';
 import VersionBadge from './VersionBadge';
+import NotificationBell from './NotificationBell';
 import { useI18n } from '@/lib/i18n';
 import { isEnabled as isGrowthColumnEnabled } from '../plugins/growth-column/index.client';
 import { isEnabled as isFamilyButlerEnabled } from '../plugins/family-butler/index.client';
@@ -40,7 +41,7 @@ export default function Layout({ children, user }: LayoutProps) {
     { name: t('messages'), href: '/messages', icon: MessageSquare },
     { name: t('chat'), href: '/chat', icon: MessageSquare },
   ];
-  
+
   // 獲取第一個家族ID（從cookie或默認）
   const getDefaultFamilyHrefWithId = (path: string) => {
     // 默認帶 familyId=1，實際使用時會正確處理
@@ -84,12 +85,15 @@ export default function Layout({ children, user }: LayoutProps) {
               <span className="text-xs text-gray-400">v1.2.5</span>
             </div>
           </Link>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100"
-          >
-            {mobileMenuOpen ? <X className="h-7 w-7 text-gray-600" /> : <Menu className="h-7 w-7 text-gray-600" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell userId={user.id} />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100"
+            >
+              {mobileMenuOpen ? <X className="h-7 w-7 text-gray-600" /> : <Menu className="h-7 w-7 text-gray-600" />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -99,18 +103,13 @@ export default function Layout({ children, user }: LayoutProps) {
           <div className="h-screen max-h-screen w-3/4 max-w-[280px] bg-white flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex-shrink-0 p-3">
               <div className="flex items-center space-x-3 p-3 bg-family-50 rounded-xl">
-                <img 
-                  src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} 
-                  alt={user.name} 
-                  className="w-12 h-12 rounded-full" 
-                />
+                <img src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} alt={user.name} className="w-12 h-12 rounded-full" />
                 <div>
                   <p className="text-lg font-semibold text-gray-900">{user.name}</p>
                   <p className="text-sm text-gray-500">{t('welcome_back')}</p>
                 </div>
               </div>
             </div>
-
             <div className="flex-1 overflow-y-auto min-h-0">
               <nav className="space-y-2 px-2 py-3">
                 {navigation.map(item => {
@@ -123,9 +122,7 @@ export default function Layout({ children, user }: LayoutProps) {
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center space-x-3 px-3 py-3 rounded-xl font-medium text-lg ${
-                        isActive
-                          ? 'bg-family-100 text-family-700'
-                          : 'text-gray-700 hover:bg-gray-100'
+                        isActive ? 'bg-family-100 text-family-700' : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <Icon className="h-6 w-6" />
@@ -133,7 +130,6 @@ export default function Layout({ children, user }: LayoutProps) {
                     </Link>
                   );
                 })}
-
                 {/* 管理员菜单 */}
                 {user.is_admin === 1 && (
                   <div className="pt-4 border-t border-gray-200">
@@ -147,9 +143,7 @@ export default function Layout({ children, user }: LayoutProps) {
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
                           className={`flex items-center space-x-3 px-3 py-3 rounded-xl font-medium text-lg ${
-                            isActive
-                              ? 'bg-red-100 text-red-700'
-                              : 'text-gray-700 hover:bg-gray-100'
+                            isActive ? 'bg-red-100 text-red-700' : 'text-gray-700 hover:bg-gray-100'
                           }`}
                         >
                           <Icon className="h-6 w-6" />
@@ -159,7 +153,6 @@ export default function Layout({ children, user }: LayoutProps) {
                     })}
                   </div>
                 )}
-
                 {/* 登出按钮 */}
                 <div className="pt-4 border-t border-gray-200 pb-8">
                   <button
@@ -185,20 +178,15 @@ export default function Layout({ children, user }: LayoutProps) {
             <p className="text-xs text-gray-400">v1.2.5</p>
           </div>
         </div>
-
         <div className="flex-1 flex flex-col overflow-y-auto">
           <div className="flex items-center space-x-3 mb-6 p-3 mx-3 bg-family-50 rounded-xl">
-            <img 
-              src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} 
-              alt={user.name} 
-              className="w-12 h-12 rounded-full" 
-            />
-            <div>
+            <img src={user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} alt={user.name} className="w-12 h-12 rounded-full" />
+            <div className="flex-1">
               <p className="text-lg font-semibold text-gray-900">{user.name}</p>
               <p className="text-sm text-gray-500">{t('welcome_back')}</p>
             </div>
+            <NotificationBell userId={user.id} />
           </div>
-
           <nav className="space-y-2 flex-1 overflow-y-auto px-3">
             {navigation.map(item => {
               const Icon = item.icon;
@@ -209,9 +197,7 @@ export default function Layout({ children, user }: LayoutProps) {
                   key={item.name}
                   href={item.href}
                   className={`flex items-center space-x-3 px-3 py-3 rounded-xl font-medium text-lg ${
-                    isActive
-                      ? 'bg-family-100 text-family-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                    isActive ? 'bg-family-100 text-family-700' : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <Icon className="h-6 w-6" />
@@ -219,7 +205,6 @@ export default function Layout({ children, user }: LayoutProps) {
                 </Link>
               );
             })}
-
             {/* 管理员菜单 */}
             {user.is_admin === 1 && (
               <div className="pt-4 border-t border-gray-200 mt-4">
@@ -232,9 +217,7 @@ export default function Layout({ children, user }: LayoutProps) {
                       key={item.name}
                       href={item.href}
                       className={`flex items-center space-x-3 px-3 py-3 rounded-xl font-medium text-lg ${
-                        isActive
-                          ? 'bg-red-100 text-red-700'
-                          : 'text-gray-700 hover:bg-gray-100'
+                        isActive ? 'bg-red-100 text-red-700' : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <Icon className="h-6 w-6" />
@@ -244,7 +227,6 @@ export default function Layout({ children, user }: LayoutProps) {
                 })}
               </div>
             )}
-
             {/* 登出按钮 */}
             <div className="pt-4 border-t border-gray-200 mt-4 mb-6">
               <button
@@ -268,11 +250,11 @@ export default function Layout({ children, user }: LayoutProps) {
 
       {/* Mobile Bottom Navigation - 动态设置列数，根据启用插件数量 */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 h-20">
-        <div className={`grid h-full ${
-          totalItems === 5 ? 'grid-cols-5' :
-          totalItems === 6 ? 'grid-cols-6' :
-          totalItems === 7 ? 'grid-cols-7' : 'grid-cols-5'
-        }`}>
+        <div
+          className={`grid h-full ${
+            totalItems === 5 ? 'grid-cols-5' : totalItems === 6 ? 'grid-cols-6' : totalItems === 7 ? 'grid-cols-7' : 'grid-cols-5'
+          }`}
+        >
           {bottomNavigation.map(item => {
             const Icon = item.icon;
             // For growth-column, match startsWith because it has query params ?familyId=xxx
@@ -283,9 +265,7 @@ export default function Layout({ children, user }: LayoutProps) {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex flex-col items-center justify-center space-y-1 ${
-                  isActive ? 'text-family-500' : 'text-gray-500'
-                }`}
+                className={`flex flex-col items-center justify-center space-y-1 ${isActive ? 'text-family-500' : 'text-gray-500'}`}
               >
                 <Icon className="h-6 w-6" />
                 <span className="text-xs font-semibold truncate px-1">{displayName}</span>
@@ -297,7 +277,7 @@ export default function Layout({ children, user }: LayoutProps) {
 
       {/* Mobile Bottom Padding */}
       <div className="h-20 lg:hidden" />
-      
+
       {/* Version Badge */}
       <VersionBadge />
     </div>
