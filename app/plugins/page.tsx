@@ -1,6 +1,6 @@
 'use client';
 
-import { Brain, Bot, Calendar, TreePine, TrendingUp, Folder, BarChart3 } from 'lucide-react';
+import { Brain, Bot, Calendar, TreePine, TrendingUp, Folder, BarChart3, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
@@ -12,6 +12,14 @@ const PLUGINS = [
     description: 'AI 智能管家，記住家族的重要資訊',
     color: 'blue',
     href: '/plugins/butler',
+  },
+  {
+    id: 'growth-social',
+    name: '家族書房',
+    icon: <BookOpen className="h-8 w-8" />,
+    description: '分享書籍、記錄心得、共同成長',
+    color: 'yellow',
+    href: '/plugins/growth-social',
   },
   {
     id: 'stats',
