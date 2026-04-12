@@ -22,6 +22,8 @@ interface TreeMember {
   parent_ids: string | null;
   spouse_id: number | null;
   generation: number;
+  user_id: number | null;
+  is_registered: number;
   children?: TreeMember[];
   spouse?: TreeMember;
 }
