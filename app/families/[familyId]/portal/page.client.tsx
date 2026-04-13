@@ -7,7 +7,7 @@ import Layout from '@/components/Layout';
 import {
   Home, Users, MessageSquare, Bell, Calendar, Settings,
   ChevronRight, Star, Crown, User, Megaphone, Clock,
-  Cake, Event, BookOpen, Bot, TrendingUp
+  Cake, CalendarDays, BookOpen, Bot, TrendingUp
 } from 'lucide-react';
 
 interface Member {
@@ -25,7 +25,7 @@ interface Props {
   currentFamilyId: number;
   data: {
     family: any;
-    members: Member[];
+    members: any[];
     announcements: any[];
     messages: any[];
     upcomingEvents: any[];
@@ -187,7 +187,7 @@ export default function FamilyPortalClient({ user, families, currentFamilyId, da
                 <div className="space-y-3">
                   {data.upcomingEvents.map((e: any) => (
                     <div key={e.id} className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
-                      <Event className="w-5 h-5 text-green-500" />
+                      <CalendarDays className="w-5 h-5 text-green-500" />
                       <div>
                         <p className="font-medium text-gray-900">{e.title}</p>
                         <p className="text-sm text-gray-500">{new Date(e.start_time).toLocaleDateString('zh-TW')}</p>

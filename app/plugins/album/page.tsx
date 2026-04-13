@@ -1,329 +1,538 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Images, Plus, Trash2, Edit2, Image as ImageIcon, Heart, MessageSquare } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Images, Plus, Trash2, Edit2, Image as ImageIcon, Heart, MessageSquare, Upload, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface Album {
-  id: number;
-  family_id: number;
-  title: string;
-  description: string | null;
-  cover_image: string | null;
-  created_by: number;
-  is_public: number;
-  created_at: string;
-  updated_at: string;
+ id: number;
+ family_id: number;
+ title: string;
+ description: string | null;
+ cover_image: string | null;
+ created_by: number;
+ is_public: number;
+ created_at: string;
+ updated_at: string;
 }
 
 interface Photo {
-  id: number;
-  album_id: number;
-  family_id: number;
-  file_path: string;
-  file_name: string;
-  title: string | null;
+ id: number;
+ album_id: number;
+ family_id: number;
+ file_path: string;
+ file_name: string;
+ title: string | null;
 }
 
 export default function FamilyAlbumPage() {
-  const [albums, setAlbums] = useState<Album[]>([]);
-  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [enabled, setEnabled] = useState(true);
-  const [showAddAlbum, setShowAddAlbum] = useState(false);
-  
-  const [familyId, setFamilyId] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      return Number(params.get('familyId')) || 1;
-    }
-    return 1;
-  });
+ const [albums, setAlbums] = useState<Album[]>([]);
+ const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+ const [photos, setPhotos] = useState<Photo[]>([]);
+ const [loading, setLoading] = useState(true);
+ const [enabled, setEnabled] = useState(true);
+ const [showAddAlbum, setShowAddAlbum] = useState(false);
+ const [showUploadModal, setShowUploadModal] = useState(false);
+ const [uploading, setUploading] = useState(false);
+ const [uploadProgress, setUploadProgress] = useState<{ total: number; success: number; failed: number } | null>(null);
+ const fileInputRef = useRef<HTMLInputElement>(null);
+ const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+ const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
-  const [newAlbum, setNewAlbum] = useState({
-    title: '',
-    description: ''
-  });
+ const [familyId, setFamilyId] = useState<number>(() => {
+ if (typeof window !== 'undefined') {
+ const params = new URLSearchParams(window.location.search);
+ return Number(params.get('familyId')) || 1;
+ }
+ return 1;
+ });
 
-  useEffect(() => {
-    if (familyId) {
-      fetchAlbums();
-    }
-  }, [familyId]);
+ const [newAlbum, setNewAlbum] = useState({ title: '', description: '' });
 
-  async function fetchAlbums() {
-    try {
-      const res = await fetch(`/api/plugins/album/albums?familyId=${familyId}`);
-      const data = await res.json();
-      
-      if (!data.enabled) {
-        setEnabled(false);
-        setLoading(false);
-        return;
-      }
+ useEffect(() => {
+ if (familyId) {
+ fetchAlbums();
+ }
+ }, [familyId]);
 
-      if (data.success) {
-        setAlbums(data.albums);
-      }
-    } catch (error) {
-      console.error('Failed to fetch albums:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
+ async function fetchAlbums() {
+ try {
+ const res = await fetch(`/api/plugins/album/albums?familyId=${familyId}`);
+ const data = await res.json();
+ if (!data.enabled) {
+ setEnabled(false);
+ setLoading(false);
+ return;
+ }
+ if (data.success) {
+ setAlbums(data.albums);
+ }
+ } catch (error) {
+ console.error('Failed to fetch albums:', error);
+ } finally {
+ setLoading(false);
+ }
+ }
 
-  async function fetchAlbumPhotos(albumId: number) {
-    try {
-      const res = await fetch(`/api/plugins/album/photos?albumId=${albumId}&limit=50`);
-      const data = await res.json();
-      
-      if (data.success) {
-        setPhotos(data.photos);
-      }
-    } catch (error) {
-      console.error('Failed to fetch photos:', error);
-    }
-  }
+ async function fetchAlbumPhotos(albumId: number) {
+ try {
+ const res = await fetch(`/api/plugins/album/photos?albumId=${albumId}&limit=50`);
+ const data = await res.json();
+ if (data.success) {
+ setPhotos(data.photos);
+ }
+ } catch (error) {
+ console.error('Failed to fetch photos:', error);
+ }
+ }
 
-  async function handleCreateAlbum(e: React.FormEvent) {
-    e.preventDefault();
-    
-    const res = await fetch('/api/plugins/album/albums', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        family_id: familyId,
-        title: newAlbum.title,
-        description: newAlbum.description,
-        is_public: 1
-      })
-    });
+ async function handleCreateAlbum(e: React.FormEvent) {
+ e.preventDefault();
+ const res = await fetch('/api/plugins/album/albums', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({
+ family_id: familyId,
+ title: newAlbum.title,
+ description: newAlbum.description,
+ is_public: 1
+ })
+ });
+ const data = await res.json();
+ if (data.success) {
+ setShowAddAlbum(false);
+ setNewAlbum({ title: '', description: '' });
+ fetchAlbums();
+ }
+ }
 
-    const data = await res.json();
-    if (data.success) {
-      setShowAddAlbum(false);
-      setNewAlbum({ title: '', description: '' });
-      fetchAlbums();
-    }
-  }
+ async function handleDeleteAlbum(id: number) {
+ if (!confirm('确定要删除这个相册吗？所有照片也会被删除。')) return;
+ const res = await fetch(`/api/plugins/album/albums?id=${id}`, { method: 'DELETE' });
+ const data = await res.json();
+ if (data.success) {
+ if (selectedAlbum?.id === id) {
+ setSelectedAlbum(null);
+ setPhotos([]);
+ }
+ fetchAlbums();
+ }
+ }
 
-  async function handleDeleteAlbum(id: number) {
-    if (!confirm('确定要删除这个相册吗？所有照片也会被删除。')) return;
-    
-    const res = await fetch(`/api/plugins/album/albums?id=${id}`, {
-      method: 'DELETE'
-    });
-    const data = await res.json();
-    if (data.success) {
-      if (selectedAlbum?.id === id) {
-        setSelectedAlbum(null);
-        setPhotos([]);
-      }
-      fetchAlbums();
-    }
-  }
+ function selectAlbum(album: Album) {
+ setSelectedAlbum(album);
+ fetchAlbumPhotos(album.id);
+ }
 
-  function selectAlbum(album: Album) {
-    setSelectedAlbum(album);
-    fetchAlbumPhotos(album.id);
-  }
+ function getDefaultCover(album: Album) {
+ if (album.cover_image) return album.cover_image;
+ return 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Cover';
+ }
 
-  function getDefaultCover(album: Album) {
-    if (album.cover_image) return album.cover_image;
-    return 'https://placehold.co/400x300/f3f4f6/9ca3af?text=No+Cover';
-  }
+ // 照片上传相关函数
+ function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+ const files = Array.from(e.target.files || []);
+ if (files.length === 0) return;
 
-  if (!enabled) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
-          <Images className="w-12 h-12 mx-auto text-yellow-400 mb-4" />
-          <h2 className="text-xl font-semibold text-yellow-800 mb-2">家族相册插件未启用</h2>
-          <p className="text-yellow-600">该插件已被禁用，请在环境变量中设置 PLUGIN_FAMILY_ALBUM=true 启用。</p>
-        </div>
-      </div>
-    );
-  }
+ // 验证文件类型
+ const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+ const validFiles = files.filter(f => validTypes.includes(f.type));
 
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="animate-pulse">加载中...</div>
-      </div>
-    );
-  }
+ if (validFiles.length < files.length) {
+ alert('部分文件类型不支持，仅支持 JPG、PNG、GIF、WebP 格式');
+ }
 
-  return (
-    <div className="container mx-auto p-4 max-w-6xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Images className="w-6 h-6 text-blue-500" />
-            家族相册
-          </h1>
-          <p className="text-gray-500 mt-1">存储和分享家族美好回忆 · 插件式设计</p>
-        </div>
-        <button
-          onClick={() => setShowAddAlbum(!showAddAlbum)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
-        >
-          <Plus className="w-4 h-4" />
-          创建相册
-        </button>
-      </div>
+ if (validFiles.length === 0) return;
 
-      {/* 创建相册表单 */}
-      {showAddAlbum && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">创建新相册</h2>
-          <form onSubmit={handleCreateAlbum} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">相册名称</label>
-              <input
-                type="text"
-                placeholder="例如：春节聚会 2026"
-                value={newAlbum.title}
-                onChange={e => setNewAlbum({...newAlbum, title: e.target.value})}
-                className="w-full border rounded-lg px-3 py-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">描述 (可选)</label>
-              <textarea
-                placeholder="描述一下这个相册..."
-                value={newAlbum.description}
-                onChange={e => setNewAlbum({...newAlbum, description: e.target.value})}
-                className="w-full border rounded-lg px-3 py-2"
-                rows={3}
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setShowAddAlbum(false)}
-                className="px-4 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                创建
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+ setSelectedFiles(prev => [...prev, ...validFiles]);
 
-      {/* 相册列表 */}
-      {!selectedAlbum ? (
-        <div>
-          {albums.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg">还没有创建任何相册</p>
-              <p className="text-sm mt-1">点击上方 "创建相册" 开始吧</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {albums.map(album => (
-                <div 
-                  key={album.id} 
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => selectAlbum(album)}
-                >
-                  <div className="h-48 overflow-hidden bg-gray-100">
-                    <img 
-                      src={getDefaultCover(album)} 
-                      alt={album.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-lg">{album.title}</h3>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteAlbum(album.id);
-                        }}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {album.description && (
-                      <p className="text-gray-500 text-sm mt-1 line-clamp-2">
-                        {album.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ) : (
-        /* 相册详情 - 照片列表 */
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <button 
-              onClick={() => setSelectedAlbum(null)}
-              className="text-blue-500 hover:underline"
-            >
-              ← 返回相册列表
-            </button>
-            <h2 className="text-xl font-semibold">{selectedAlbum.title}</h2>
-          </div>
+ // 生成预览
+ validFiles.forEach(file => {
+ const reader = new FileReader();
+ reader.onload = (e) => {
+ setPreviewUrls(prev => [...prev, e.target?.result as string]);
+ };
+ reader.readAsDataURL(file);
+ });
+ }
 
-          {photos.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p className="text-lg">这个相册还没有照片</p>
-              <p className="text-sm mt-1">上传一些照片开始分享回忆吧</p>
-              {/* TODO: 照片上传功能 */}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {photos.map(photo => (
-                <div key={photo.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                  <div className="aspect-square overflow-hidden bg-gray-100">
-                    <img 
-                      src={photo.file_path} 
-                      alt={photo.title || photo.file_name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  {(photo.title || photo.title) && (
-                    <div className="p-2">
-                      <p className="text-sm font-medium line-clamp-1">{photo.title || photo.file_name}</p>
-                    </div>
-                  )}
-                  <div className="px-2 pb-2 flex items-center gap-4 text-gray-500">
-                    <div className="flex items-center gap-1 text-xs">
-                      <Heart className="w-3 h-3" />
-                      <span>0</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs">
-                      <MessageSquare className="w-3 h-3" />
-                      <span>0</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+ function removeFile(index: number) {
+ setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+ setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+ }
 
-      {/* Footer: 插件提示 */}
-      <div className="mt-8 text-center text-sm text-gray-400">
-        🖼️ 家族相册插件 · 可插拔设计 · 设置环境变量即可禁用
-      </div>
-    </div>
-  );
+ async function handleUpload() {
+ if (selectedFiles.length === 0 || !selectedAlbum) return;
+
+ setUploading(true);
+ setUploadProgress({ total: selectedFiles.length, success: 0, failed: 0 });
+
+ const formData = new FormData();
+ formData.append('albumId', String(selectedAlbum.id));
+ formData.append('familyId', String(familyId));
+ selectedFiles.forEach(file => {
+ formData.append('files', file);
+ });
+
+ try {
+ const res = await fetch('/api/plugins/album/upload', {
+ method: 'POST',
+ body: formData
+ });
+
+ const data = await res.json();
+
+ if (data.success) {
+ setUploadProgress({
+ total: data.summary.total,
+ success: data.summary.success,
+ failed: data.summary.failed
+ });
+
+ // 刷新照片列表
+ await fetchAlbumPhotos(selectedAlbum.id);
+
+ // 如果有失败的照片
+ if (data.errors && data.errors.length > 0) {
+ const errorMessages = data.errors.map((e: { file: string; error: string }) => `${e.file}: ${e.error}`).join('\n');
+ alert(`上传完成，但部分文件失败：\n${errorMessages}`);
+ }
+
+ // 延迟关闭弹窗
+ setTimeout(() => {
+ setShowUploadModal(false);
+ setSelectedFiles([]);
+ setPreviewUrls([]);
+ setUploadProgress(null);
+ }, data.summary.failed > 0 ? 2000 : 500);
+ } else {
+ alert(data.error || '上传失败');
+ }
+ } catch (error) {
+ console.error('Upload failed:', error);
+ alert('上传失败，请重试');
+ } finally {
+ setUploading(false);
+ }
+ }
+
+ function openUploadModal() {
+ setShowUploadModal(true);
+ setSelectedFiles([]);
+ setPreviewUrls([]);
+ setUploadProgress(null);
+ }
+
+ if (!enabled) {
+ return (
+ <div className="container mx-auto p-4">
+ <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+ <Images className="w-12 h-12 mx-auto text-yellow-400 mb-4" />
+ <h2 className="text-xl font-semibold text-yellow-800 mb-2">家族相册插件未启用</h2>
+ <p className="text-yellow-600">该插件已被禁用，请在环境变量中设置 PLUGIN_FAMILY_ALBUM=true 启用。</p>
+ </div>
+ </div>
+ );
+ }
+
+ if (loading) {
+ return (
+ <div className="container mx-auto p-4">
+ <div className="animate-pulse">加载中...</div>
+ </div>
+ );
+ }
+
+ return (
+ <div className="container mx-auto p-4 max-w-6xl">
+ {/* Header */}
+ <div className="flex items-center justify-between mb-6">
+ <div>
+ <h1 className="text-2xl font-bold flex items-center gap-2">
+ <Images className="w-6 h-6 text-blue-500" />
+ 家族相册
+ </h1>
+ <p className="text-gray-500 mt-1">存储和分享家族美好回忆 · 插件式设计</p>
+ </div>
+ <button
+ onClick={() => setShowAddAlbum(!showAddAlbum)}
+ className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+ >
+ <Plus className="w-4 h-4" /> 创建相册
+ </button>
+ </div>
+
+ {/* 创建相册表单 */}
+ {showAddAlbum && (
+ <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+ <h2 className="text-lg font-semibold mb-4">创建新相册</h2>
+ <form onSubmit={handleCreateAlbum} className="space-y-4">
+ <div>
+ <label className="block text-sm font-medium text-gray-700 mb-1">相册名称</label>
+ <input
+ type="text"
+ placeholder="例如：春节聚会 2026"
+ value={newAlbum.title}
+ onChange={e => setNewAlbum({...newAlbum, title: e.target.value})}
+ className="w-full border rounded-lg px-3 py-2"
+ required
+ />
+ </div>
+ <div>
+ <label className="block text-sm font-medium text-gray-700 mb-1">描述 (可选)</label>
+ <textarea
+ placeholder="描述一下这个相册..."
+ value={newAlbum.description}
+ onChange={e => setNewAlbum({...newAlbum, description: e.target.value})}
+ className="w-full border rounded-lg px-3 py-2"
+ rows={3}
+ />
+ </div>
+ <div className="flex gap-2 justify-end">
+ <button
+ type="button"
+ onClick={() => setShowAddAlbum(false)}
+ className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+ >
+ 取消
+ </button>
+ <button
+ type="submit"
+ className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+ >
+ 创建
+ </button>
+ </div>
+ </form>
+ </div>
+ )}
+
+ {/* 相册列表 */}
+ {!selectedAlbum ? (
+ <div>
+ {albums.length === 0 ? (
+ <div className="text-center py-12 text-gray-500">
+ <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+ <p className="text-lg">还没有创建任何相册</p>
+ <p className="text-sm mt-1">点击上方 "创建相册" 开始吧</p>
+ </div>
+ ) : (
+ <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+ {albums.map(album => (
+ <div
+ key={album.id}
+ className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+ onClick={() => selectAlbum(album)}
+ >
+ <div className="h-48 overflow-hidden bg-gray-100">
+ <img src={getDefaultCover(album)} alt={album.title} className="w-full h-full object-cover" />
+ </div>
+ <div className="p-4">
+ <div className="flex items-center justify-between">
+ <h3 className="font-semibold text-lg">{album.title}</h3>
+ <button
+ onClick={(e) => {
+ e.stopPropagation();
+ handleDeleteAlbum(album.id);
+ }}
+ className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+ >
+ <Trash2 className="w-4 h-4" />
+ </button>
+ </div>
+ {album.description && (
+ <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+ {album.description}
+ </p>
+ )}
+ </div>
+ </div>
+ ))}
+ </div>
+ )}
+ </div>
+ ) : (
+ /* 相册详情 - 照片列表 */
+ <div>
+ <div className="flex items-center justify-between mb-6">
+ <div className="flex items-center gap-2">
+ <button
+ onClick={() => setSelectedAlbum(null)}
+ className="text-blue-500 hover:underline"
+ >
+ ← 返回相册列表
+ </button>
+ <h2 className="text-xl font-semibold">{selectedAlbum.title}</h2>
+ </div>
+ <button
+ onClick={openUploadModal}
+ className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-600"
+ >
+ <Upload className="w-4 h-4" /> 上传照片
+ </button>
+ </div>
+
+ {photos.length === 0 ? (
+ <div className="text-center py-12 text-gray-500">
+ <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+ <p className="text-lg">这个相册还没有照片</p>
+ <p className="text-sm mt-1 mb-4">点击上方 "上传照片" 开始分享回忆</p>
+ <button
+ onClick={openUploadModal}
+ className="bg-green-500 text-white px-6 py-3 rounded-lg inline-flex items-center gap-2 hover:bg-green-600"
+ >
+ <Upload className="w-5 h-5" /> 上传照片
+ </button>
+ </div>
+ ) : (
+ <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+ {photos.map(photo => (
+ <div
+ key={photo.id}
+ className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+ >
+ <div className="aspect-square overflow-hidden bg-gray-100">
+ <img
+ src={photo.file_path}
+ alt={photo.title || photo.file_name}
+ className="w-full h-full object-cover"
+ />
+ </div>
+ {(photo.title || photo.file_name) && (
+ <div className="p-2">
+ <p className="text-sm font-medium line-clamp-1">{photo.title || photo.file_name}</p>
+ </div>
+ )}
+ <div className="px-2 pb-2 flex items-center gap-4 text-gray-500">
+ <div className="flex items-center gap-1 text-xs">
+ <Heart className="w-3 h-3" />
+ <span>0</span>
+ </div>
+ <div className="flex items-center gap-1 text-xs">
+ <MessageSquare className="w-3 h-3" />
+ <span>0</span>
+ </div>
+ </div>
+ </div>
+ ))}
+ </div>
+ )}
+ </div>
+ )}
+
+ {/* 上传照片弹窗 */}
+ {showUploadModal && (
+ <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+ <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+ <div className="p-6">
+ <div className="flex items-center justify-between mb-4">
+ <h3 className="text-xl font-semibold">上传照片到「{selectedAlbum?.title}」</h3>
+ <button
+ onClick={() => setShowUploadModal(false)}
+ className="p-1 hover:bg-gray-100 rounded"
+ >
+ <X className="w-5 h-5" />
+ </button>
+ </div>
+
+ {/* 文件选择区域 */}
+ <div
+ className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+ onClick={() => fileInputRef.current?.click()}
+ >
+ <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+ <p className="text-gray-600 mb-2">点击选择照片或拖拽文件到此处</p>
+ <p className="text-sm text-gray-400">支持 JPG、PNG、GIF、WebP 格式，单个文件最大 10MB</p>
+ <input
+ ref={fileInputRef}
+ type="file"
+ multiple
+ accept="image/jpeg,image/png,image/gif,image/webp"
+ onChange={handleFileSelect}
+ className="hidden"
+ />
+ </div>
+
+ {/* 预览已选文件 */}
+ {selectedFiles.length > 0 && (
+ <div className="mt-6">
+ <h4 className="text-sm font-semibold text-gray-700 mb-3">
+ 已选择 {selectedFiles.length} 张照片
+ </h4>
+ <div className="grid grid-cols-3 gap-3">
+ {previewUrls.map((url, index) => (
+ <div key={index} className="relative group">
+ <img
+ src={url}
+ alt={`预览 ${index + 1}`}
+ className="w-full aspect-square object-cover rounded-lg"
+ />
+ <button
+ onClick={() => removeFile(index)}
+ className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+ >
+ <X className="w-4 h-4" />
+ </button>
+ </div>
+ ))}
+ </div>
+ </div>
+ )}
+
+ {/* 上传进度 */}
+ {uploadProgress && (
+ <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+ <p className="text-sm text-gray-600">
+ 上传进度：{uploadProgress.success}/{uploadProgress.total} 张成功
+ {uploadProgress.failed > 0 && (
+ <span className="text-red-500 ml-2">({uploadProgress.failed} 张失败)</span>
+ )}
+ </p>
+ <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+ <div
+ className="h-full bg-green-500 transition-all"
+ style={{ width: `${(uploadProgress.success / uploadProgress.total) * 100}%` }}
+ />
+ </div>
+ </div>
+)}
+
+ {/* 操作按钮 */}
+ <div className="mt-6 flex justify-end gap-3">
+ <button
+ onClick={() => setShowUploadModal(false)}
+ className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+ disabled={uploading}
+ >
+ 取消
+ </button>
+ <button
+ onClick={handleUpload}
+ disabled={selectedFiles.length === 0 || uploading}
+ className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+ >
+ {uploading ? (
+ <>
+ <Loader2 className="w-4 h-4 animate-spin" />
+ 上传中...
+ </>
+ ) : (
+ <>
+ <Upload className="w-4 h-4" />
+ 上传 {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
+ </>
+ )}
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+ )}
+
+ {/* Footer: 插件提示 */}
+ <div className="mt-8 text-center text-sm text-gray-400">
+ 🖼️ 家族相册插件 · 可插拔设计 · 设置环境变量即可禁用
+ </div>
+ </div>
+ );
 }

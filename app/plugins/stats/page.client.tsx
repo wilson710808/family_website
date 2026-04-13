@@ -37,8 +37,8 @@ interface Props {
   families: { id: number; name: string }[];
   initialStats: {
     overview: Overview;
-    activity: ActivityDay[];
-    ranking: MemberRanking[];
+    activity: any[];
+    ranking: any[];
   } | null;
   initialFamilyId: number | null;
 }

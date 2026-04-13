@@ -39,8 +39,8 @@ interface Props {
   user: { id: number; name: string; avatar: string };
   families: { id: number; name: string }[];
   initialData: {
-    books: BookItem[];
-    notes: NoteItem[];
+    books: any[];
+    notes: any[];
     stats: { bookCount: number; noteCount: number };
   } | null;
   initialFamilyId: number | null;
@@ -55,8 +55,8 @@ const NOTE_TYPE_LABELS: Record<string, { label: string; icon: React.ReactNode; c
 export default function GrowthSocialClient({ user, families, initialData, initialFamilyId }: Props) {
   const [selectedFamily, setSelectedFamily] = useState(initialFamilyId);
   const [activeTab, setActiveTab] = useState<'books' | 'notes'>('books');
-  const [books, setBooks] = useState<BookItem[]>(initialData?.books || []);
-  const [notes, setNotes] = useState<NoteItem[]>(initialData?.notes || []);
+  const [books, setBooks] = useState<any[]>(initialData?.books || []);
+  const [notes, setNotes] = useState<any[]>(initialData?.notes || []);
   const [stats, setStats] = useState(initialData?.stats || { bookCount: 0, noteCount: 0 });
   const [loading, setLoading] = useState(false);
 
