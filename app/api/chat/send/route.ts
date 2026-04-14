@@ -5,11 +5,11 @@ import { getCurrentUser, addContributionPoints } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
-  }
-    const { familyId, content } = await request.json();
+    if (!user) {
+      return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+    }
 
+    const { familyId, content } = await request.json();
     if (!familyId || !content?.trim()) {
       return NextResponse.json({ success: false, error: '参数不完整' }, { status: 400 });
     }
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     `).get(result.lastInsertRowid as number);
 
     // 触发管家 AI（异步，不阻塞响应）
-    triggerButlerReply(db, Number(familyId), message as any, user.name);
+    triggerButlerReply(db, Number(familyId), message as any, user.name, user.id);
 
     return NextResponse.json({
       success: true,
@@ -46,20 +46,40 @@ export async function POST(request: NextRequest) {
 }
 
 // ============ 管家 AI 觸發（非阻塞） ============
-
 async function triggerButlerReply(
   db: any,
   familyId: number,
   currentMessage: { id: number; user_id: number; user_name: string; content: string; created_at: string },
-  userName: string
+  userName: string,
+  userId: number
 ) {
   try {
     // 动态导入，避免循环依赖
-    const { isEnabled, detectTrigger, generateReply } = await import('@/plugins/family-butler');
+    const { isEnabled, detectTrigger, generateReply, saveChatMessage, saveMemory } = await import('@/plugins/family-butler');
 
     if (!isEnabled()) return;
+    
+    // 保存聊天消息到管家记忆（用于上下文理解）
+    saveChatMessage(db, {
+      family_id: familyId,
+      message_id: currentMessage.id,
+      user_id: currentMessage.user_id,
+      user_name: currentMessage.user_name,
+      content: currentMessage.content,
+    });
 
     const triggerType = detectTrigger(currentMessage.content);
+    
+    // 即使不触发AI回复，也尝试学习和记忆重要信息
+    const memoryTriggers = ['生日', '喜歡', '不喜歡', '愛吃', '討厭', '工作', '學校', '家住', '最近', '計劃', '想去', '身體', '健康', '重要', '紀念日', '結婚'];
+    if (memoryTriggers.some(t => currentMessage.content.includes(t))) {
+      try {
+        saveMemory(db, familyId, '偏好', `${currentMessage.user_name}: ${currentMessage.content.slice(0, 100)}`, userId);
+      } catch (e) {
+        console.warn('[Butler] 記憶保存失敗:', e);
+      }
+    }
+    
     if (triggerType === 'none') return;
 
     // 获取最近 30 条消息
@@ -68,8 +88,7 @@ async function triggerButlerReply(
       FROM chat_messages cm
       JOIN users u ON cm.user_id = u.id
       WHERE cm.family_id = ?
-      ORDER BY cm.created_at DESC
-      LIMIT 30
+      ORDER BY cm.created_at DESC LIMIT 30
     `).all(familyId) as any[];
 
     // 反转按时间正序
@@ -100,8 +119,7 @@ async function triggerButlerReply(
              'https://api.dicebear.com/7.x/bottts/svg?seed=butler' as user_avatar
       FROM chat_messages cm
       WHERE cm.family_id = ? AND cm.user_id = 0
-      ORDER BY cm.created_at DESC
-      LIMIT 1
+      ORDER BY cm.created_at DESC LIMIT 1
     `).get(familyId);
 
     // 通过 Socket.IO 广播管家消息

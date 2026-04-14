@@ -2,18 +2,17 @@
  * 家族管家 - 核心 AI 邏輯
  * 上下文理解 + 家族記憶 + 智能回覆
  */
-
 import type Database from 'better-sqlite3';
 import { PERSONA, CONTEXT_TEMPLATE } from './prompts';
+
 // @ts-ignore
 import config from './config.json';
 
-// ============ 配置 ============
-
+// ============ 配置（優先使用環境變量）============
 const AI_CONFIG = {
-  baseUrl: process.env.BUTLER_BASE_URL || config.ai.baseUrl,
-  apiKey: process.env.BUTLER_API_KEY || '',
-  model: process.env.BUTLER_MODEL || config.ai.model,
+  baseUrl: process.env.BUTLER_BASE_URL || process.env.OPENAI_BASE_URL || config.ai.baseUrl,
+  apiKey: process.env.BUTLER_API_KEY || process.env.OPENAI_API_KEY || '',
+  model: process.env.BUTLER_MODEL || process.env.FAMILY_BUTLER_MODEL || config.ai.model,
   maxTokens: config.ai.maxTokens,
   temperature: config.ai.temperature,
   timeout: config.ai.timeout,
@@ -21,7 +20,6 @@ const AI_CONFIG = {
 };
 
 // ============ 觸發檢測 ============
-
 export type TriggerType = 'mention' | 'greeting' | 'question' | 'thanks' | 'emotion' | 'conflict' | 'none';
 
 export function detectTrigger(content: string): TriggerType {
@@ -29,29 +27,28 @@ export function detectTrigger(content: string): TriggerType {
   const lower = text.toLowerCase();
 
   // 最高優先級：衝突檢測
-  const conflictWords = ['滾', '閉嘴', '去死', '白癡', '智障', '腦殘', '廢物', '垃圾', '不要臉', '混蛋'];
+  const conflictWords = ['滾', '閉嘴', '去死', '白癡', '智障', '腦殘', '廢物', '垃圾', '不要臉', '混蛋', '吵架', '打架'];
   if (conflictWords.some(w => lower.includes(w))) return 'conflict';
 
   // 感謝（優先於 mention，避免「謝謝管家」觸發 mention）
-  if (config.triggers.thanks.some(t => lower.includes(t))) return 'thanks';
+  if (config.triggers.thanks.some((t: string) => lower.includes(t))) return 'thanks';
 
   // @管家 / 直接叫管家
-  if (config.triggers.mention.some(t => text.includes(t))) return 'mention';
+  if (config.triggers.mention.some((t: string) => text.includes(t))) return 'mention';
 
   // 問候
-  if (config.triggers.greeting.some(t => text.includes(t))) return 'greeting';
+  if (config.triggers.greeting.some((t: string) => text.includes(t))) return 'greeting';
 
   // 問題
-  if (config.triggers.question.some(t => text.includes(t))) return 'question';
+  if (config.triggers.question.some((t: string) => text.includes(t))) return 'question';
 
   // 情緒表達
-  if (config.triggers.emotion.some(t => text.includes(t))) return 'emotion';
+  if (config.triggers.emotion.some((t: string) => text.includes(t))) return 'emotion';
 
   return 'none';
 }
 
 // ============ 上下文構建 ============
-
 interface ChatMessage {
   id: number;
   user_id: number;
@@ -66,29 +63,55 @@ export function buildContext(messages: ChatMessage[]): string {
 }
 
 // ============ 家族記憶 ============
-
 export function getFamilyMemories(db: any, familyId: number): string {
-  const memories = db.prepare(`
-    SELECT category, content FROM plugin_butler_memories
-    WHERE family_id = ?
-    ORDER BY created_at DESC
-    LIMIT 20
-  `).all(familyId) as { category: string; content: string }[];
+  try {
+    const memories = db.prepare(`
+      SELECT category, content FROM plugin_butler_memories
+      WHERE family_id = ?
+      ORDER BY created_at DESC LIMIT 20
+    `).all(familyId) as { category: string; content: string }[];
 
-  if (memories.length === 0) return '（暫無記憶，我還在認識這個家族）';
-
-  return memories.map(m => `- [${m.category}] ${m.content}`).join('\n');
+    if (memories.length === 0) return '（暫無記憶，我還在認識這個家族）';
+    return memories.map(m => `- [${m.category}] ${m.content}`).join('\n');
+  } catch (error) {
+    return '（暫無記憶）';
+  }
 }
 
 export function saveMemory(db: any, familyId: number, category: string, content: string, userId: number): void {
-  db.prepare(`
-    INSERT INTO plugin_butler_memories (family_id, category, content, created_by)
-    VALUES (?, ?, ?, ?)
-  `).run(familyId, category, content, userId);
+  try {
+    db.prepare(`
+      INSERT INTO plugin_butler_memories (family_id, category, content, created_by)
+      VALUES (?, ?, ?, ?)
+    `).run(familyId, category, content, userId);
+  } catch (error) {
+    console.error('[Butler] 保存記憶失敗:', error);
+  }
+}
+
+// ============ 獲取成員畫像 ============
+function getMemberProfile(db: any, familyId: number, userId: number): string {
+  try {
+    const profile = db.prepare(`
+      SELECT user_name, personality_traits, concerns, achievements
+      FROM plugin_butler_member_profiles
+      WHERE family_id = ? AND user_id = ?
+    `).get(familyId, userId) as any;
+
+    if (!profile) return '';
+
+    let info = `${profile.user_name}`;
+    if (profile.personality_traits) {
+      const traits = JSON.parse(profile.personality_traits);
+      if (traits.length > 0) info += `，性格：${traits.join('、')}`;
+    }
+    return info;
+  } catch {
+    return '';
+  }
 }
 
 // ============ AI 回覆生成 ============
-
 interface GenerateReplyParams {
   db: any;
   familyId: number;
@@ -120,15 +143,24 @@ export async function generateReply(params: GenerateReplyParams): Promise<string
   try {
     const context = buildContext(messages);
     const memories = getFamilyMemories(db, familyId);
+    const memberProfile = getMemberProfile(db, familyId, userId);
 
-    const userPrompt = CONTEXT_TEMPLATE
+    // 構建帶有成員信息的提示
+    let userPrompt = CONTEXT_TEMPLATE
       .replace('{context}', context)
       .replace('{memories}', memories)
       .replace('{userName}', userName)
       .replace('{userMessage}', userMessage);
 
+    if (memberProfile) {
+      userPrompt = `（成員信息：${memberProfile}）\n\n` + userPrompt;
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), AI_CONFIG.timeout);
+
+    console.log(`[Butler] 調用 AI API: ${AI_CONFIG.baseUrl}/chat/completions`);
+    console.log(`[Butler] 模型: ${AI_CONFIG.model}`);
 
     const response = await fetch(`${AI_CONFIG.baseUrl}/chat/completions`, {
       method: 'POST',
@@ -151,7 +183,8 @@ export async function generateReply(params: GenerateReplyParams): Promise<string
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error(`[Butler] API 錯誤: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`[Butler] API 錯誤: ${response.status}`, errorText);
       return null;
     }
 
@@ -164,7 +197,6 @@ export async function generateReply(params: GenerateReplyParams): Promise<string
 
     // 記錄回覆
     saveReply(db, familyId, messages[messages.length - 1]?.id || 0, reply, triggerType);
-
     return reply;
   } catch (error: any) {
     if (error.name === 'AbortError') {
@@ -177,7 +209,6 @@ export async function generateReply(params: GenerateReplyParams): Promise<string
 }
 
 // ============ 回覆記錄 ============
-
 function saveReply(db: any, familyId: number, messageId: number, content: string, triggerType: string): void {
   try {
     db.prepare(`
