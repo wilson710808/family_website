@@ -590,7 +590,7 @@ class SocketManager {
         SELECT * FROM plugin_butler_scheduled_reminders
         WHERE family_id = ?
         AND remind_date >= date('now')
-        AND (content LIKE ? OR creator_id = ?)
+        AND (content LIKE ? OR created_by = ?)
         ORDER BY remind_date ASC
       `);
       const rows = stmt.all(familyId, `%${userName}%`, userId);
