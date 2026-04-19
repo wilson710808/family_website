@@ -12,6 +12,19 @@ const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || '0.0.0.0';
 const port = parseInt(process.env.PORT || '443', 10);
 
+// 静态文件目录
+const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+
+// MIME 类型映射
+const MIME_TYPES: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+};
+
+
 // HTTPS 配置 - 当证书存在时启用 HTTPS
 let httpsOptions: { key: Buffer; cert: Buffer; ca?: Buffer } | null = null;
 const sslKeyPath = process.env.SSL_KEY_PATH || './certs/private.key';
@@ -44,6 +57,29 @@ app.prepare().then(() => {
   const requestHandler = async (req: any, res: any) => {
     try {
       const parsedUrl = parse(req.url, true);
+      
+      // 处理静态文件请求 (uploads 目录)
+      if (parsedUrl.pathname?.startsWith('/uploads/')) {
+        const filePath = path.join(UPLOADS_DIR, parsedUrl.pathname.replace('/uploads/', ''));
+        
+        // 检查文件是否存在
+        if (fs.existsSync(filePath)) {
+          const ext = path.extname(filePath).toLowerCase();
+          const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+          
+          res.setHeader('Content-Type', contentType);
+          res.setHeader('Cache-Control', 'public, max-age=31536000');
+          
+          const fileStream = fs.createReadStream(filePath);
+          fileStream.pipe(res);
+          return;
+        } else {
+          res.statusCode = 404;
+          res.end('File not found');
+          return;
+        }
+      }
+      
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error('Error occurred handling', req.url, err);
