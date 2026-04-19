@@ -42,9 +42,9 @@ async function getPersonalStats(userId: number) {
   const upcomingBirthdays = db.prepare(`
     SELECT COUNT(*) as count FROM plugin_birthday_reminders
     WHERE family_id IN (${placeholders})
-    AND is_active = 1
-    AND date(reminder_date) >= date('now')
-    AND date(reminder_date) <= date('now', '+30 days')
+    AND is_enabled = 1
+    AND date(birth_date) >= date('now')
+    AND date(birth_date) <= date('now', '+30 days')
   `).pluck().get(...familyIds) as number;
 
   // 即将到来的日历事件（未来7天内）
@@ -157,10 +157,10 @@ async function getUpcomingItems(userId: number) {
       FROM plugin_birthday_reminders b
       JOIN families f ON b.family_id = f.id
       WHERE b.family_id IN (${placeholders})
-      AND b.is_active = 1
-      AND date(b.reminder_date) >= date('now')
-      AND date(b.reminder_date) <= date('now', '+30 days')
-      ORDER BY b.reminder_date ASC
+      AND b.is_enabled = 1
+      AND date(b.birth_date) >= date('now')
+      AND date(b.birth_date) <= date('now', '+30 days')
+      ORDER BY b.birth_date ASC
       LIMIT 5
     `).all(...familyIds) as any[];
   } catch {}

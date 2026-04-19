@@ -113,3 +113,14 @@
 -rw-r--r-- 1 root root 60K Apr 16 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260416_030001.db.gz
 -rw-r--r-- 1 root root 60K Apr 15 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260415_030001.db.gz
 -rw-r--r-- 1 root root 55K Apr 14 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260414_030001.db.gz
+✅ 備份成功: /root/.openclaw/workspace/family-portal/backups/family_20260419_030001.db
+   大小: 656K
+   已壓縮: /root/.openclaw/workspace/family-portal/backups/family_20260419_030001.db.gz
+   已清理超過 30 天的舊備份
+
+📁 最近備份:
+-rw-r--r-- 1 root root 61K Apr 19 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260419_030001.db.gz
+-rw-r--r-- 1 root root 60K Apr 18 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260418_030001.db.gz
+-rw-r--r-- 1 root root 60K Apr 17 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260417_030001.db.gz
+-rw-r--r-- 1 root root 60K Apr 16 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260416_030001.db.gz
+-rw-r--r-- 1 root root 60K Apr 15 03:00 /root/.openclaw/workspace/family-portal/backups/family_20260415_030001.db.gz

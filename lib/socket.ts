@@ -100,6 +100,7 @@ class SocketManager {
         content: string;
         messageId: number;
         createdAt: string;
+    messageType?: 'text' | 'image' | 'sticker';
       }) => {
         const { familyId, ...messageData } = data;
         // 广播给房间里所有人(包括发送者)
@@ -110,6 +111,10 @@ class SocketManager {
         if (user) {
           user.lastActive = Date.now();
           this.onlineUsers.set(socket.id, user);
+
+    // 只处理文本消息的管家回复（图片和表情不触发AI）
+    const msgType = (data.messageType || 'text') as 'text' | 'image' | 'sticker';
+    if (msgType !== 'text') return;
         }
 
         // 家族管家:檢查是否需要回覆

@@ -13,6 +13,17 @@ const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'chat');
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
+interface ChatMessage {
+  id: number;
+  family_id: number;
+  user_id: number;
+  content: string;
+  created_at: string;
+  message_type: string;
+  user_name: string;
+  user_avatar: string | null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -34,18 +45,12 @@ export async function POST(request: NextRequest) {
 
     // 验证文件类型
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ 
-        success: false, 
-        error: '不支援的圖片格式，僅支持 JPG、PNG、GIF、WebP' 
-      }, { status: 400 });
+      return NextResponse.json({ success: false, error: '不支援的圖片格式，僅支持 JPG、PNG、GIF、WebP' }, { status: 400 });
     }
 
     // 验证文件大小
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ 
-        success: false, 
-        error: '圖片大小不能超過 5MB' 
-      }, { status: 400 });
+      return NextResponse.json({ success: false, error: '圖片大小不能超過 5MB' }, { status: 400 });
     }
 
     // 确保上传目录存在
@@ -73,36 +78,29 @@ export async function POST(request: NextRequest) {
     const result = db.prepare(`
       INSERT INTO chat_messages (family_id, user_id, content, message_type, metadata)
       VALUES (?, ?, ?, 'image', ?)
-    `).run(familyId, user.id, imageUrl, JSON.stringify({
-      originalName: file.name,
-      size: file.size,
-      type: file.type
-    }));
+    `).run(familyId, user.id, imageUrl, JSON.stringify({ originalName: file.name, size: file.size, type: file.type }));
 
     // 添加贡献积分：发送图片 +3 积分
     addContributionPoints(familyId, user.id, 3);
 
     // 获取插入的消息
     const message = db.prepare(`
-      SELECT cm.id, cm.family_id, cm.user_id, cm.content, cm.created_at, cm.message_type,
-             u.name as user_name, u.avatar as user_avatar
+      SELECT cm.id, cm.family_id, cm.user_id, cm.content, cm.created_at, cm.message_type, u.name as user_name, u.avatar as user_avatar
       FROM chat_messages cm
       JOIN users u ON cm.user_id = u.id
       WHERE cm.id = ?
-    `).get(result.lastInsertRowid as number);
+    `).get(result.lastInsertRowid as number) as ChatMessage | undefined;
 
-    return NextResponse.json({ 
-      success: true, 
-      message: {
-        ...message,
-        message_type: 'image'
-      }
+    if (!message) {
+      return NextResponse.json({ success: false, error: '消息保存失敗' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: { ...message, message_type: 'image' }
     });
   } catch (error) {
     console.error('[Chat Upload] 上傳失敗:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: '上傳失敗，請重試' 
-    }, { status: 500 });
+    return NextResponse.json({ success: false, error: '上傳失敗，請重試' }, { status: 500 });
   }
 }
