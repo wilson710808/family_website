@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser, isUserInFamily } from '@/lib/auth';
 import { db } from '@/lib/db';
 
-// 获取家族统计数据
 export async function GET(request: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: '未登錄' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const familyId = searchParams.get('familyId');
     const type = searchParams.get('type') || 'overview';
@@ -15,142 +20,63 @@ export async function GET(request: NextRequest) {
 
     const fid = Number(familyId);
 
+    const inFamily = await isUserInFamily(user.id, fid);
+    if (!inFamily) {
+      return NextResponse.json({ error: '你不是該家族成員' }, { status: 403 });
+    }
+
     if (type === 'overview') {
-      // 综合概览
-      const totalMessages = db.prepare(`
-        SELECT COUNT(*) as count FROM messages WHERE family_id = ?
-      `).pluck().get(fid) as number;
-
-      const totalAnnouncements = db.prepare(`
-        SELECT COUNT(*) as count FROM announcements WHERE family_id = ?
-      `).pluck().get(fid) as number;
-
-      let totalEvents = 0;
-      try {
-        totalEvents = db.prepare(`
-          SELECT COUNT(*) as count FROM plugin_calendar_events WHERE family_id = ?
-        `).pluck().get(fid) as number;
-      } catch {}
-
-      let totalPhotos = 0;
-      try {
-        totalPhotos = db.prepare(`
-          SELECT COUNT(*) as count FROM plugin_album_photos WHERE family_id = ?
-        `).pluck().get(fid) as number;
-      } catch {}
-
-      const memberCount = db.prepare(`
-        SELECT COUNT(*) as count FROM family_members WHERE family_id = ? AND status = 'approved'
-      `).pluck().get(fid) as number;
-
-      const weeklyActive = db.prepare(`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM messages
-        WHERE family_id = ? AND created_at >= datetime('now', '-7 days')
-      `).pluck().get(fid) as number;
-
-      const todayActive = db.prepare(`
-        SELECT COUNT(*) as count
-        FROM messages
-        WHERE family_id = ? AND date(created_at) = date('now')
-      `).pluck().get(fid) as number;
+      const totalMessages = db.prepare('SELECT COUNT(*) as count FROM messages WHERE family_id = ?').pluck().get(fid) as number;
+      const totalChatMessages = db.prepare('SELECT COUNT(*) as count FROM chat_messages WHERE family_id = ?').pluck().get(fid) as number;
+      const totalMembers = db.prepare("SELECT COUNT(*) as count FROM family_members WHERE family_id = ? AND status = 'approved'").pluck().get(fid) as number;
+      const totalAlbums = db.prepare('SELECT COUNT(*) as count FROM plugin_album_albums WHERE family_id = ?').pluck().get(fid) as number;
 
       return NextResponse.json({
         success: true,
-        stats: {
-          totalMessages,
-          totalAnnouncements,
-          totalEvents,
-          totalPhotos,
-          memberCount,
-          weeklyActive,
-          todayActive,
-        },
+        type: 'overview',
+        data: { totalMessages, totalChatMessages, totalMembers, totalAlbums },
       });
     }
 
     if (type === 'activity') {
-      // 活跃度趋势
-      const result = db.prepare(`
-        SELECT stat_date, message_count, active_members, new_messages
+      const since = new Date(Date.now() - days * 86400000).toISOString().split('T')[0];
+      const dailyActivity = db.prepare(`
+        SELECT date, message_count, chat_count, active_users
         FROM plugin_stats_daily
-        WHERE family_id = ? AND stat_date >= date('now', '-' || ? || ' days')
-        ORDER BY stat_date ASC
-      `).all(fid, days);
+        WHERE family_id = ? AND date >= ?
+        ORDER BY date ASC
+      `).all(fid, since);
 
-      // 如果没有统计缓存，实时计算
-      if (result.length === 0) {
-        const realTimeData = db.prepare(`
-          SELECT 
-            date(created_at) as stat_date,
-            COUNT(*) as message_count,
-            COUNT(DISTINCT user_id) as active_members
-          FROM messages
-          WHERE family_id = ? AND created_at >= datetime('now', '-' || ? || ' days')
-          GROUP BY date(created_at)
-          ORDER BY stat_date ASC
-        `).all(fid, days);
-
-        return NextResponse.json({
-          success: true,
-          activity: realTimeData,
-          source: 'realtime',
-        });
-      }
-
-      return NextResponse.json({
-        success: true,
-        activity: result,
-        source: 'cached',
-      });
+      return NextResponse.json({ success: true, type: 'activity', data: dailyActivity });
     }
 
     if (type === 'ranking') {
-      // 贡献排行
       const ranking = db.prepare(`
-        SELECT 
-          u.id, u.name, u.avatar,
-          fm.contribution_points,
-          fm.contribution_stars,
-          (SELECT COUNT(*) FROM messages WHERE user_id = u.id AND family_id = ?) as message_count,
-          (SELECT COUNT(*) FROM announcements WHERE user_id = u.id AND family_id = ?) as announcement_count
-        FROM users u
-        JOIN family_members fm ON u.id = fm.user_id
+        SELECT u.name, u.avatar, fm.contribution_points, fm.contribution_stars
+        FROM family_members fm
+        JOIN users u ON fm.user_id = u.id
         WHERE fm.family_id = ? AND fm.status = 'approved'
-        ORDER BY fm.contribution_points DESC, message_count DESC
+        ORDER BY fm.contribution_points DESC
         LIMIT 20
-      `).all(fid, fid, fid);
+      `).all(fid);
 
-      return NextResponse.json({
-        success: true,
-        ranking,
-      });
+      return NextResponse.json({ success: true, type: 'ranking', data: ranking });
     }
 
     if (type === 'wordcloud') {
-      // 词云数据
-      let wordCloud: any[] = [];
-      try {
-        wordCloud = db.prepare(`
-          SELECT word, count
-          FROM plugin_stats_word_cloud
-          WHERE family_id = ? AND count >= 2
-          ORDER BY count DESC
-          LIMIT 100
-        `).all(fid) as any[];
-      } catch {
-        // 表不存在时返回空
-      }
+      const words = db.prepare(`
+        SELECT word, count FROM plugin_stats_word_cloud
+        WHERE family_id = ?
+        ORDER BY count DESC
+        LIMIT 50
+      `).all(fid);
 
-      return NextResponse.json({
-        success: true,
-        wordCloud,
-      });
+      return NextResponse.json({ success: true, type: 'wordcloud', data: words });
     }
 
-    return NextResponse.json({ error: '未知统计类型' }, { status: 400 });
+    return NextResponse.json({ error: '未知的統計類型' }, { status: 400 });
   } catch (error) {
-    console.error('获取统计失败:', error);
-    return NextResponse.json({ error: '获取统计失败' }, { status: 500 });
+    console.error('[Stats API] GET error:', error);
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }

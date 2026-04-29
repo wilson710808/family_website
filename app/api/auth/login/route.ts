@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from '@/lib/db';
+import { ensureJwtSecret } from '@/lib/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
 const COOKIE_NAME = 'auth-token';
 
 export async function POST(request: NextRequest) {
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
     // 生成 JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
-      JWT_SECRET,
+      ensureJwtSecret(),
       { expiresIn: '30d' }
     );
 

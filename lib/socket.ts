@@ -19,7 +19,6 @@ import {
 } from '../plugins/family-butler';
 import { getTodaysBirthdays } from '../plugins/birthday-reminder';
 import {
-  generateButlerReply,
   generateBirthdayGreeting,
   generateHolidayGreeting,
   generateDailySummary,
@@ -47,7 +46,7 @@ class SocketManager {
 
     this.io = new Server(httpServer, {
       cors: {
-        origin: '*',
+        origin: process.env.SOCKET_CORS_ORIGIN || '*',  // TODO: 在生產環境設置具體域名
         methods: ['GET', 'POST'],
       },
       path: '/socket.io/',
@@ -117,74 +116,11 @@ class SocketManager {
     if (msgType !== 'text') return;
         }
 
-        // 家族管家:檢查是否需要回覆
-        // 規則:
-        // 1. 如果消息包含 "管家" 或者 "@管家" → 一定回覆,開始對話
-        // 2. 如果最近 10 分鐘內已經有管家回覆 → 繼續對話,自動回覆
-        // 3. 如果超過 2 分鐘沒有人回覆這條消息 → 管家主動接話鼓勵
-        // 4. 如果聊天室只有一位成員在線 → 默認所有對話都是跟管家互動,必須回覆
-        // 這樣不需要每次都@管家,可以連續對話
-        const onlineCount = this.getOnlineUsersForFamily(data.familyId).length;
-        const shouldReply =
-          data.content.includes('管家') ||
-          this.hasRecentButlerReply(data.familyId) ||
-          this.shouldInitiateReply(data.familyId) ||
-          onlineCount <= 1; // 只有一位成員在線,默認和管家對話
-
-        if (shouldReply) {
-          console.log(`[FamilyButler] 需要回覆: ${data.content} (by ${data.userName}), online=${onlineCount}`);
-          console.log(`[FamilyButler] 需要回覆: ${data.content} (by ${data.userName})`);
-          try {
-            // 獲取最近10條消息作為上下文
-            const recentMessages = this.getRecentMessagesForButler(data.familyId);
-            console.log(`[FamilyButler] 獲取到 ${recentMessages.length} 條最近消息作為上下文`);
-
-            // 獲取上下文信息
-            const upcomingEvents = getUpcomingAnnouncements(db, data.familyId);
-            const upcomingReminders = getUpcomingReminders(db, data.familyId);
-            const todaysBirthdays = getTodaysBirthdays(data.familyId);
-            const { isHoliday, name: holidayName } = isTodayHoliday();
-            console.log(`[FamilyButler] 上下文: events=${upcomingEvents.length}, reminders=${upcomingReminders.length}, birthdays=${todaysBirthdays.length}, holiday=${isHoliday}`);
-      // 獲取家庭畫像和歷史摘要
-      const memberProfiles = getFamilyMemberProfiles(db, data.familyId);
-      const recentSummaries = getRecentDailySummaries(db, data.familyId, 3);
-      console.log(`[FamilyButler] 家庭畫像: members=${memberProfiles.length}, summaries=${recentSummaries.length}`);
-      
-      // 直接調用 AI 生成回覆
-      const reply = await generateButlerReply({
-        familyId: data.familyId,
-        userId: data.userId,
-        userName: data.userName,
-        message: data.content,
-        recentMessages: recentMessages,
-        context: {
-          hasBirthdayToday: todaysBirthdays.length > 0,
-          birthdayPerson: todaysBirthdays.length > 0 ? todaysBirthdays[0].title : undefined,
-          isHoliday,
-          holidayName: isHoliday ? holidayName : undefined,
-          upcomingEvents,
-          upcomingReminders,
-        },
-        familyProfile: {
-          memberProfiles: memberProfiles.map((p: any) => ({
-            user_name: p.user_name,
-            personality_traits: p.personality_traits ? JSON.parse(p.personality_traits) : [],
-            concerns: p.concerns ? JSON.parse(p.concerns) : [],
-            achievements: p.achievements ? JSON.parse(p.achievements) : [],
-          })),
-          recentSummaries: recentSummaries.map((s: any) => s.summary_text),
-        },
-      });
-
-            console.log(`[FamilyButler] 生成回覆成功: ${reply.slice(0, 50)}...`);
-            // 廣播管家回覆到聊天室
-            this.sendButlerMessage(data.familyId, reply);
-          } catch (error) {
-            console.error('[FamilyButler] 生成回覆失敗:', error);
-            console.error('[FamilyButler] Error stack:', (error as Error).stack);
-            this.sendButlerMessage(data.familyId, '抱歉,我現在有點反應遲鈍,請稍後再試試看😊');
-          }
-        }
+            // [修復 #11] 管家 AI 觸發統一由 HTTP API /api/chat/send 負責
+    // Socket 只負責廣播消息，避免雙重觸發導致重複回覆
+    // 原雙重觸發路徑：
+    //   1. Socket.IO chat-message 事件 → 此處的管家回覆邏輯（已移除）
+    //   2. HTTP /api/chat/send → triggerButlerReply()（保留為唯一路徑）
       });
 
       // 管家打招呼
@@ -330,13 +266,23 @@ class SocketManager {
     // 7. 每天凌晨2點生成昨日摘要(台北時區)
     const hour = taipeiNow.getUTCHours();
     if (hour === 2) {
-      // 重新獲取所有活躍家族
-      const allFamilyIds = new Set<number>();
-      for (const user of this.onlineUsers.values()) {
-        allFamilyIds.add(user.familyId);
-      }
+        // [修復 #26] 不依賴在線用戶，從數據庫獲取所有家族
+        const allFamilyIds = new Set<number>();
+        // 優先從在線用戶獲取
+        for (const user of this.onlineUsers.values()) {
+          allFamilyIds.add(user.familyId);
+        }
+        // 同時從數據庫查詢所有家族，確保離線家族也能生成摘要
+        try {
+          const allFamilies = db.prepare('SELECT id FROM families').all() as { id: number }[];
+          for (const f of allFamilies) {
+            allFamilyIds.add(f.id);
+          }
+        } catch (e) {
+          console.error('[FamilyButler] 查詢所有家族失敗:', e);
+        }
 
-      for (const familyId of allFamilyIds) {
+        for (const familyId of allFamilyIds) {
         try {
           const { saveDailySummary } = await import('../plugins/family-butler');
 
@@ -544,13 +490,23 @@ class SocketManager {
   private async welcomeNewMember(familyId: number, userId: number, userName: string) {
     // 檢查是否今天已經歡迎過這個用戶了(避免每次進入都彈歡迎)
     // 用緩存記錄,每天只歡迎一次
-    const cacheKey = `${familyId}-${userId}-${new Date().toDateString()}`;
-    const welcomeCache = (this as any)._welcomeCache || new Set();
+    const today = new Date().toISOString().split('T')[0]; // 使用 YYYY-MM-DD 格式，每日自動過期
+    const cacheKey = `${familyId}-${userId}-${today}`;
+    // 歡迎緩存：使用 Map 結構，每天自動清理舊數據
+    if (!(this as any)._welcomeCache) {
+      (this as any)._welcomeCache = new Map<string, string>();
+    }
+    const welcomeCache = (this as any)._welcomeCache as Map<string, string>;
+    // 清理非今天的緩存條目
+    for (const [key] of welcomeCache) {
+      if (!key.endsWith(today)) {
+        welcomeCache.delete(key);
+      }
+    }
     if (welcomeCache.has(cacheKey)) {
       return;
     }
-    welcomeCache.add(cacheKey);
-    (this as any)._welcomeCache = welcomeCache;
+    welcomeCache.set(cacheKey, today);
 
     console.log(`[FamilyButler] 新成員 ${userName} 進入家族 ${familyId},準備發送歡迎`);
 

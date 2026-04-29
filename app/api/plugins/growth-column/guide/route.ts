@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isEnabled } from '../../../../../plugins/growth-column';
-import Database from 'better-sqlite3';
+import { db } from '@/lib/db';
 
 // 配置 - 从环境变量读取
 const isNvidia = process.env.OPENAI_BASE_URL?.includes('nvidia');
@@ -322,8 +322,7 @@ export async function POST(request: Request) {
     }
 
     const trimmedBookName = bookName.trim();
-    const dbPath = process.env.DB_PATH || './family.db';
-    const db = new Database(dbPath);
+ // 使用全局 db 連接
     let guide: any;
     let fromCache = false;
 
@@ -409,7 +408,7 @@ export async function POST(request: Request) {
         console.log(`[GrowthColumn] 已更新收藏缓存: ${trimmedBookName}`);
       }
 
-      db.close();
+      // 使用全局 db 連接，無需 close
     } catch (dbError) {
       console.warn('保存历史/更新收藏缓存失败:', dbError);
       // 不影响主流程

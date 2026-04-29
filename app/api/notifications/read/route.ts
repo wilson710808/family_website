@@ -1,70 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 // 标记通知为已读
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { notificationId, userId, markAll } = body;
-
-    if (markAll && userId) {
-      // 标记所有为已读
-      const result = db.prepare(`
-        UPDATE plugin_notifications
-        SET is_read = 1, read_at = CURRENT_TIMESTAMP
-        WHERE user_id = ? AND is_read = 0
-      `).run(userId);
-
-      return NextResponse.json({
-        success: true,
-        updatedCount: result.changes,
-      });
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
     }
 
-    if (!notificationId || !userId) {
-      return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
+    const { notificationId, markAllRead, familyId } = await request.json();
+
+    if (markAllRead && familyId) {
+      // 标记该家族所有通知为已读
+      db.prepare(`
+        UPDATE plugin_notifications SET is_read = 1
+        WHERE user_id = ? AND family_id = ? AND is_read = 0
+      `).run(user.id, Number(familyId));
+      return NextResponse.json({ success: true });
     }
 
-    // 标记单个为已读
-    const result = db.prepare(`
-      UPDATE plugin_notifications
-      SET is_read = 1, read_at = CURRENT_TIMESTAMP
+    if (!notificationId) {
+      return NextResponse.json({ success: false, error: '缺少通知ID' }, { status: 400 });
+    }
+
+    // 只能标记自己的通知
+    db.prepare(`
+      UPDATE plugin_notifications SET is_read = 1
       WHERE id = ? AND user_id = ?
-    `).run(notificationId, userId);
-
-    if (result.changes === 0) {
-      return NextResponse.json({ error: '通知不存在或无权限' }, { status: 404 });
-    }
+    `).run(Number(notificationId), user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('标记已读失败:', error);
-    return NextResponse.json({ error: '标记已读失败' }, { status: 500 });
+    console.error('标记通知失败:', error);
+    return NextResponse.json({ success: false, error: '操作失败' }, { status: 500 });
   }
 }
 
 // 删除通知
 export async function DELETE(request: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const notificationId = searchParams.get('notificationId');
-    const userId = searchParams.get('userId');
+    const notificationId = searchParams.get('id');
 
-    if (!notificationId || !userId) {
-      return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
+    if (!notificationId) {
+      return NextResponse.json({ success: false, error: '缺少通知ID' }, { status: 400 });
     }
 
-    const result = db.prepare(`
+    // 只能删除自己的通知
+    db.prepare(`
       DELETE FROM plugin_notifications WHERE id = ? AND user_id = ?
-    `).run(Number(notificationId), Number(userId));
-
-    if (result.changes === 0) {
-      return NextResponse.json({ error: '通知不存在或无权限' }, { status: 404 });
-    }
+    `).run(Number(notificationId), user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('删除通知失败:', error);
-    return NextResponse.json({ error: '删除通知失败' }, { status: 500 });
+    return NextResponse.json({ success: false, error: '删除失败' }, { status: 500 });
   }
 }

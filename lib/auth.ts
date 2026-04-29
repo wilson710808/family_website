@@ -29,7 +29,19 @@ export interface Family {
   contribution_stars?: number; // 贡献星级 (1-5)
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.warn('⚠️ JWT_SECRET environment variable is not set. Using insecure default for build/dev.');
+}
+const _jwtSecret = JWT_SECRET || 'dev-only-insecure-secret-do-not-use-in-prod';
+
+// 在實際請求時檢查（避免 build 時報錯）
+export function ensureJwtSecret(): string {
+  if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable must be set in production');
+  }
+  return _jwtSecret;
+}
 const DEFAULT_ADMIN_USER: User = {
   id: 1,
   email: 'admin@family.com',
@@ -55,7 +67,7 @@ export async function getCurrentUser(): Promise<User | null> {
     
     // 验证 JWT token
     try {
-      const decoded = jwt.verify(token.value, JWT_SECRET) as { userId: number };
+      const decoded = jwt.verify(token.value, ensureJwtSecret()) as { userId: number };
       const userId = decoded.userId;
       
       // 从数据库获取用户信息
@@ -114,11 +126,14 @@ export async function initDefaultUser() {
     const bcrypt = require('bcryptjs');
     const defaultAdmin = db.prepare('SELECT * FROM users WHERE email = ?').get('admin@family.com');
     if (!defaultAdmin) {
-      const hashedPassword = bcrypt.hashSync('admin123456', 10);
+      const hashedPassword = bcrypt.hashSync(process.env.DEFAULT_ADMIN_PASSWORD || 'admin123456', 10);
       db.prepare(
         'INSERT INTO users (email, password, name, is_admin) VALUES (?, ?, ?, 1)'
       ).run('admin@family.com', hashedPassword, '系统管理员');
       console.log('默认管理员账号创建成功');
+ if (!process.env.DEFAULT_ADMIN_PASSWORD) {
+ console.warn('⚠️  使用默认管理员密码，请在生产环境设置 DEFAULT_ADMIN_PASSWORD 环境变量');
+ }
     }
   } catch (error) {
     console.error('初始化默认用户失败:', error);
@@ -128,6 +143,11 @@ export async function initDefaultUser() {
 // 开发环境初始化默认用户
 if (process.env.NODE_ENV !== 'production') {
   initDefaultUser();
+} else if (process.env.NODE_ENV === 'production') {
+  // 生產環境安全檢查：如果默認管理員使用預設密碼，發出警告
+  if (!process.env.DEFAULT_ADMIN_PASSWORD) {
+    console.error('🔒 [安全警告] 生產環境未設置 DEFAULT_ADMIN_PASSWORD，請立即設置！');
+  }
 }
 
 /**

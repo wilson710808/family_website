@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, isUserInFamily } from '@/lib/auth';
 import { isEnabled, createEvent, getFamilyEvents, getUpcomingEvents, updateEvent, deleteEvent, getEvent } from '@/plugins/event-calendar';
 
 export async function GET(request: NextRequest) {
   if (!isEnabled()) {
     return NextResponse.json({ error: '日曆插件未啟用' }, { status: 404 });
   }
-
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: '未登錄' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const familyId = searchParams.get('familyId');
     const startDate = searchParams.get('start');
@@ -20,6 +24,10 @@ export async function GET(request: NextRequest) {
     }
 
     const familyIdNum = Number(familyId);
+    const inFamily = await isUserInFamily(user.id, familyIdNum);
+    if (!inFamily) {
+      return NextResponse.json({ error: '你不是該家族成員' }, { status: 403 });
+    }
 
     let events;
     if (upcoming === 'true') {
@@ -39,22 +47,27 @@ export async function POST(request: NextRequest) {
   if (!isEnabled()) {
     return NextResponse.json({ error: '日曆插件未啟用' }, { status: 404 });
   }
-
   try {
     const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ success: false, error: '未登录' }, { status: 401 });
-  }
-    const body = await request.json();
+    if (!user) {
+      return NextResponse.json({ success: false, error: '未登錄' }, { status: 401 });
+    }
 
+    const body = await request.json();
     const { familyId, title, description, eventType, location, startAt, endAt, isAllDay } = body;
 
     if (!familyId || !title || !startAt) {
-      return NextResponse.json({ error: '缺少必要参数' }, { status: 400 });
+      return NextResponse.json({ error: '缺少必要參數' }, { status: 400 });
+    }
+
+    const familyIdNum = Number(familyId);
+    const inFamily = await isUserInFamily(user.id, familyIdNum);
+    if (!inFamily) {
+      return NextResponse.json({ error: '你不是該家族成員' }, { status: 403 });
     }
 
     const eventId = createEvent(db, {
-      family_id: Number(familyId),
+      family_id: familyIdNum,
       title,
       description: description || null,
       event_type: eventType || 'general',
@@ -78,17 +91,37 @@ export async function PUT(request: NextRequest) {
   if (!isEnabled()) {
     return NextResponse.json({ error: '日曆插件未啟用' }, { status: 404 });
   }
-
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: '未登錄' }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { id, ...data } = body;
+    const { id, familyId, ...data } = body;
 
     if (!id) {
       return NextResponse.json({ error: '缺少事件 ID' }, { status: 400 });
     }
 
-    const success = updateEvent(db, Number(id), data);
+    // 验证家族成员资格
+    if (familyId) {
+      const inFamily = await isUserInFamily(user.id, Number(familyId));
+      if (!inFamily) {
+        return NextResponse.json({ error: '你不是該家族成員' }, { status: 403 });
+      }
+    } else {
+      // 没有 familyId 时，从事件本身获取
+      const event = getEvent(db, Number(id));
+      if (event) {
+        const inFamily = await isUserInFamily(user.id, (event as any).family_id);
+        if (!inFamily) {
+          return NextResponse.json({ error: '你不是該家族成員' }, { status: 403 });
+        }
+      }
+    }
 
+    const success = updateEvent(db, Number(id), data);
     return NextResponse.json({ success });
   } catch (error) {
     console.error('更新事件失败:', error);
@@ -100,8 +133,12 @@ export async function DELETE(request: NextRequest) {
   if (!isEnabled()) {
     return NextResponse.json({ error: '日曆插件未啟用' }, { status: 404 });
   }
-
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: '未登錄' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -109,8 +146,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '缺少事件 ID' }, { status: 400 });
     }
 
-    const success = deleteEvent(db, Number(id));
+    // 从事件本身获取家族ID并验证
+    const event = getEvent(db, Number(id));
+    if (event) {
+      const inFamily = await isUserInFamily(user.id, (event as any).family_id);
+      if (!inFamily) {
+        return NextResponse.json({ error: '你不是該家族成員' }, { status: 403 });
+      }
+    }
 
+    const success = deleteEvent(db, Number(id));
     return NextResponse.json({ success });
   } catch (error) {
     console.error('删除事件失败:', error);
