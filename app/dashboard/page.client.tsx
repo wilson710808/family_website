@@ -176,7 +176,7 @@ export default function DashboardClient({
             {recentActivities.length > 0 ? (
               <div className="divide-y divide-gray-200">
                 {recentActivities.slice(0, 10).map((activity: any) => (
-                  <div key={activity.id} className="p-8">
+                  <div key={`${activity.type}-${activity.id}`} className="p-8">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">
                         <div className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 ${
