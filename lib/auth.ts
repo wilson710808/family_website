@@ -79,8 +79,13 @@ export async function getCurrentUser(): Promise<User | null> {
         return user;
       }
     } catch (jwtError) {
-      // token 无效或过期，返回 null
+      // token 无效或过期，清除无效 cookie 并返回 null
       console.error('JWT 验证失败:', jwtError);
+      try {
+        const { cookies: delCookies } = await import('next/headers');
+        const delStore = await delCookies();
+        delStore.set('auth-token', '', { maxAge: 0, path: '/' });
+      } catch {}
       return null;
     }
     
