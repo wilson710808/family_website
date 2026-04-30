@@ -188,7 +188,7 @@ export default function PersonalHomeClient({
             </div>
             <div className="space-y-3">
               {pendingInvitations.map(inv => (
-                <div key={inv.id} className="flex items-center justify-between bg-white rounded-lg p-4">
+                <div key={`inv-${inv.id}`} className="flex items-center justify-between bg-white rounded-lg p-4">
                   <div>
                     <p className="font-medium text-gray-900">{inv.name}</p>
                     <p className="text-sm text-gray-500">邀請你加入家族</p>
@@ -218,7 +218,7 @@ export default function PersonalHomeClient({
               </div>
               <div className="divide-y">
                 {upcomingItems.birthdays.map((b: any) => (
-                  <div key={b.id} className="p-4 hover:bg-gray-50">
+                  <div key={`birthday-${b.id}`} className="p-4 hover:bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-gray-900">{b.name}</p>
@@ -252,7 +252,7 @@ export default function PersonalHomeClient({
               </div>
               <div className="divide-y">
                 {upcomingItems.events.map((e: any) => (
-                  <div key={e.id} className="p-4 hover:bg-gray-50">
+                  <div key={`event-${e.id}`} className="p-4 hover:bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-gray-900">{e.title}</p>
@@ -335,7 +335,8 @@ export default function PersonalHomeClient({
             ) : (
               <div className="divide-y">
                 {recentActivities.slice(0, 10).map((activity: any) => (
-                  <div key={activity.id} className="p-4 hover:bg-gray-50">
+
+                  <div key={`${activity.type}-${activity.id}`} className="p-4 hover:bg-gray-50">
                     <div className="flex items-start gap-4">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                         activity.type === 'announcement' ? 'bg-blue-100' :

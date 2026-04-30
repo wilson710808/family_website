@@ -10,7 +10,7 @@ const { socketManager } = require('./lib/socket.ts');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || '0.0.0.0';
-const port = parseInt(process.env.PORT || '443', 10);
+const port = parseInt(process.env.PORT || '3001', 10);
 
 // 静态文件目录
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');

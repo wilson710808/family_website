@@ -194,7 +194,7 @@ function ChatContent() {
     if (!familyId || !user) return;
 
     const socketUrl = window.location.origin;
-    socket = io(socketUrl, { path: '/socket.io/', reconnection: true, reconnectionDelay: 1000, reconnectionAttempts: 10 });
+    socket = io(socketUrl, { path: '/ws/01-family-portal/socket.io/', reconnection: true, reconnectionDelay: 1000, reconnectionAttempts: 10 });
 
     socket.on('connect', () => {
       console.log('[Socket] Connected');

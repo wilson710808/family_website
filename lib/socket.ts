@@ -49,7 +49,7 @@ class SocketManager {
         origin: process.env.SOCKET_CORS_ORIGIN || '*',  // TODO: 在生產環境設置具體域名
         methods: ['GET', 'POST'],
       },
-      path: '/socket.io/',
+      path: '/ws/01-family-portal/socket.io/',
     });
 
     console.log('[Socket] Initialized');
