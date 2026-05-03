@@ -43,3 +43,4 @@ backups/
 # Server logs
 *.log
 server*.log
+uploads/
